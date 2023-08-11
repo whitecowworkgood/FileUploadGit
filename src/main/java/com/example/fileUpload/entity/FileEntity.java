@@ -6,7 +6,8 @@ import lombok.*;
 @Entity
 @NoArgsConstructor
 @Getter
-public class File {
+@Setter
+public class FileEntity {
 
 
     @Id
@@ -23,10 +24,8 @@ public class File {
     private Long fileSize;
 
     @Builder
-    public File(Long id, String fileName, String filePath, String fileType, Long fileSize) {
+    public FileEntity(Long id) {
         this.id = id;
-        this.fileName = fileName;
-        this.fileType = fileType;
-        this.fileSize = fileSize;
     }
+
 }

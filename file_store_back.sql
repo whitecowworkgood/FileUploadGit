@@ -16,28 +16,29 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Table structure for table `file`
+-- Table structure for table `file_entity`
 --
 
-DROP TABLE IF EXISTS `file`;
+DROP TABLE IF EXISTS `file_entity`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `file` (
+CREATE TABLE `file_entity` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `file_name` varchar(255) NOT NULL,
   `file_size` bigint(20) NOT NULL,
   `file_type` varchar(255) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
--- Dumping data for table `file`
+-- Dumping data for table `file_entity`
 --
 
-LOCK TABLES `file` WRITE;
-/*!40000 ALTER TABLE `file` DISABLE KEYS */;
-/*!40000 ALTER TABLE `file` ENABLE KEYS */;
+LOCK TABLES `file_entity` WRITE;
+/*!40000 ALTER TABLE `file_entity` DISABLE KEYS */;
+INSERT INTO `file_entity` VALUES (1,'Outlook 회의실 예약 매뉴얼 V.2.pdf',678971,'application/pdf');
+/*!40000 ALTER TABLE `file_entity` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -49,4 +50,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2023-08-11 15:17:22
+-- Dump completed on 2023-08-11 15:57:44

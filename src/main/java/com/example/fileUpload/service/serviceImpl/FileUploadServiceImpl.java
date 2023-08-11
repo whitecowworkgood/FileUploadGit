@@ -1,5 +1,7 @@
 package com.example.fileUpload.service.serviceImpl;
 
+
+import com.example.fileUpload.entity.FileEntity;
 import com.example.fileUpload.repository.SaveFileRepository;
 import com.example.fileUpload.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +14,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -22,8 +23,7 @@ import java.util.Map;
 @RequiredArgsConstructor
 @Transactional
 public class FileUploadServiceImpl implements FileUploadService {
-
-    //private final SaveFileRepository saveFileRepository;
+    private final SaveFileRepository saveFileRepository;
 
     @Value("${Save-Directory}")
     private String dir;
@@ -33,9 +33,11 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Override
     public void fileUpload(MultipartFile file) {
+
+
         if (!file.isEmpty()) {
             String filename = file.getOriginalFilename();
-            log.info("file.getOriginalFilename = {}", filename);
+            //log.info("file.getOriginalFilename = {}", filename);
 
             String fullPath = dir + filename;
 
@@ -43,12 +45,19 @@ public class FileUploadServiceImpl implements FileUploadService {
                 file.transferTo(new File(fullPath));
             } catch (IOException e) {
                 throw new RuntimeException(e);
-            }finally {
-                Map<String, String> files = new HashMap<>();
-                files.put("filename", filename);
-
-                fileJson.add(files);
             }
+//                Map<String, String> files = new HashMap<>();
+//                files.put("filename", filename);
+//
+//                fileJson.add(files);
+
+            FileEntity fileEntity = new FileEntity();
+
+            fileEntity.setFileName(filename);
+            fileEntity.setFileType(file.getContentType());
+            fileEntity.setFileSize(file.getSize());
+
+            saveFileRepository.save(fileEntity);
 
         }
     }
