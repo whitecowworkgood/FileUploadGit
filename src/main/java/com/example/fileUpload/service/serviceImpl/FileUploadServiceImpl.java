@@ -13,9 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+
 
 
 @Service
@@ -28,7 +26,6 @@ public class FileUploadServiceImpl implements FileUploadService {
     @Value("${Save-Directory}")
     private String dir;
 
-    private List<Map<String, String>> fileJson = new ArrayList<>();
     //추후 프로젝트 경로나, c:\\경로에 폴더가 있는지 확인 후, 없으면 폴더 생성 후 파일 전송하기
 
     @Override
@@ -46,10 +43,6 @@ public class FileUploadServiceImpl implements FileUploadService {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-//                Map<String, String> files = new HashMap<>();
-//                files.put("filename", filename);
-//
-//                fileJson.add(files);
 
             FileEntity fileEntity = new FileEntity();
 
@@ -63,13 +56,18 @@ public class FileUploadServiceImpl implements FileUploadService {
     }
 
     @Override
-    public List<Map<String, String>> printAll() {
-        return fileJson;
+    public Object printAll() {
+        return saveFileRepository.findAll();
     }
 
     @Override
-    public Map<String, String> printOne(int id) {
+    public Object printOne(Long id) {
+        //System.out.println(saveFileRepository.findById(id));
+        return saveFileRepository.findById(id);
+    }
 
-        return fileJson.get(id);
+    @Override
+    public void deleteOne(Long id) {
+        saveFileRepository.deleteById(id);
     }
 }

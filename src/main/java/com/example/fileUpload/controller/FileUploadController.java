@@ -39,8 +39,17 @@ public class FileUploadController {
 
     @GetMapping("/upload/{id}")
     @ResponseBody
-    public Object printFiles(@PathVariable("id") int id){
+    public Object printFiles(@PathVariable("id") Long id){
         return fileUploadService.printOne(id);
+
+    }
+
+    @DeleteMapping("/upload")
+    public String DeleteFile(@RequestParam("id") Long id){
+
+        fileUploadService.deleteOne(id);
+
+        return "redirect:/file/uploads";
 
     }
 
