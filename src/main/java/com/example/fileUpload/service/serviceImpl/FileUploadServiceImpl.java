@@ -80,9 +80,13 @@ public class FileUploadServiceImpl implements FileUploadService {
         if(file.exists()){
             if(file.delete()){
                 saveFileRepository.deleteById(id);
+            }else{
+                log.warn(fileName+"파일 삭제 오류 발생");
+
             }
         }else{
-
+            log.warn(fileName+"파일이 없음, DB에서 정보 삭제");
+            saveFileRepository.deleteById(id);
         }
 
     }
