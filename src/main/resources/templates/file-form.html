@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <title>file upload form</title>
+
+    <link rel="stylesheet" href="/drag_drop.css">
+    <script defer src="/drag_drop.js"></script>
+</head>
+<body>
+<div class="file_box">
+    <form class="filename" action="/file/upload" method="post" enctype="multipart/form-data">
+        <div class="file-name" id="file-name">최대 100MB 이하 파일</div><br>
+
+        <input id="file" type="button" value="첨부파일 가져오기"><br>
+
+        <input type="file" name="file" id="file-input" style="display: none;">
+        <input type="submit">
+    </form>
+
+</div>
+
+</body>
+
+
+</html>
