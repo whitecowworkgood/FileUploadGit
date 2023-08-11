@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 
 
@@ -68,6 +69,21 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Override
     public void deleteOne(Long id) {
-        saveFileRepository.deleteById(id);
+
+        FileEntity fileEntity = saveFileRepository.findById(id).get();
+
+
+        String fileName = fileEntity.getFileName();
+
+        File file = new File(dir+fileName);
+
+        if(file.exists()){
+            if(file.delete()){
+                saveFileRepository.deleteById(id);
+            }
+        }else{
+
+        }
+
     }
 }
