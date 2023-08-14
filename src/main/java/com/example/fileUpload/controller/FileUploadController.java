@@ -129,7 +129,7 @@ public class FileUploadController {
         if(createResult){
             Message successMessage = new Message();
             successMessage.setMessage("파일 업로드 성공");
-            return ResponseEntity.status(HttpStatus.OK).body(successMessage);
+            return ResponseEntity.status(HttpStatus.CREATED).body(successMessage);
 
         }else{
             Message failedMessage = new Message();
