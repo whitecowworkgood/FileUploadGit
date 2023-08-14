@@ -4,7 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@NoArgsConstructor
+@Builder
+@AllArgsConstructor
 @Getter
 @Setter
 public class FileEntity {
@@ -23,9 +24,7 @@ public class FileEntity {
     @Column(nullable = false)
     private Long fileSize;
 
-    @Builder
-    public FileEntity(Long id) {
-        this.id = id;
-    }
+    public FileEntity() {
 
+    }
 }

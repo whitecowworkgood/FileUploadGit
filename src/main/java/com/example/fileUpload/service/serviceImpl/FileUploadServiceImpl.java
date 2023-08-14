@@ -7,14 +7,16 @@ import com.example.fileUpload.repository.SaveFileRepository;
 import com.example.fileUpload.service.FileUploadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 
@@ -23,7 +25,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional
 public class FileUploadServiceImpl implements FileUploadService {
+
     private final SaveFileRepository saveFileRepository;
+    private final ModelMapper modelMapper;
 
     @Value("${Save-Directory}")
     private String dir;
@@ -31,65 +35,75 @@ public class FileUploadServiceImpl implements FileUploadService {
     //추후 프로젝트 경로나, c:\\경로에 폴더가 있는지 확인 후, 없으면 폴더 생성 후 파일 전송하기
 
     @Override
-    public void fileUpload(MultipartFile file) {
+    public boolean fileUpload(FileDto fileDto) {
 
-        if (!file.isEmpty()) {
-            String filename = file.getOriginalFilename();
-            //log.info("file.getOriginalFilename = {}", filename);
-
-            String fullPath = dir + filename;
+            MultipartFile file = fileDto.getFileData();
 
             try {
+                String fullPath = dir + fileDto.getFileName();
                 file.transferTo(new File(fullPath));
+
+                FileEntity fileEntity = modelMapper.map(fileDto, FileEntity.class);
+                saveFileRepository.save(fileEntity);
+                return true;
+
             } catch (IOException e) {
-                throw new RuntimeException(e);
+                throw new RuntimeException("파일 업로드 중 오류 발생"+e);
             }
 
-            FileEntity fileEntity = new FileEntity();
+    }
 
-            fileEntity.setFileName(filename);
-            fileEntity.setFileType(file.getContentType());
-            fileEntity.setFileSize(file.getSize());
+    @Override
+    public List<FileDto> printAll() {
+        //return saveFileRepository.findAll();
+        List<FileEntity> fileEntities = saveFileRepository.findAll();
+        List<FileDto> fileDtos = new ArrayList<>();
 
-            saveFileRepository.save(fileEntity);
+        for (FileEntity fileEntity : fileEntities) {
+            FileDto fileDto = modelMapper.map(fileEntity, FileDto.class);
+            fileDtos.add(fileDto);
+        }
 
+        return fileDtos;
+    }
+
+    @Override
+    public FileDto printOne(Long id) {
+        Optional<FileEntity> optionalFileEntity = saveFileRepository.findById(id);
+        FileEntity fileEntity = optionalFileEntity.orElse(null);
+
+        if (fileEntity != null) {
+            return modelMapper.map(fileEntity, FileDto.class);
+        } else {
+            return null; // 또는 예외 처리 등
         }
     }
 
     @Override
-    public Object printAll() {
-        return saveFileRepository.findAll();
-    }
+    public boolean deleteOne(Long id) {
 
-    @Override
-    public FileEntity printOne(Long id) {
-        //System.out.println(saveFileRepository.findById(id));
+        FileEntity fileEntity = saveFileRepository.findById(id).orElse(null);
 
-        Optional<FileEntity> optionalFileEntity = saveFileRepository.findById(id);
-        return optionalFileEntity.orElse(null);
-       // return saveFileRepository.findById(id);
-    }
+        if(fileEntity != null){
+            String fileName = fileEntity.getFileName();
+            File file = new File(dir+fileName);
 
-    @Override
-    public void deleteOne(Long id) {
+            if(file.exists()){
 
-        FileEntity fileEntity = saveFileRepository.findById(id).get();
+                if(file.delete()){
+                    saveFileRepository.deleteById(fileEntity.getId());
+                }else{
+                    log.warn(fileName+"파일 삭제 오류 발생");
 
-
-        String fileName = fileEntity.getFileName();
-
-        File file = new File(dir+fileName);
-
-        if(file.exists()){
-            if(file.delete()){
-                saveFileRepository.deleteById(id);
+                }
             }else{
-                log.warn(fileName+"파일 삭제 오류 발생");
-
+                log.warn(fileName+"파일이 없음, DB에서 정보 삭제");
+                saveFileRepository.deleteById(fileEntity.getId());
             }
+            return true;
+
         }else{
-            log.warn(fileName+"파일이 없음, DB에서 정보 삭제");
-            saveFileRepository.deleteById(id);
+            return false;
         }
 
     }

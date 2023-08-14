@@ -1,15 +1,16 @@
 package com.example.fileUpload.service;
 
-import com.example.fileUpload.entity.FileEntity;
-import org.springframework.web.multipart.MultipartFile;
+import com.example.fileUpload.dto.FileDto;
+
+import java.util.List;
 
 public interface FileUploadService {
 
-    void fileUpload(MultipartFile multipartFile);
+    boolean fileUpload(FileDto fileDto);
 
-    Object printAll();
+    public List<FileDto> printAll();
 
-    public FileEntity printOne(Long id);
+    public FileDto printOne(Long id);
 
-    void deleteOne(Long id);
+    boolean deleteOne(Long id);
 }
