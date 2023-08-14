@@ -1,6 +1,7 @@
 package com.example.fileUpload.service.serviceImpl;
 
 
+import com.example.fileUpload.dto.FileDto;
 import com.example.fileUpload.entity.FileEntity;
 import com.example.fileUpload.repository.SaveFileRepository;
 import com.example.fileUpload.service.FileUploadService;
@@ -14,7 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-
+import java.util.Optional;
 
 
 @Service
@@ -31,7 +32,6 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Override
     public void fileUpload(MultipartFile file) {
-
 
         if (!file.isEmpty()) {
             String filename = file.getOriginalFilename();
@@ -62,9 +62,12 @@ public class FileUploadServiceImpl implements FileUploadService {
     }
 
     @Override
-    public Object printOne(Long id) {
+    public FileEntity printOne(Long id) {
         //System.out.println(saveFileRepository.findById(id));
-        return saveFileRepository.findById(id);
+
+        Optional<FileEntity> optionalFileEntity = saveFileRepository.findById(id);
+        return optionalFileEntity.orElse(null);
+       // return saveFileRepository.findById(id);
     }
 
     @Override

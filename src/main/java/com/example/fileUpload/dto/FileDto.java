@@ -5,15 +5,14 @@ import lombok.*;
 
 @Getter
 @Setter
-@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class FileDto {
 
-    private Long id;
     private String fileName;
     private String fileType;
     private Long fileSize;
 
     //private OleDto oleDto;
-
 
 }

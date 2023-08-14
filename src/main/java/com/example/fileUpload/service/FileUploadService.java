@@ -1,5 +1,6 @@
 package com.example.fileUpload.service;
 
+import com.example.fileUpload.entity.FileEntity;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface FileUploadService {
@@ -8,7 +9,7 @@ public interface FileUploadService {
 
     Object printAll();
 
-    Object printOne(Long id);
+    public FileEntity printOne(Long id);
 
     void deleteOne(Long id);
 }
