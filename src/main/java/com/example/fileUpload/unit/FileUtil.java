@@ -11,7 +11,9 @@ public class FileUtil {
     private static final Tika tika = new Tika();
     public static boolean valuedDocFile(InputStream inputStream){
         try{
-            List<String> validTypeList = List.of("application/pdf");
+            List<String> validTypeList = List.of("application/pdf",
+                    "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                    "application/excel", "application/msword");
             String mimeType = tika.detect(inputStream);
 
             boolean isValid = validTypeList.stream().anyMatch(notValidType
