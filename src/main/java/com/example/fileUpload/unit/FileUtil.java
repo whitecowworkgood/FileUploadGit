@@ -8,7 +8,6 @@ import java.util.List;
 
 public class FileUtil {
 
-    //private static final Tika tika = new Tika();
     public static boolean valuedDocFile(FileDto fileDto){
         List<String> validTypeList = List.of("application/pdf","image/jpeg","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                     "application/vnd.openxmlformats-officedocument.presentationml.presentation",
@@ -22,21 +21,13 @@ public class FileUtil {
             return false;
         }
 
-
-//            String mimeType = tika.detect(inputStream);
-//            System.out.println(mimeType);
-//            boolean isValid = validTypeList.stream().anyMatch(notValidType
-//                    -> notValidType.equalsIgnoreCase(mimeType));
-//
-//            return isValid;
-//        }catch(IOException e){
-//            e.printStackTrace();
-//            return false;
-//        }
     }
 
     public static void fileOleParser(){
 
+    }
+
+    private FileUtil() {
     }
 }
 
