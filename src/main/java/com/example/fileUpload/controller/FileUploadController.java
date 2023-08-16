@@ -28,16 +28,16 @@ public class FileUploadController {
 /*
  * 해당 영역은 페이지를 넘겨만 주는 영역
  */
-    @GetMapping("/")
-    public String root(){
-        return "redirect:/file/upload";
-    }
-
-    @GetMapping("/upload")
-    public String printForm(){
-        log.debug("form 출력");
-        return "file-form";
-    }
+//    @GetMapping("/")
+//    public String root(){
+//        return "redirect:/file/upload";
+//    }
+//
+//    @GetMapping("/upload")
+//    public String printForm(){
+//        log.debug("form 출력");
+//        return "file-form";
+//    }
 
 
     /*
@@ -117,7 +117,6 @@ public class FileUploadController {
                 .fileType(file.getContentType())
                 .fileData(file)
                 .build();
-
 
         boolean createResult = fileUploadService.fileUpload(fileDto);
 

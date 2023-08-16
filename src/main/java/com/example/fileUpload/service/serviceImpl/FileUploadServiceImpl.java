@@ -38,10 +38,10 @@ public class FileUploadServiceImpl implements FileUploadService {
     @Override
     public boolean fileUpload(FileDto fileDto) {
 
-        try(InputStream inputStream = fileDto.getFileData().getInputStream()) {
+        try{
 
             if(!fileDto.getFileData().isEmpty()){
-                boolean isValid = FileUtil.valuedDocFile(inputStream);
+                boolean isValid = FileUtil.valuedDocFile(fileDto);
 
                 if(!isValid){
                     log.warn("문서 파일이 아닙니다.");
