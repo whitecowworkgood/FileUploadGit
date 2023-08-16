@@ -3,10 +3,7 @@ package com.example.fileUpload.controller;
 
 import com.example.fileUpload.dto.FileDto;
 import com.example.fileUpload.dto.Message;
-import com.example.fileUpload.entity.FileEntity;
 import com.example.fileUpload.service.FileUploadService;
-import jakarta.servlet.http.HttpServletRequest;
-import jdk.swing.interop.SwingInterOpUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -15,8 +12,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -99,7 +94,7 @@ public class FileUploadController {
     @DeleteMapping("/upload")
     public ResponseEntity<Message> DeleteFile(@RequestParam("id") Long id){
 
-        Boolean deleteResult = fileUploadService.deleteOne(id);
+        boolean deleteResult = fileUploadService.deleteOne(id);
 
         if(deleteResult){
             Message successMessage = new Message();

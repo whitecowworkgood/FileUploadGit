@@ -5,16 +5,17 @@ import com.example.fileUpload.dto.FileDto;
 import com.example.fileUpload.entity.FileEntity;
 import com.example.fileUpload.repository.SaveFileRepository;
 import com.example.fileUpload.service.FileUploadService;
+import com.example.fileUpload.unit.FileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -37,20 +38,29 @@ public class FileUploadServiceImpl implements FileUploadService {
     @Override
     public boolean fileUpload(FileDto fileDto) {
 
-            MultipartFile file = fileDto.getFileData();
+        try(InputStream inputStream = fileDto.getFileData().getInputStream()) {
 
-            try {
+            if(!fileDto.getFileData().isEmpty()){
+                boolean isValid = FileUtil.valuedDocFile(inputStream);
+
+                if(!isValid){
+                    log.warn("문서 파일이 아닙니다.");
+                    //추후 결과 반환
+                    return false;
+                }
+
                 String fullPath = dir + fileDto.getFileName();
-                file.transferTo(new File(fullPath));
+                fileDto.getFileData().transferTo(new File(fullPath));
 
                 FileEntity fileEntity = modelMapper.map(fileDto, FileEntity.class);
                 saveFileRepository.save(fileEntity);
-                return true;
-
-            } catch (IOException e) {
-                throw new RuntimeException("파일 업로드 중 오류 발생"+e);
             }
 
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
     }
 
     @Override
