@@ -15,10 +15,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import static com.example.fileUpload.unit.FileUtil.fileOleParser;
 
 
 @Service
@@ -26,13 +27,11 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Transactional
 public class FileUploadServiceImpl implements FileUploadService {
-
     private final SaveFileRepository saveFileRepository;
     private final ModelMapper modelMapper;
 
     @Value("${Save-Directory}")
     private String dir;
-
     //추후 프로젝트 경로나, c:\\경로에 폴더가 있는지 확인 후, 없으면 폴더 생성 후 파일 전송하기
 
     @Override
@@ -44,13 +43,13 @@ public class FileUploadServiceImpl implements FileUploadService {
                 boolean isValid = FileUtil.valuedDocFile(fileDto);
 
                 if(!isValid){
-                    log.warn("문서 파일이 아닙니다.");
-                    //추후 결과 반환
                     return false;
                 }
+                fileOleParser(fileDto.getFileData().getInputStream());
 
                 String fullPath = dir + fileDto.getFileName();
                 fileDto.getFileData().transferTo(new File(fullPath));
+
 
                 FileEntity fileEntity = modelMapper.map(fileDto, FileEntity.class);
                 saveFileRepository.save(fileEntity);

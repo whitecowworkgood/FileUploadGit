@@ -26,7 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/file")
-@Tag(name = "Restful", description = "restful API 구성")
+@Tag(name = "FileUpload", description = "파일 업로드 API 구성")
 public class FileUploadController {
 
     private final FileUploadService fileUploadService;
@@ -56,7 +56,9 @@ public class FileUploadController {
     public ResponseEntity<Message> printFiles(){
 
         List<FileDto> fileDtos = fileUploadService.printAll();
-
+//        if(fileDtos.isEmpty()){
+//            return ;이런식으로 처음 예외를 구현을 하면, 나머지 else도 필요 없고, 나머지는 참인 경우만 해결됨
+//        }
         if(!fileDtos.isEmpty()){
             Message message = new Message();
 

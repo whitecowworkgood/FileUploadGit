@@ -5288,3 +5288,65 @@ Caused by: java.lang.IllegalArgumentException: Could not resolve placeholder 'be
 20230817 11:01:37.584 [http-nio-8080-exec-5] INFO  [DispatcherServlet:532] - Initializing Servlet 'dispatcherServlet' 
 20230817 11:01:37.585 [http-nio-8080-exec-5] INFO  [DispatcherServlet:554] - Completed initialization in 1 ms 
 20230817 11:01:37.626 [http-nio-8080-exec-5] INFO  [AbstractOpenApiResource:369] - Init duration for springdoc-openapi is: 37 ms 
+20230817 11:03:59.021 [SpringApplicationShutdownHook] INFO  [LocalContainerEntityManagerFactoryBean:650] - Closing JPA EntityManagerFactory for persistence unit 'default' 
+20230817 11:03:59.022 [SpringApplicationShutdownHook] INFO  [HikariDataSource:350] - HikariPool-28 - Shutdown initiated... 
+20230817 11:03:59.026 [SpringApplicationShutdownHook] INFO  [HikariDataSource:352] - HikariPool-28 - Shutdown completed. 
+20230817 11:07:13.580 [restartedMain] INFO  [FileUploadApplication:51] - Starting FileUploadApplication using Java 17.0.8 with PID 3132 (C:\Users\15ZD90P\Desktop\fileupload\target\classes started by 15ZD90P in C:\Users\15ZD90P\Desktop\fileupload) 
+20230817 11:07:13.581 [restartedMain] INFO  [FileUploadApplication:634] - No active profile set, falling back to 1 default profile: "default" 
+20230817 11:07:13.631 [restartedMain] INFO  [DevToolsPropertyDefaultsPostProcessor:250] - Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable 
+20230817 11:07:13.631 [restartedMain] INFO  [DevToolsPropertyDefaultsPostProcessor:250] - For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG' 
+20230817 11:07:14.296 [restartedMain] INFO  [RepositoryConfigurationDelegate:291] - Multiple Spring Data modules found, entering strict repository configuration mode 
+20230817 11:07:14.297 [restartedMain] INFO  [RepositoryConfigurationDelegate:138] - Bootstrapping Spring Data JDBC repositories in DEFAULT mode. 
+20230817 11:07:14.331 [restartedMain] INFO  [RepositoryConfigurationExtensionSupport:320] - Spring Data JDBC - Could not safely identify store assignment for repository candidate interface com.example.fileUpload.repository.SaveFileRepository; If you want this repository to be a JDBC repository, consider annotating your entities with one of these annotations: org.springframework.data.relational.core.mapping.Table. 
+20230817 11:07:14.331 [restartedMain] INFO  [RepositoryConfigurationDelegate:208] - Finished Spring Data repository scanning in 30 ms. Found 0 JDBC repository interfaces. 
+20230817 11:07:14.348 [restartedMain] INFO  [RepositoryConfigurationDelegate:291] - Multiple Spring Data modules found, entering strict repository configuration mode 
+20230817 11:07:14.349 [restartedMain] INFO  [RepositoryConfigurationDelegate:138] - Bootstrapping Spring Data JPA repositories in DEFAULT mode. 
+20230817 11:07:14.376 [restartedMain] INFO  [RepositoryConfigurationDelegate:208] - Finished Spring Data repository scanning in 23 ms. Found 1 JPA repository interfaces. 
+20230817 11:07:14.956 [restartedMain] INFO  [TomcatWebServer:108] - Tomcat initialized with port(s): 8080 (http) 
+20230817 11:07:14.962 [restartedMain] INFO  [Http11NioProtocol:173] - Initializing ProtocolHandler ["http-nio-8080"] 
+20230817 11:07:14.963 [restartedMain] INFO  [StandardService:173] - Starting service [Tomcat] 
+20230817 11:07:14.963 [restartedMain] INFO  [StandardEngine:173] - Starting Servlet engine: [Apache Tomcat/10.1.11] 
+20230817 11:07:15.012 [restartedMain] INFO  [[/]:173] - Initializing Spring embedded WebApplicationContext 
+20230817 11:07:15.012 [restartedMain] INFO  [ServletWebServerApplicationContext:291] - Root WebApplicationContext: initialization completed in 1381 ms 
+20230817 11:07:15.142 [restartedMain] INFO  [LogHelper:31] - HHH000204: Processing PersistenceUnitInfo [name: default] 
+20230817 11:07:15.179 [restartedMain] INFO  [Version:44] - HHH000412: Hibernate ORM core version 6.2.6.Final 
+20230817 11:07:15.181 [restartedMain] INFO  [Environment:191] - HHH000406: Using bytecode reflection optimizer 
+20230817 11:07:15.291 [restartedMain] INFO  [BytecodeProviderInitiator:53] - HHH000021: Bytecode provider name : bytebuddy 
+20230817 11:07:15.393 [restartedMain] INFO  [SpringPersistenceUnitInfo:87] - No LoadTimeWeaver setup: ignoring JPA class transformer 
+20230817 11:07:15.407 [restartedMain] INFO  [HikariDataSource:110] - HikariPool-1 - Starting... 
+20230817 11:07:15.469 [restartedMain] INFO  [HikariPool:565] - HikariPool-1 - Added connection org.mariadb.jdbc.Connection@1dee15ec 
+20230817 11:07:15.470 [restartedMain] INFO  [HikariDataSource:123] - HikariPool-1 - Start completed. 
+20230817 11:07:15.628 [restartedMain] INFO  [BytecodeProviderInitiator:53] - HHH000021: Bytecode provider name : bytebuddy 
+20230817 11:07:16.060 [restartedMain] INFO  [JtaPlatformInitiator:51] - HHH000490: Using JtaPlatform implementation: [org.hibernate.engine.transaction.jta.platform.internal.NoJtaPlatform] 
+20230817 11:07:16.109 [restartedMain] INFO  [LocalContainerEntityManagerFactoryBean:437] - Initialized JPA EntityManagerFactory for persistence unit 'default' 
+20230817 11:07:16.472 [restartedMain] WARN  [JpaBaseConfiguration$JpaWebConfiguration:231] - spring.jpa.open-in-view is enabled by default. Therefore, database queries may be performed during view rendering. Explicitly configure spring.jpa.open-in-view to disable this warning 
+20230817 11:07:16.638 [restartedMain] INFO  [WelcomePageHandlerMapping:57] - Adding welcome page: class path resource [static/index.html] 
+20230817 11:07:17.499 [restartedMain] INFO  [OptionalLiveReloadServer:59] - LiveReload server is running on port 35729 
+20230817 11:07:17.516 [restartedMain] INFO  [Http11NioProtocol:173] - Starting ProtocolHandler ["http-nio-8080"] 
+20230817 11:07:17.532 [restartedMain] INFO  [TomcatWebServer:220] - Tomcat started on port(s): 8080 (http) with context path '' 
+20230817 11:07:17.542 [restartedMain] INFO  [FileUploadApplication:57] - Started FileUploadApplication in 4.385 seconds (process running for 4.954) 
+20230817 11:07:18.201 [http-nio-8080-exec-1] INFO  [[/]:173] - Initializing Spring DispatcherServlet 'dispatcherServlet' 
+20230817 11:07:18.201 [http-nio-8080-exec-1] INFO  [DispatcherServlet:532] - Initializing Servlet 'dispatcherServlet' 
+20230817 11:07:18.202 [http-nio-8080-exec-1] INFO  [DispatcherServlet:554] - Completed initialization in 1 ms 
+20230817 11:07:18.603 [http-nio-8080-exec-9] INFO  [AbstractOpenApiResource:369] - Init duration for springdoc-openapi is: 180 ms 
+20230817 11:07:26.344 [http-nio-8080-exec-10] INFO  [Logger:37] - [컨트롤러 트랜잭션 시작] ResponseEntity com.example.fileUpload.controller.FileUploadController.printFile(Long) 
+20230817 11:07:26.350 [http-nio-8080-exec-10] INFO  [Logger:20] - [서비스 트랜잭션 시작] FileDto com.example.fileUpload.service.serviceImpl.FileUploadServiceImpl.printOne(Long) 
+20230817 11:07:26.404 [http-nio-8080-exec-10] INFO  [Logger:22] - [서비스 트랜잭션 커밋] FileDto com.example.fileUpload.service.serviceImpl.FileUploadServiceImpl.printOne(Long) 
+20230817 11:07:26.404 [http-nio-8080-exec-10] INFO  [Logger:29] - [서비스 리소스 릴리즈] FileDto com.example.fileUpload.service.serviceImpl.FileUploadServiceImpl.printOne(Long) 
+20230817 11:07:26.413 [http-nio-8080-exec-10] INFO  [Logger:39] - [컨트롤러 트랜잭션 커밋] ResponseEntity com.example.fileUpload.controller.FileUploadController.printFile(Long) 
+20230817 11:07:26.413 [http-nio-8080-exec-10] INFO  [Logger:46] - [컨트롤러 리소스 릴리즈] ResponseEntity com.example.fileUpload.controller.FileUploadController.printFile(Long) 
+20230817 11:07:59.474 [http-nio-8080-exec-1] INFO  [Logger:37] - [컨트롤러 트랜잭션 시작] ResponseEntity com.example.fileUpload.controller.FileUploadController.printFiles() 
+20230817 11:07:59.475 [http-nio-8080-exec-1] INFO  [Logger:20] - [서비스 트랜잭션 시작] List com.example.fileUpload.service.serviceImpl.FileUploadServiceImpl.printAll() 
+20230817 11:07:59.532 [http-nio-8080-exec-1] INFO  [Logger:22] - [서비스 트랜잭션 커밋] List com.example.fileUpload.service.serviceImpl.FileUploadServiceImpl.printAll() 
+20230817 11:07:59.532 [http-nio-8080-exec-1] INFO  [Logger:29] - [서비스 리소스 릴리즈] List com.example.fileUpload.service.serviceImpl.FileUploadServiceImpl.printAll() 
+20230817 11:07:59.534 [http-nio-8080-exec-1] INFO  [Logger:39] - [컨트롤러 트랜잭션 커밋] ResponseEntity com.example.fileUpload.controller.FileUploadController.printFiles() 
+20230817 11:07:59.534 [http-nio-8080-exec-1] INFO  [Logger:46] - [컨트롤러 리소스 릴리즈] ResponseEntity com.example.fileUpload.controller.FileUploadController.printFiles() 
+20230817 11:10:54.198 [File Watcher] INFO  [LocalDevToolsAutoConfiguration$RestartingClassPathChangeChangedEventListener:211] - Restarting due to 1 class path change (0 additions, 0 deletions, 1 modification) 
+20230817 11:10:54.208 [Thread-5] INFO  [Http11NioProtocol:173] - Pausing ProtocolHandler ["http-nio-8080"] 
+20230817 11:10:54.208 [Thread-5] INFO  [StandardService:173] - Stopping service [Tomcat] 
+20230817 11:10:54.209 [Thread-5] INFO  [[/]:173] - Destroying Spring FrameworkServlet 'dispatcherServlet' 
+20230817 11:10:54.211 [Thread-5] INFO  [Http11NioProtocol:173] - Stopping ProtocolHandler ["http-nio-8080"] 
+20230817 11:10:54.212 [Thread-5] INFO  [Http11NioProtocol:173] - Destroying ProtocolHandler ["http-nio-8080"] 
+20230817 11:10:54.214 [Thread-5] INFO  [LocalContainerEntityManagerFactoryBean:650] - Closing JPA EntityManagerFactory for persistence unit 'default' 
+20230817 11:10:54.216 [Thread-5] INFO  [HikariDataSource:350] - HikariPool-1 - Shutdown initiated... 
+20230817 11:10:54.218 [Thread-5] INFO  [HikariDataSource:352] - HikariPool-1 - Shutdown completed. 
