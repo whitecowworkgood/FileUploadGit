@@ -4,6 +4,12 @@ package com.example.fileUpload.controller;
 import com.example.fileUpload.dto.FileDto;
 import com.example.fileUpload.dto.Message;
 import com.example.fileUpload.service.FileUploadService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -20,7 +26,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @Slf4j
 @RequestMapping("/file")
-
+@Tag(name = "Restful", description = "restful API 구성")
 public class FileUploadController {
 
     private final FileUploadService fileUploadService;
@@ -43,6 +49,7 @@ public class FileUploadController {
     /*
      * 해당 영역은 API 영역
      */
+    @Operation(summary = "전체 파일 조회", description = "저장된 파일정보들을 조회합니다.")
     @GetMapping("/uploads")
     @ResponseBody
     //HttpServletRequest httpServletRequest 이것으로 헤더들 보고 설정할 수 있음.
@@ -66,7 +73,7 @@ public class FileUploadController {
         }
 
     }
-
+    @Operation(summary = "선택 파일 조회", description = "파일 id를 통해 파일정보를 조회합니다.")
     @GetMapping("/upload/{id}")
     @ResponseBody
     public ResponseEntity<Message> printFile(@PathVariable("id") Long id){
@@ -90,7 +97,7 @@ public class FileUploadController {
 
     }
 
-
+    @Operation(summary = "파일 삭제", description = "파일 id를 통해 파일정보를 삭제합니다.")
     @DeleteMapping("/upload")
     public ResponseEntity<Message> DeleteFile(@RequestParam("id") Long id){
 
@@ -107,7 +114,7 @@ public class FileUploadController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(failedMessage);
         }
     }
-
+    @Operation(summary = "전체 파일 생성", description = "파일을 저장합니다.")
     @PostMapping("/upload")
     public ResponseEntity<Message> uploadFile(@RequestParam("file") MultipartFile file){
 
