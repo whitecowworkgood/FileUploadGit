@@ -3,13 +3,15 @@ package com.example.fileUpload.dto;
 import lombok.Data;
 
 @Data
-public class Message {
+public class GetMessage {
 
     private String message;
+    private int httpStatus;
     private Object data;
 
-    public Message() {
+    public GetMessage() {
         this.data = null;
-        this.message = null;
+        this.message = "NO_CONTENT";
+        this.httpStatus = 204;
     }
 }

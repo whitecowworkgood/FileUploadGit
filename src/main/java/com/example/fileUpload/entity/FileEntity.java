@@ -15,10 +15,10 @@ public class FileEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1020)
     private String fileName;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 1020)
     private String fileType;
 
     @Column(nullable = false)

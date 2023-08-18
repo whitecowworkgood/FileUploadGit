@@ -24,9 +24,9 @@ DROP TABLE IF EXISTS `file_entity`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `file_entity` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `file_name` varchar(255) NOT NULL,
+  `file_name` varchar(1020) NOT NULL,
   `file_size` bigint(20) NOT NULL,
-  `file_type` varchar(255) NOT NULL,
+  `file_type` varchar(1020) NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
