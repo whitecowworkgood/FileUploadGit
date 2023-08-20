@@ -9,6 +9,7 @@ import com.example.fileUpload.unit.FileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.modelmapper.MappingException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -27,6 +28,8 @@ import static com.example.fileUpload.unit.FileUtil.fileOleParser;
 @Slf4j
 @RequiredArgsConstructor
 @Transactional
+@SuppressWarnings("ResultOfMethodCallIgnored")
+//@SuppressWarnings("unused")
 public class FileUploadServiceImpl implements FileUploadService {
     private final SaveFileRepository saveFileRepository;
     private final ModelMapper modelMapper;
@@ -37,34 +40,27 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Override
     public boolean fileUpload(FileDto fileDto) {
-        try{
-            if(!fileDto.getFileData().isEmpty()){
-                boolean isValid = FileUtil.valuedDocFile(fileDto);
+        try {
+            if (!fileDto.getFileData().isEmpty()) {
+                String fullPath = dir + fileDto.getFileName();
 
-                if(isValid){
-                    String fullPath = dir + fileDto.getFileName();
+                if (FileUtil.isValidPath(dir, fullPath)) {
 
-                    if(FileUtil.isValidPath(dir, fullPath)){
-                        //return false;
+                    if (FileUtil.valuedDocFile(fileDto)) {
                         fileDto.getFileData().transferTo(new File(fullPath));
-                        //IOException
                         FileEntity fileEntity = modelMapper.map(fileDto, FileEntity.class);
 
-                        if(fileEntity == null){
-                            throw new RuntimeException();
-                        }
                         saveFileRepository.save(fileEntity);
-                        //RuntimeException
                         return true;
                     }
                 }
             }
-        } catch (IOException e) {
+        } catch (RuntimeException e) {
             log.error(ExceptionUtils.getStackTrace(e));
+            new File(dir + fileDto.getFileName()).delete();
 
-        }catch (RuntimeException e){
-            log.error(ExceptionUtils.getStackTrace(e));
-            //db저장시 예외처리를 구현하면 됨 - 저장된 파일 삭제 처리 추가하기
+        } catch (IOException i) {
+            log.error(ExceptionUtils.getStackTrace(i));
         }
         return false;
     }
@@ -98,7 +94,7 @@ public class FileUploadServiceImpl implements FileUploadService {
         String fileName = fileEntity.getFileName();
         String fullPath = dir + fileName;
 
-        if(!FileUtil.isValidPath(dir, fullPath)){
+        if (!FileUtil.isValidPath(dir, fullPath)) {
             return false;
         }
 
@@ -111,10 +107,4 @@ public class FileUploadServiceImpl implements FileUploadService {
         saveFileRepository.deleteById(fileEntity.getId());
         return true;
     }
-
-//    @Override
-//    //@Scheduled(fixedRate = 60000)
-//    public void Scheduler() {
-//       // log.info("스케줄러 가동");
-//    }
 }

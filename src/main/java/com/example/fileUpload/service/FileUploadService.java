@@ -13,6 +13,4 @@ public interface FileUploadService {
     public FileDto printOne(Long id);
 
     boolean deleteOne(Long id);
-
-    //void Scheduler();
 }

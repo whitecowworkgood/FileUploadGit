@@ -3,6 +3,7 @@ package com.example.fileUpload.unit;
 import com.example.fileUpload.dto.FileDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,11 +19,7 @@ public class FileUtil {
                 "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
                 "application/vnd.ms-powerpoint", "application/vnd.ms-excel", "application/msword");
 
-        if(validTypeList.contains(fileDto.getFileType())){
-            return true;
-        }
-
-        return false;
+        return validTypeList.contains(fileDto.getFileType());
     }
 
     public static boolean isValidPath(String defaultPath, String savePath){

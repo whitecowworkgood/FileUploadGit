@@ -1,17 +1,27 @@
 package com.example.fileUpload.aop;
 
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
+import org.aspectj.lang.annotation.Before;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 
 @Component
 @Slf4j
 @Aspect
 
-public class Logger {
+public class Aop {
+    @Value("${Save-Directory}")
+    String dir;
 
     @Around("execution(* com.example.fileUpload.service.*.*(..))")
     public Object serviceLogger(ProceedingJoinPoint joinPoint) throws Throwable{
@@ -45,5 +55,34 @@ public class Logger {
         }finally {
             log.info("[컨트롤러 리소스 릴리즈] {}", joinPoint.getSignature());
         }
+    }
+    @Before("execution(* com.example.fileUpload.service.*.*(..))")
+    public void downloadFolderCheck() throws Throwable{
+        Path folder = Paths.get(dir);
+
+        // 폴더 존재 여부 확인
+        if (!Files.exists(folder) || !Files.isDirectory(folder)) {
+            try {
+                Files.createDirectory(folder);
+                System.out.println("Folder created: " + dir);
+            } catch (IOException e) {
+                // 폴더 생성 실패에 대한 예외 처리
+                log.error(ExceptionUtils.getStackTrace(e));
+            }
+        }
+    }
+
+    @Around("execution(* com.example.fileUpload.service.*.*(..))")
+    public Object validateDownloadFolderWithDB(ProceedingJoinPoint joinPoint) throws Throwable{
+        try{
+
+            return true;
+        }catch (Exception e){
+            throw e;
+
+        }finally {
+
+        }
+
     }
 }
