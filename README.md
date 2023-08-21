@@ -20,5 +20,5 @@
 
     // 스케쥴링을 통해서 db와 저장경로의 파일을 대조해서 오류(dbo 폴더x, dbx 폴더o)인 경우 조치를 취하도록 구현
     // 아니면 기타 방법으로 db와 파일목록을 조회해서 오류 찾고 조치를 취하도록 설정
-    //  ㄴvalidateDownloadFolderWithDB - AOP에서 구현하기
+    //  ㄴvalidateDownloadFolderWithDB - AOP에서 구현하기 - 구현 완료
     // 파일 업로드 예외처리 구현하기 - 구현 완료

@@ -69,6 +69,12 @@ public class FileUtil {
 
     }
 
+    public static List<String> getFolderFiles(String folderPath){
+        File folder = new File(folderPath);
+        String[] fileList = folder.list();
+        return List.of(fileList);
+    }
+
     private FileUtil() {
     }
 }
