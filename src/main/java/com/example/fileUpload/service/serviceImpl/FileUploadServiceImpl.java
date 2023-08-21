@@ -17,12 +17,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static com.example.fileUpload.unit.FileUtil.fileOleParser;
 
 @Service
 @Slf4j
@@ -47,10 +46,11 @@ public class FileUploadServiceImpl implements FileUploadService {
                 if (FileUtil.isValidPath(dir, fullPath)) {
 
                     if (FileUtil.valuedDocFile(fileDto)) {
+
                         fileDto.getFileData().transferTo(new File(fullPath));
                         FileEntity fileEntity = modelMapper.map(fileDto, FileEntity.class);
-
                         saveFileRepository.save(fileEntity);
+
                         return true;
                     }
                 }

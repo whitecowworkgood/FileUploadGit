@@ -3,12 +3,31 @@ package com.example.fileUpload.unit;
 import com.example.fileUpload.dto.FileDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.apache.poi.ooxml.POIXMLDocument;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.poi.xwpf.usermodel.XWPFPicture;
+import org.apache.poi.xwpf.usermodel.XWPFPicture;
+import org.apache.xmlbeans.XmlCursor;
+import org.apache.poi.ooxml.POIXMLDocument;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
+import javax.xml.namespace.QName;
+import org.apache.tika.exception.TikaException;
+import org.apache.tika.metadata.Metadata;
+import org.apache.tika.parser.AutoDetectParser;
+import org.apache.tika.parser.ParseContext;
+import org.apache.tika.parser.Parser;
+import org.apache.tika.sax.BodyContentHandler;
+import org.apache.xmlbeans.XmlCursor;
+import org.xml.sax.SAXException;
+
+
+import javax.xml.namespace.QName;
+import java.io.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 public class FileUtil {
@@ -47,25 +66,47 @@ public class FileUtil {
         }
     }
 
-    public static void fileOleParser(InputStream inputStream) throws IOException {
+    public static void fileOleParser(String pathFile) {
+        //List<String> oleObjectList = new ArrayList<>(); // OLE 정보를 담을 리스트
 
-//        if (!file.isEmpty()) {
-//            try (InputStream inputStream = file.getInputStream()){
+        //File documentFile = new File(pathFile);
 
-                byte[] bytes = new byte[1024]; // heap에 만들어지는 것은 0으로 자동 초기화된다.
-                int len = 0;
+        /*try (InputStream stream = new FileInputStream(documentFile)) {
+            BodyContentHandler handler = new BodyContentHandler();
+            Metadata metadata = new Metadata();
+            AutoDetectParser parser = new AutoDetectParser();
+            ParseContext context = new ParseContext();
 
-                len = inputStream.read(bytes, 0, 5);
+            parser.parse(stream, handler, metadata, context);
 
-                for (int i = 0; i<len; i++) {
-                    System.out.printf("%x \n", bytes[i]);
+            String[] oleObjectInfo = metadata.getValues("OLE-Object-Info");
+            if (oleObjectInfo != null && oleObjectInfo.length > 0) {
+                System.out.println("OLE Object Information: " + oleObjectInfo[0]);
+
+            }
+            //return oleObjectInfo;
+        } catch (TikaException | IOException | SAXException e) {
+            throw new RuntimeException(e);
+        }*/
+
+        /*try (FileInputStream fis = new FileInputStream(pathFile)) {
+            XWPFDocument document = new XWPFDocument(POIXMLDocument.openPackage(fis));
+            List<XWPFPicture> pictures = document.getAllPictures();
+
+            for (XWPFPicture picture : pictures) {
+                XmlCursor cursor = picture.getCTPicture().newCursor();
+                cursor.selectPath("./*");
+
+                while(cursor.toNextSelection()) {
+                    if (cursor.getName().getLocalPart().equals("imagedata")) {
+                        String oleFilename = cursor.getAttributeText(new QName("ole", "filename"));
+                        System.out.println("OLE Object Filename: " + oleFilename);
+                    }
                 }
-                //inputStream.close();
-
-//            } catch (IOException e) {
-//                throw new RuntimeException(e);
-//            }
-//        }
+            }
+        } catch (IOException e) {
+            ExceptionUtils.getStackTrace(e);
+        }*/
 
     }
 

@@ -1,9 +1,7 @@
 package com.example.fileUpload.aop;
 
-import com.example.fileUpload.dto.FileDto;
 import com.example.fileUpload.entity.FileEntity;
 import com.example.fileUpload.repository.SaveFileRepository;
-import com.example.fileUpload.service.FileUploadService;
 import com.example.fileUpload.unit.FileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +11,6 @@ import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -21,8 +18,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashSet;
 import java.util.List;
-import java.util.stream.Collectors;
 
 
 @Component
@@ -85,45 +82,35 @@ public class Aop {
             }
         }
     }
-
-    @Around("execution(* com.example.fileUpload.service.*.*(..))")
-    public Object validateDownloadFolderWithDB(ProceedingJoinPoint joinPoint) throws Throwable{
+    /* 해당 코드는 DB와 폴더의 갯수를 검증하는 코드
+     * 팀장님과의 상담으로, 주기적으로 검증을 하는 것 보단, 처음 업로드 할때, 검증을 잘하면
+     * 상관이 없을 것이라 판단, 코드는 남겨놓고, 업로드시 검증을 강화함.
+    @After("execution(* com.example.fileUpload.service.*.*(..))")
+    public void validateDownloadFolderWithDB() throws Throwable{
         try {
-            log.info("[검증 시작] {}", joinPoint.getSignature());
-
-            //List<FileDto> dbFiles = fileUploadService.printAll();
             List<FileEntity> fileEntities = saveFileRepository.findAll();
             List<String> folderData = FileUtil.getFolderFiles(dir);
 
-
-            log.info("Folder Files: {}", folderData.toString());
-
             if (fileEntities.size() != folderData.size()) {
                 log.warn("DB와 폴더의 갯수가 틀립니다.");
-                // 필요한 처리, 관리자페이지가 있다면 알려준다거나 기타 방법이 있음
+                //throw new RuntimeException();
+                // 관리자페이지가 있다면 알려준다거나 기타 방법이 있음
             }
 
             List<String> dbFileNames = fileEntities.stream()
                     .map(FileEntity::getFileName)
-                    .collect(Collectors.toList());
+                    .toList();
 
-            boolean allMatch = folderData.stream().allMatch(dbFileNames::contains);
+            boolean allMatch = new HashSet<>(dbFileNames).containsAll(folderData);
 
             if (!allMatch) {
                 log.warn("DB와 Folder 데이터가 일치하지 않습니다.");
                 // 필요한 처리, 관리자페이지가 있다면 알려준다거나 기타 방법이 있음
                 // 자동화...?
             }
-
-            Object result = joinPoint.proceed();
-            log.info("[검증 종료] {}", joinPoint.getSignature());
-
-            return result;
-        }catch(Exception e){
+        } catch(Exception e){
             ExceptionUtils.getStackTrace(e);
             throw e;
         }
-    }
-
-
+    }*/
 }

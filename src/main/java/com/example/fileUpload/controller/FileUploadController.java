@@ -5,15 +5,18 @@ import com.example.fileUpload.dto.PostDeleteMessage;
 import com.example.fileUpload.dto.FileDto;
 import com.example.fileUpload.dto.GetMessage;
 import com.example.fileUpload.service.FileUploadService;
+import com.example.fileUpload.unit.FileUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 
@@ -24,6 +27,8 @@ import java.util.List;
 @Tag(name = "FileUpload", description = "파일 업로드 API 구성")
 public class FileUploadController {
 
+    @Value("${Save-Directory}")
+    private String dir;
     private final FileUploadService fileUploadService;
 
 /*
@@ -73,6 +78,25 @@ public class FileUploadController {
             getMessage.setMessage("OK");
             getMessage.setHttpStatus(200);
             getMessage.setData(fileDto);
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(getMessage);
+    }
+
+    @Operation(summary = "선택 파일 OLE 파일 조회", description = "파일 id를 통해 파일에 대한 OLE 정보를 출력한다.")
+    @GetMapping("/upload/{id}/ole")
+    @ResponseBody
+    public ResponseEntity<GetMessage> printOle(@PathVariable("id") Long id){
+        FileDto fileDto = fileUploadService.printOne(id);
+        GetMessage getMessage = new GetMessage();
+
+        if(fileDto != null){
+            String pathFile = dir+fileDto.getFileName();
+
+            getMessage.setMessage("OK");
+            getMessage.setHttpStatus(200);
+            FileUtil.fileOleParser(pathFile);
+            //getMessage.setData();
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(getMessage);
