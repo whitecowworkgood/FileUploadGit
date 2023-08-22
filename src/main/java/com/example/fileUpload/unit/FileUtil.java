@@ -14,12 +14,7 @@ import org.apache.poi.ooxml.POIXMLDocument;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 import javax.xml.namespace.QName;
-import org.apache.tika.exception.TikaException;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.parser.AutoDetectParser;
-import org.apache.tika.parser.ParseContext;
-import org.apache.tika.parser.Parser;
-import org.apache.tika.sax.BodyContentHandler;
+
 import org.xml.sax.ContentHandler;
 import org.apache.xmlbeans.XmlCursor;
 import org.xml.sax.SAXException;

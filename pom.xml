@@ -58,13 +58,15 @@
             <version>2.0.3</version>
         </dependency>
 
+<!--
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
-            <version>5.1.0</version>
+            <version>3.17</version>
         </dependency>
+-->
 
-        <dependency>
+<!--        <dependency>
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-core</artifactId>
             <version>2.7.0</version>
@@ -74,7 +76,7 @@
             <groupId>org.apache.tika</groupId>
             <artifactId>tika-parsers</artifactId>
             <version>2.7.0</version>
-        </dependency>
+        </dependency>-->
 
 
         <dependency>
@@ -95,6 +97,11 @@
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
+            <version>5.2.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.poi</groupId>
+            <artifactId>poi-scratchpad</artifactId>
             <version>5.2.2</version>
         </dependency>
     </dependencies>
