@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -86,7 +87,7 @@ public class FileUploadController {
     @Operation(summary = "선택 파일 OLE 파일 조회", description = "파일 id를 통해 파일에 대한 OLE 정보를 출력한다.")
     @GetMapping("/upload/{id}/ole")
     @ResponseBody
-    public ResponseEntity<GetMessage> printOle(@PathVariable("id") Long id){
+    public ResponseEntity<GetMessage> printOle(@PathVariable("id") Long id) throws OpenXML4JException, IOException {
         FileDto fileDto = fileUploadService.printOne(id);
         GetMessage getMessage = new GetMessage();
 
