@@ -26,3 +26,8 @@
     //팀장님 피드백 - 파일 업로드 부분, db저장 부분을 나눠서, 파일을 우선 temp폴더에 넣고, 검증(문서인지 뭔지),
     //그리고 난 후 c:\files로 이동, 이동에 문제가 없었다면 db에 데이터 저장, 만약 문제가 있었다면, 파일 삭제(db저장 전에 조치)
     //db에 업로드를 하고 저장, 만약 db저장에 문제가 생겼다면, 파일 삭제(과감하게)
+
+    //https://poi.apache.org/components/poifs/how-to.html#reading_event
+    //https://poi.apache.org/components/slideshow/how-to-shapes.html#OLE
+    //doc파일에서 ole가 1개일때, 데이터 추출까지 성공 -> ppt, xls랑 ole가 2개 이상일때 수행
+    //예상안(doc) list에 정규표현식으로 폴더를 찾고, 크기랑 package스트림으로 파일 저장
