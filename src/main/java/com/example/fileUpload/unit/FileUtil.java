@@ -49,8 +49,7 @@ public class FileUtil {
 
     public static void docOleParser(String pathFile) throws IOException{
 
-        String regex = "_\\d{10}";
-        Pattern pattern = Pattern.compile(regex);
+        Pattern pattern = Pattern.compile("_\\d{10}");
         int fileCounter = 1;
         byte[] oleData;
         String fileTypeString = null;
@@ -59,6 +58,8 @@ public class FileUtil {
         byte[] pngEndPattern = new byte[] { (byte) 0x49, 0x45, 0x4E, 0x44, (byte)0xAE, 0x42, 0x60, (byte)0x82};
         byte[] jpgStartPattern = new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0 };
         byte[] jpgEndPattern = new byte[] { (byte) 0xff, (byte)0xD9 };
+        byte[] pdfStartPattern = new byte[]{ (byte) 0x25, 0x50, 0x44, 0x46};
+        byte[] pdfEndPattern = new byte[]{ (byte) 0x25, 0x25, 0x45, 0x4F, 0x46, 0x0A};
 
 
         //doc에 한해 구현한 코드 doc to (doc,ppt,xls,jpg,png)
@@ -127,8 +128,6 @@ public class FileUtil {
                                         byte[] buffer = new byte[1024];
                                         int bytesRead;
 
-                                        boolean pngIsLocation = false;
-                                        boolean jpgIsLocation = false;
 
                                         int startPatternIndex = -1;  // 헤더 시작 위치를 기억하는 변수
                                         int endPatternIndex = -1;    // 푸터 시작 위치를 기억하는 변수
@@ -136,7 +135,35 @@ public class FileUtil {
                                         while ((bytesRead = oleStream.read(buffer)) != -1) {
                                             outputStream.write(buffer, 0, bytesRead);
 
-                                            //png
+                                            if (startPatternIndex == -1) {
+                                                // 검사할 파일 유형들의 헤더 패턴을 배열로 정의
+                                                byte[][] headerPatterns = new byte[][] {
+                                                        pngStartPattern,
+                                                        jpgStartPattern,
+                                                        pdfStartPattern  // 추가 파일 유형의 헤더 패턴을 여기에 추가
+                                                };
+
+                                                // 해당 헤더 패턴들을 순회하며 일치하는지 검사
+                                                for (int i = 0; i < headerPatterns.length; i++) {
+                                                    if (startsWith(outputStream.toByteArray(), headerPatterns[i])) {
+                                                        startPatternIndex = outputStream.size() - headerPatterns[i].length;
+
+                                                        // 파일 유형에 따라 확장자 설정
+                                                        if (Arrays.equals(headerPatterns[i], pngStartPattern)) {
+                                                            fileTypeString = "png";
+                                                        } else if (Arrays.equals(headerPatterns[i], jpgStartPattern)) {
+                                                            fileTypeString = "jpg";
+                                                        } else if (Arrays.equals(headerPatterns[i], pdfStartPattern)) {
+                                                            fileTypeString = "pdf";
+                                                        }else{
+                                                            fileTypeString = "dat";
+                                                        }
+                                                        break;
+                                                    }
+                                                }
+                                            }//코드가 돌아가는지 테스트 해보기
+
+                                            /*//png 기존에 사용하던 코드
                                             if (startPatternIndex == -1) {
                                                 startPatternIndex = indexOf(outputStream.toByteArray(), pngStartPattern);
                                             }
@@ -154,22 +181,33 @@ public class FileUtil {
                                                 endPatternIndex = indexOf(outputStream.toByteArray(), jpgEndPattern);
                                             }
 
-                                            if (startPatternIndex != -1 && endPatternIndex != -1) {
+                                            //pdf
+                                            if (startPatternIndex == -1) {
+                                                startPatternIndex = indexOf(outputStream.toByteArray(), pdfStartPattern);
+                                            }
+
+                                            if (endPatternIndex == -1) {
+                                                endPatternIndex = indexOf(outputStream.toByteArray(), pdfEndPattern);
+                                            }
+                                            //증복을 제거할 방법이 있나 확인해 보기*/
+
+
+
+                                           /* if (startPatternIndex != -1 && endPatternIndex != -1) {
                                                 if (endPatternIndex > startPatternIndex) {
-                                                    // Header and footer positions found, determine the file type
                                                     if (Arrays.equals(Arrays.copyOfRange(outputStream.toByteArray(), startPatternIndex, startPatternIndex + pngStartPattern.length), pngStartPattern)) {
                                                         fileTypeString = "png";
                                                     } else if (Arrays.equals(Arrays.copyOfRange(outputStream.toByteArray(), startPatternIndex, startPatternIndex + jpgStartPattern.length), jpgStartPattern)) {
                                                         fileTypeString = "jpg";
+                                                    }else if (Arrays.equals(Arrays.copyOfRange(outputStream.toByteArray(), startPatternIndex, startPatternIndex + pdfStartPattern.length), pdfStartPattern)) {
+                                                        fileTypeString = "pdf";
                                                     }
-
                                                     break;
                                                 } else {
-                                                    // Reset positions if end comes before start
                                                     startPatternIndex = -1;
                                                     endPatternIndex = -1;
                                                 }
-                                            }
+                                            }*/
                                         }
 
                                         if (startPatternIndex != -1 && endPatternIndex != -1) {
