@@ -3,11 +3,12 @@ package com.example.fileUpload.unit;
 import com.example.fileUpload.dto.FileDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.poifs.filesystem.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Slf4j
 public class FileUtil {
@@ -46,155 +47,160 @@ public class FileUtil {
         }
     }
 
-    public static void fileOleParser(String pathFile) throws IOException, OpenXML4JException {
-        //doc
+    public static void docOleParser(String pathFile) throws IOException{
 
-        try(POIFSFileSystem fs = new POIFSFileSystem(new File(pathFile))){
+        String regex = "_\\d{10}";
+        Pattern pattern = Pattern.compile(regex);
+        int fileCounter = 1;
+        byte[] oleData;
+        String fileTypeString = null;
+
+        byte[] pngStartPattern = new byte[] { (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
+        byte[] pngEndPattern = new byte[] { (byte) 0x49, 0x45, 0x4E, 0x44, (byte)0xAE, 0x42, 0x60, (byte)0x82};
+        byte[] jpgStartPattern = new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0 };
+        byte[] jpgEndPattern = new byte[] { (byte) 0xff, (byte)0xD9 };
+
+
+        //doc에 한해 구현한 코드 doc to (doc,ppt,xls,jpg,png)
+        try(POIFSFileSystem fs = new POIFSFileSystem(new File(pathFile))) {
             DirectoryEntry root = fs.getRoot();
+
             DirectoryEntry objectPoolDir = (DirectoryEntry) root.getEntry("ObjectPool");
-            //해당 엔트리는 doc에서 숫자가 랜덤임 정규표현식이나 기타 방법을 써야함.
-            DirectoryEntry randomNum = (DirectoryEntry) objectPoolDir.getEntry("_1754246191");
-            DocumentEntry PackageFile = (DocumentEntry) randomNum.getEntry("Package");
 
-            DocumentInputStream stream = new DocumentInputStream(PackageFile);
+            for (Entry entryDir : objectPoolDir) {
 
-            //System.out.println(stream);
-            int dataSize = PackageFile.getSize(); // 읽을 데이터 크기
+                if (entryDir instanceof DirectoryEntry) {
+                    String entryFileName = entryDir.getName();
+                    Matcher matcher = pattern.matcher(entryFileName);
 
-            byte[] buffer = new byte[dataSize];
-            int bytesRead = stream.read(buffer, 0, dataSize);
+                    if (matcher.matches()) {
+                        //System.out.println("Matching entry found: " + entryFileName + "  int : " + fileCounter);
+                        DirectoryEntry randomNum = (DirectoryEntry) objectPoolDir.getEntry(entryFileName);
 
-            if (bytesRead > 0) {
-                String data = new String(buffer, 0, bytesRead);
-                System.out.println("Read data: " + data);
-            } else {
-                System.out.println("No data read.");
-            }
-            //System.out.println(PackageFile);
-            //listDirectoryContents(objectPoolDir, "");
+                        Iterator<Entry> entries = randomNum.getEntries();
 
-            /*for(Entry entry: root){
-                System.out.println("dir: " + entry.getName());
-                //System.out.println(entry.);
-            }*/
+                        while (entries.hasNext()) {
+                            Entry entry = entries.next();
+                            if (entry instanceof DocumentEntry dataEntry) {
 
-        }
-        /*try (FileInputStream fis = new FileInputStream(pathFile);
-             POIFSFileSystem poifs = new POIFSFileSystem(fis);
-             HWPFDocument document = new HWPFDocument(poifs)) {
+                                String entryName = dataEntry.getName();
+                                //System.out.println(entryName);
+                                if (entryName.startsWith("Package")) {
+                                    DocumentEntry fileEntry = (DocumentEntry) randomNum.getEntry(entryName);
+                                    DocumentEntry oleType = (DocumentEntry) randomNum.getEntry("\u0001CompObj");
 
-            ObjectPool objectPool = document.getObjectsPool();
-            int objectCount = objectPool.getObjectCount();
+                                    DocumentInputStream oleTypeStream = new DocumentInputStream(oleType);
+                                    byte[] buffer = new byte[oleTypeStream.available()];
+                                    oleTypeStream.read(buffer);
+                                    oleTypeStream.close();
 
-            for (int i = 0; i < objectCount; i++) {
-                String objectName = objectPool.getObject(i).getName();
-                String className = objectPool.getObject(i).getClassName();
-                long size = objectPool.getObject(i).getSize();
+                                    String compObjContents = new String(buffer);
 
-                System.out.println("Object Name: " + objectName);
-                System.out.println("Class Name: " + className);
-                System.out.println("Size: " + size + " bytes");
-                System.out.println("---------------------------");
-            }
+                                    if (compObjContents.contains("PowerPoint")) {
+                                        fileTypeString = "pptx";
+                                    } else if (compObjContents.contains("Excel")) {
+                                        fileTypeString = "xlsx";
+                                    } else if (compObjContents.contains("Word")) {
+                                        fileTypeString = "docx";
+                                    }
 
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
-        /*try (FileInputStream fis = new FileInputStream(pathFile);
-             POIFSFileSystem poifs = new POIFSFileSystem(fis);
-             HWPFDocument document = new HWPFDocument(poifs)) {
+                                    DocumentInputStream oleStream = new DocumentInputStream(fileEntry);
+                                    oleData = new byte[oleStream.available()];
+                                    oleStream.read(oleData);
+                                    oleStream.close();
 
-            Picture[] pictures = document.getPicturesTable().getAllPictures().toArray(new Picture[0]);
-            for (Picture picture : pictures) {
-                String objectName = picture.suggestFullFileName();
-                System.out.println("Object Name: " + objectName);
-
-                byte[] bytes = picture.getContent();
-                picture.suggestFileExtension();
-                System.out.println("Content: " + Arrays.toString(bytes));
-
-                // 추출된 데이터(bytes)를 원하는 방식으로 처리합니다.
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }*/
-        //}
+                                    String outputFileName = String.format("output-ole-object%d.%s", fileCounter, fileTypeString);
+                                    try (FileOutputStream outputStream = new FileOutputStream("C:\\files\\ole\\" + outputFileName)) {
+                                        outputStream.write(oleData);
+                                    } catch (IOException e) {
+                                        ExceptionUtils.getStackTrace(e);
+                                        log.error("파일 저장 실패");
+                                    }
 
 
-        /*FileInputStream fis = new FileInputStream(pathFile);
+                                } else if (entryName.endsWith(Ole10Native.OLE10_NATIVE)) {
 
-        XWPFDocument document = new XWPFDocument(fis);
+                                    DocumentEntry fileEntry = (DocumentEntry) randomNum.getEntry(entryName);
 
-        List<PackagePart> embeddedDocs;
-        embeddedDocs = document.getAllEmbeddedParts();
+                                    try (DocumentInputStream oleStream = new DocumentInputStream(fileEntry)) {
+                                        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                                        byte[] buffer = new byte[1024];
+                                        int bytesRead;
 
-        if (embeddedDocs != null && !embeddedDocs.isEmpty()) {
+                                        boolean pngIsLocation = false;
+                                        boolean jpgIsLocation = false;
 
-            for (PackagePart pPart : embeddedDocs) {
-                System.out.print(pPart.getPartName().getName() + ", ");
-                System.out.print(pPart.getContentType() + ", ");
-                System.out.println();
-                //System.out.println(pPart.save(getPartName());
-            }
-            //docx는 됨
-            //추후 생성자를 바꿔서 doc와 ppt파일들, 엑셀도 되게 하기
-            *//*
-            네, 주어진 코드는 .docx 확장자를 가진 파일인 DOCX 형식의 문서에서 embedded 객체를 추출하는 코드입니다. XWPFDocument 클래스는 Apache POI 라이브러리에서 제공하는 클래스 중 하나로, Word 문서를 처리할 때 사용되며 주로 DOCX 파일 형식을 다룰 때 사용됩니다.
+                                        int startPatternIndex = -1;  // 헤더 시작 위치를 기억하는 변수
+                                        int endPatternIndex = -1;    // 푸터 시작 위치를 기억하는 변수
 
-따라서 이 코드는 .docx 확장자를 가진 파일의 내부에 있는 embedded 객체들의 정보를 출력하는 목적으로 작성된 것입니다. 위의 코드는 OOXML 형식의 DOCX 파일에서만 작동합니다. 만약 .doc 확장자의 문서를 처리하려면, 다른 형식의 문서를 다루는 코드를 사용해야 할 수 있습니다.
+                                        while ((bytesRead = oleStream.read(buffer)) != -1) {
+                                            outputStream.write(buffer, 0, bytesRead);
 
-.doc 확장자를 가진 문서를 처리하기 위해서는 HWPFDocument 클래스를 사용하여야 합니다. 해당 클래스는 .doc 확장자를 가진 문서의 내용을 추출하는 데 사용됩니다. 이와 비슷하게 .ppt 확장자를 가진 프레젠테이션 파일이 있다면, .pptx 형식의 프레젠테이션을 처리하는 XSLFSlideShow 클래스를 사용하여 추출 작업을 수행할 수 있습니다.
+                                            //png
+                                            if (startPatternIndex == -1) {
+                                                startPatternIndex = indexOf(outputStream.toByteArray(), pngStartPattern);
+                                            }
 
-요약하자면, 코드는 .docx 확장자를 가진 파일의 embedded 객체 정보를 출력하는 데 사용되며, 다른 확장자의 문서를 다루려면 해당 확장자에 맞는 라이브러리와 클래스를 사용하여 처리해야 합니다.
-             *//*
-        }*/
-    }
+                                            if (endPatternIndex == -1) {
+                                                endPatternIndex = indexOf(outputStream.toByteArray(), pngEndPattern);
+                                            }
 
-/*        List<String> oleObjectList = new ArrayList<>(); // OLE 정보를 담을 리스트
+                                            //jpg
+                                            if (startPatternIndex == -1) {
+                                                startPatternIndex = indexOf(outputStream.toByteArray(), jpgStartPattern);
+                                            }
 
-        File documentFile = new File(pathFile);
+                                            if (endPatternIndex == -1) {
+                                                endPatternIndex = indexOf(outputStream.toByteArray(), jpgEndPattern);
+                                            }
 
-        try (InputStream stream = new FileInputStream(documentFile)) {
-            BodyContentHandler handler = new BodyContentHandler();
-            Metadata metadata = new Metadata();
-            AutoDetectParser parser = new AutoDetectParser();
-            ParseContext context = new ParseContext();
+                                            if (startPatternIndex != -1 && endPatternIndex != -1) {
+                                                if (endPatternIndex > startPatternIndex) {
+                                                    // Header and footer positions found, determine the file type
+                                                    if (Arrays.equals(Arrays.copyOfRange(outputStream.toByteArray(), startPatternIndex, startPatternIndex + pngStartPattern.length), pngStartPattern)) {
+                                                        fileTypeString = "png";
+                                                    } else if (Arrays.equals(Arrays.copyOfRange(outputStream.toByteArray(), startPatternIndex, startPatternIndex + jpgStartPattern.length), jpgStartPattern)) {
+                                                        fileTypeString = "jpg";
+                                                    }
 
-            parser.parse(stream, handler, metadata, context);
+                                                    break;
+                                                } else {
+                                                    // Reset positions if end comes before start
+                                                    startPatternIndex = -1;
+                                                    endPatternIndex = -1;
+                                                }
+                                            }
+                                        }
 
-            String[] oleObjectInfo = metadata.getValues("Workbook");
-            if (oleObjectInfo != null && oleObjectInfo.length > 0) {
-                System.out.println("OLE Object Information: " + oleObjectInfo[0]);
+                                        if (startPatternIndex != -1 && endPatternIndex != -1) {
+                                            // Extract the data between start and end patterns
+                                            byte[] extractedData = Arrays.copyOfRange(outputStream.toByteArray(), startPatternIndex, endPatternIndex + pngEndPattern.length);
 
-            }else{
-                log.info("no ole");
-            }
-            //return oleObjectInfo;
-        } catch (TikaException | IOException | SAXException e) {
-            throw new RuntimeException(e);
-        }*/
+                                            // 데이터를 파일로 저장
+                                            String outputFileName = String.format("output-ole-object%d.%s", fileCounter, fileTypeString);
+                                            try (FileOutputStream fileOutputStream = new FileOutputStream("C:\\files\\ole\\" + outputFileName)) {
+                                                fileOutputStream.write(extractedData);
 
-        /*try (FileInputStream fis = new FileInputStream(pathFile)) {
-            XWPFDocument document = new XWPFDocument(POIXMLDocument.openPackage(fis));
-            List<XWPFPicture> pictures = document.getAllPictures();
-
-            for (XWPFPicture picture : pictures) {
-                XmlCursor cursor = picture.getCTPicture().newCursor();
-                cursor.selectPath("./*");
-
-                while(cursor.toNextSelection()) {
-                    if (cursor.getName().getLocalPart().equals("imagedata")) {
-                        String oleFilename = cursor.getAttributeText(new QName("ole", "filename"));
-                        System.out.println("OLE Object Filename: " + oleFilename);
+                                            } catch (IOException e) {
+                                                ExceptionUtils.getStackTrace(e);
+                                                log.error("파일 저장 실패");
+                                            }
+                                        } else {
+                                            log.error("헤더 또는 푸터를 찾을 수 없음");
+                                        }
+                                    } catch (IOException e) {
+                                        ExceptionUtils.getStackTrace(e);
+                                        log.error("IO 오류 발생");
+                                    }
+                                }
+                            }
+                        }
+                        fileCounter++;
                     }
                 }
             }
-        } catch (IOException e) {
-            ExceptionUtils.getStackTrace(e);
-        }*/
-
-    //}
+        }
+    }
 
     public static List<String> getFolderFiles(String folderPath){
         File folder = new File(folderPath);
@@ -202,18 +208,60 @@ public class FileUtil {
         return List.of(fileList);
     }
 
-    public static void listDirectoryContents(DirectoryEntry dir, String indent) {
-        for (Entry entry : dir) {
+    public static void exploreDirectory(DirectoryEntry dirEntry) {
+        System.out.println("Directory: " + dirEntry.getName());
+
+        Iterator<Entry> entries = dirEntry.getEntries();
+        while (entries.hasNext()) {
+            Entry entry = entries.next();
             if (entry instanceof DirectoryEntry) {
-                System.out.println(indent + "Dir: " + entry.getName());
-                listDirectoryContents((DirectoryEntry) entry, indent + "  ");
-            } else if (entry instanceof DocumentEntry) {
-                System.out.println(indent + "File: " + entry.getName());
+                exploreDirectory((DirectoryEntry) entry); // 재귀 호출로 하위 디렉토리 탐색
+            } else {
+                System.out.println("File: " + entry.getName());
             }
         }
     }
+    private static boolean startsWith(byte[] array, byte[] prefix) {
+        if (array.length < prefix.length) {
+            return false;
+        }
+        for (int i = 0; i < prefix.length; i++) {
+            if (array[i] != prefix[i]) {
+                return false;
+            }
+        }
+        return true;
+    }
 
+    private static boolean endsWith(byte[] data, byte[] endPattern) {
+        if (data.length < endPattern.length) {
+            return false;
+        }
 
+        for (int i = 0; i < endPattern.length; i++) {
+            if (data[data.length - endPattern.length + i] != endPattern[i]) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
+    private static int indexOf(byte[] source, byte[] pattern) {
+        for (int i = 0; i <= source.length - pattern.length; i++) {
+            boolean match = true;
+            for (int j = 0; j < pattern.length; j++) {
+                if (source[i + j] != pattern[j]) {
+                    match = false;
+                    break;
+                }
+            }
+            if (match) {
+                return i;
+            }
+        }
+        return -1;
+    }
 
     private FileUtil() {
     }

@@ -18,10 +18,6 @@
     // 스케쥴링을 통해서 db와 저장경로의 파일을 대조해서 오류(dbo 폴더x, dbx 폴더o)인 경우 조치를 취하도록 구현
     // 아니면 기타 방법으로 db와 파일목록을 조회해서 오류 찾고 조치를 취하도록 설정
     //  ㄴvalidateDownloadFolderWithDB - AOP에서 구현하기 - 구현 완료
-    // 파일 업로드 예외처리 구현하기 - 구현 완료
-    // 파일 업로드에서 aop의 문제인지 기타 문제인지 모르겠지만, 파일 업로드시 파일명 끝에 숫자가 붙음 해결하기
-    // oleparser의 문제임 해결해야 함~~
-    // 이제 OLE 분석 구현하기~~ 
 
     //팀장님 피드백 - 파일 업로드 부분, db저장 부분을 나눠서, 파일을 우선 temp폴더에 넣고, 검증(문서인지 뭔지),
     //그리고 난 후 c:\files로 이동, 이동에 문제가 없었다면 db에 데이터 저장, 만약 문제가 있었다면, 파일 삭제(db저장 전에 조치)
@@ -29,5 +25,13 @@
 
     //https://poi.apache.org/components/poifs/how-to.html#reading_event
     //https://poi.apache.org/components/slideshow/how-to-shapes.html#OLE
-    //doc파일에서 ole가 1개일때, 데이터 추출까지 성공 -> ppt, xls랑 ole가 2개 이상일때 수행
-    //예상안(doc) list에 정규표현식으로 폴더를 찾고, 크기랑 package스트림으로 파일 저장
+
+
+    //doc파일에 한해서, pptx, xlsx, docx문서를 비롯한, png, jpg를 추출하는데 성공 -> ppt, doc, xls를 추출하는 코드 추가하기
+    //특이사항 -> xlsx는 추출을 하면, 데이터가 없어짐...? 시트도 없어짐
+    //ppt
+    //xls
+
+    //docx  
+    //pptx
+    //xlsx
