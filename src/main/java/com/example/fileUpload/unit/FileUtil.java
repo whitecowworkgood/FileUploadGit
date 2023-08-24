@@ -59,10 +59,10 @@ public class FileUtil {
         byte[] jpgStartPattern = new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0 };
         byte[] jpgEndPattern = new byte[] { (byte) 0xff, (byte)0xD9 };
         byte[] pdfStartPattern = new byte[]{ (byte) 0x25, 0x50, 0x44, 0x46};
-        byte[] pdfEndPattern = new byte[]{ (byte) 0x25, 0x25, 0x45, 0x4F, 0x46, 0x0A};
+        byte[] pdfEndPattern = new byte[]{ (byte) 0x25, 0x25, 0x45, 0x4F, 0x46};
 
 
-        //doc에 한해 구현한 코드 doc to (doc,ppt,xls,jpg,png)
+        //doc에 한해 구현한 코드 doc to (doc,ppt,xls,jpg,png,pdf)
         try(POIFSFileSystem fs = new POIFSFileSystem(new File(pathFile))) {
             DirectoryEntry root = fs.getRoot();
 
@@ -127,98 +127,85 @@ public class FileUtil {
                                         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
                                         byte[] buffer = new byte[1024];
                                         int bytesRead;
-
-
+                                        int footerSize = -1;
                                         int startPatternIndex = -1;  // 헤더 시작 위치를 기억하는 변수
                                         int endPatternIndex = -1;    // 푸터 시작 위치를 기억하는 변수
 
+                                        // 검사할 파일 유형들의 헤더와 푸터 패턴을 배열로 정의
+                                        byte[][] headerPatterns = new byte[][] {
+                                                pngStartPattern,
+                                                pdfStartPattern,
+                                                jpgStartPattern
+                                                  // 추가 파일 유형의 헤더 패턴을 여기에 추가
+                                        };
+
+                                        byte[] footerPatterns = new byte[]{};
+
                                         while ((bytesRead = oleStream.read(buffer)) != -1) {
                                             outputStream.write(buffer, 0, bytesRead);
-
                                             if (startPatternIndex == -1) {
-                                                // 검사할 파일 유형들의 헤더 패턴을 배열로 정의
-                                                byte[][] headerPatterns = new byte[][] {
-                                                        pngStartPattern,
-                                                        jpgStartPattern,
-                                                        pdfStartPattern  // 추가 파일 유형의 헤더 패턴을 여기에 추가
-                                                };
-
-                                                // 해당 헤더 패턴들을 순회하며 일치하는지 검사
                                                 for (int i = 0; i < headerPatterns.length; i++) {
-                                                    if (startsWith(outputStream.toByteArray(), headerPatterns[i])) {
-                                                        startPatternIndex = outputStream.size() - headerPatterns[i].length;
-
+                                                    int headerIndex = indexOf(outputStream.toByteArray(), headerPatterns[i]);
+                                                    if (headerIndex != -1) {
+                                                        startPatternIndex = headerIndex;
                                                         // 파일 유형에 따라 확장자 설정
                                                         if (Arrays.equals(headerPatterns[i], pngStartPattern)) {
                                                             fileTypeString = "png";
-                                                        } else if (Arrays.equals(headerPatterns[i], jpgStartPattern)) {
-                                                            fileTypeString = "jpg";
+                                                            footerSize=pngEndPattern.length;
+                                                            footerPatterns = Arrays.copyOfRange(pngEndPattern, 0, footerSize);
+
                                                         } else if (Arrays.equals(headerPatterns[i], pdfStartPattern)) {
                                                             fileTypeString = "pdf";
-                                                        }else{
-                                                            fileTypeString = "dat";
+                                                            footerSize=pdfEndPattern.length;
+                                                            footerPatterns = Arrays.copyOfRange(pdfEndPattern, 0, footerSize);
+                                                        }else if (Arrays.equals(headerPatterns[i], jpgStartPattern)) {
+                                                            fileTypeString = "jpg";
+                                                            footerSize=jpgEndPattern.length;
+                                                            footerPatterns = Arrays.copyOfRange(jpgEndPattern, 0, footerSize);
+                                                        } else{
+                                                            fileTypeString=".bin";
                                                         }
                                                         break;
                                                     }
                                                 }
-                                            }//코드가 돌아가는지 테스트 해보기
-
-                                            /*//png 기존에 사용하던 코드
-                                            if (startPatternIndex == -1) {
-                                                startPatternIndex = indexOf(outputStream.toByteArray(), pngStartPattern);
                                             }
+                                            //새로 구현한 코드
+                                            if (endPatternIndex == -1 && startPatternIndex != -1) {
+                                                int footerIndex = indexOf(outputStream.toByteArray(), footerPatterns, outputStream.size() - 1);
+                                                if (footerIndex != -1) {
+                                                    //footerSize = footerPatterns[j].length;
+                                                    endPatternIndex = footerIndex;
 
-                                            if (endPatternIndex == -1) {
-                                                endPatternIndex = indexOf(outputStream.toByteArray(), pngEndPattern);
-                                            }
-
-                                            //jpg
-                                            if (startPatternIndex == -1) {
-                                                startPatternIndex = indexOf(outputStream.toByteArray(), jpgStartPattern);
-                                            }
-
-                                            if (endPatternIndex == -1) {
-                                                endPatternIndex = indexOf(outputStream.toByteArray(), jpgEndPattern);
-                                            }
-
-                                            //pdf
-                                            if (startPatternIndex == -1) {
-                                                startPatternIndex = indexOf(outputStream.toByteArray(), pdfStartPattern);
-                                            }
-
-                                            if (endPatternIndex == -1) {
-                                                endPatternIndex = indexOf(outputStream.toByteArray(), pdfEndPattern);
-                                            }
-                                            //증복을 제거할 방법이 있나 확인해 보기*/
-
-
-
-                                           /* if (startPatternIndex != -1 && endPatternIndex != -1) {
-                                                if (endPatternIndex > startPatternIndex) {
-                                                    if (Arrays.equals(Arrays.copyOfRange(outputStream.toByteArray(), startPatternIndex, startPatternIndex + pngStartPattern.length), pngStartPattern)) {
-                                                        fileTypeString = "png";
-                                                    } else if (Arrays.equals(Arrays.copyOfRange(outputStream.toByteArray(), startPatternIndex, startPatternIndex + jpgStartPattern.length), jpgStartPattern)) {
-                                                        fileTypeString = "jpg";
-                                                    }else if (Arrays.equals(Arrays.copyOfRange(outputStream.toByteArray(), startPatternIndex, startPatternIndex + pdfStartPattern.length), pdfStartPattern)) {
-                                                        fileTypeString = "pdf";
+                                                    // 푸터를 찾았으니 파일 유형이 맞는지 검증
+                                                    boolean isValidFooter = Arrays.equals(Arrays.copyOfRange(outputStream.toByteArray(), footerIndex, footerIndex + footerSize), footerPatterns);
+                                                    if (!isValidFooter) {
+                                                        log.error("푸터 유효성 검증 실패");
+                                                        endPatternIndex = -1; // 푸터 검증 실패 시 푸터 인덱스 초기화
                                                     }
+
                                                     break;
-                                                } else {
-                                                    startPatternIndex = -1;
-                                                    endPatternIndex = -1;
                                                 }
-                                            }*/
+                                            }
+
+                                            if (startPatternIndex != -1 && endPatternIndex != -1) {
+                                                break;
+                                            }
                                         }
 
                                         if (startPatternIndex != -1 && endPatternIndex != -1) {
-                                            // Extract the data between start and end patterns
-                                            byte[] extractedData = Arrays.copyOfRange(outputStream.toByteArray(), startPatternIndex, endPatternIndex + pngEndPattern.length);
+                                            //System.out.println("start: "+startPatternIndex+" end: "+ endPatternIndex);
 
+                                            //System.out.println("fotter size: "+footerSize);
+                                            byte[] extractedData = Arrays.copyOfRange(outputStream.toByteArray(), startPatternIndex, endPatternIndex + footerSize);
+
+                                            //log.info("버퍼 크기: "+String.valueOf(extractedData.length));
                                             // 데이터를 파일로 저장
                                             String outputFileName = String.format("output-ole-object%d.%s", fileCounter, fileTypeString);
                                             try (FileOutputStream fileOutputStream = new FileOutputStream("C:\\files\\ole\\" + outputFileName)) {
                                                 fileOutputStream.write(extractedData);
-
+                                                log.info("OLE object saved to: C:\\files\\ole\\" + outputFileName);
+                                                startPatternIndex=-1;
+                                                endPatternIndex=-1;
                                             } catch (IOException e) {
                                                 ExceptionUtils.getStackTrace(e);
                                                 log.error("파일 저장 실패");
@@ -259,7 +246,7 @@ public class FileUtil {
             }
         }
     }
-    private static boolean startsWith(byte[] array, byte[] prefix) {
+   /* private static boolean startsWith(byte[] array, byte[] prefix) {
         if (array.length < prefix.length) {
             return false;
         }
@@ -283,7 +270,7 @@ public class FileUtil {
         }
 
         return true;
-    }
+    }*/
 
     private static int indexOf(byte[] source, byte[] pattern) {
         for (int i = 0; i <= source.length - pattern.length; i++) {
@@ -300,6 +287,22 @@ public class FileUtil {
         }
         return -1;
     }
+    private static int indexOf(byte[] data, byte[] pattern, int endIndex) {
+        for (int i = endIndex - pattern.length + 1; i >= 0; i--) {
+            boolean match = true;
+            for (int j = 0; j < pattern.length; j++) {
+                if (data[i + j] != pattern[j]) {
+                    match = false;
+                    break;
+                }
+            }
+            if (match) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
 
     private FileUtil() {
     }

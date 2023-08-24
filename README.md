@@ -27,11 +27,15 @@
     //https://poi.apache.org/components/slideshow/how-to-shapes.html#OLE
 
 
-    //doc파일에 한해서, pptx, xlsx, docx문서를 비롯한, png, jpg를 추출하는데 성공 -> ppt, doc, xls를 추출하는 코드 추가하기
-    //특이사항 -> xlsx는 추출을 하면, 데이터가 없어짐...? 시트도 없어짐
+    //doc파일에 한해서, pptx, xlsx, docx문서를 비롯한, png, jpg, pdf를 추출하는데 성공 -> ppt, doc, xls를 추출하는 코드 추가하기
+    //특이사항 -> xlsx는 추출을 하면, 데이터가 없어짐...? 시트도 없어짐 -> 저장된 데이터를 전부 가져오기에, 저장방식의 문제일 수 있음
+
     //ppt
+
     //xls
 
     //docx  
+
     //pptx
+
     //xlsx
