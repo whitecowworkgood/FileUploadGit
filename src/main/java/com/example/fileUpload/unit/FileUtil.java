@@ -13,6 +13,11 @@ import java.util.regex.Pattern;
 @Slf4j
 public class FileUtil {
 
+    public static final Pattern xlsPattern = Pattern.compile("MBD[A-Z0-9]{8}");
+    public static final Pattern filePattern = Pattern.compile("_\\d{10}");
+    public static final Pattern docPattern = Pattern.compile("ObjectPool");
+    public static final Pattern pptPattern = Pattern.compile("PowerPoint Document");
+
     public static boolean valuedDocFile(FileDto fileDto){
         List<String> validTypeList = List.of("application/pdf","application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
                 "application/vnd.openxmlformats-officedocument.presentationml.presentation",
@@ -50,13 +55,9 @@ public class FileUtil {
 
     public static void oleParser(String pathFile) {//ole를 추출하는 제일 첫번째 코드, 정규표현식 메서드 이용 후, 반환된 리스트로
 
+
         try (POIFSFileSystem fs = new POIFSFileSystem(new File(pathFile))) {
             DirectoryEntry root = fs.getRoot();
-
-            Pattern xlsPattern = Pattern.compile("MBD[A-Z0-9]{8}");
-            //Pattern docPattern = Pattern.compile("_\\d{10}");
-            Pattern docPattern = Pattern.compile("ObjectPool");
-            Pattern pptPattern = Pattern.compile("PowerPoint Document");
 
             exploreDirectory(root, xlsPattern, docPattern, pptPattern);
         } catch (IOException e) {
@@ -73,16 +74,13 @@ public class FileUtil {
 
             if (xlsMatcher.matches()) {
                 System.out.println("Found MBD: " + entryName);
+                //
             } else if (docMatcher.matches()) {
                 System.out.println("Found pool: " + entryName);
             }else if (pptMatcher.matches()) {
-                System.out.println("Found pool: " + entryName);
+                System.out.println("Found powerpoint: " + entryName);
             }/*else{
                 log.info("연결되어 있는 외부객체가 없음");
-            }*/
-
-            /*if (entry instanceof DirectoryEntry) {
-                exploreDirectory((DirectoryEntry) entry, xlsPattern, docPattern, pptPattern);
             }*/
         }
     }
@@ -114,7 +112,6 @@ public class FileUtil {
                     Matcher matcher = pattern.matcher(entryFileName);
 
                     if (matcher.matches()) {
-                        //System.out.println("Matching entry found: " + entryFileName + "  int : " + fileCounter);
                         DirectoryEntry randomNum = (DirectoryEntry) objectPoolDir.getEntry(entryFileName);
 
                         Iterator<Entry> entries = randomNum.getEntries();
@@ -175,7 +172,6 @@ public class FileUtil {
                                                 pngStartPattern,
                                                 pdfStartPattern,
                                                 jpgStartPattern
-                                                  // 추가 파일 유형의 헤더 패턴을 여기에 추가
                                         };
 
                                         byte[] footerPatterns = new byte[]{};
@@ -212,7 +208,6 @@ public class FileUtil {
                                             if (endPatternIndex == -1 && startPatternIndex != -1) {
                                                 int footerIndex = indexOf(outputStream.toByteArray(), footerPatterns, outputStream.size() - 1);
                                                 if (footerIndex != -1) {
-                                                    //footerSize = footerPatterns[j].length;
                                                     endPatternIndex = footerIndex;
 
                                                     // 푸터를 찾았으니 파일 유형이 맞는지 검증
@@ -232,19 +227,12 @@ public class FileUtil {
                                         }
 
                                         if (startPatternIndex != -1 && endPatternIndex != -1) {
-                                            //System.out.println("start: "+startPatternIndex+" end: "+ endPatternIndex);
-
-                                            //System.out.println("fotter size: "+footerSize);
                                             byte[] extractedData = Arrays.copyOfRange(outputStream.toByteArray(), startPatternIndex, endPatternIndex + footerSize);
 
-                                            //log.info("버퍼 크기: "+String.valueOf(extractedData.length));
-                                            // 데이터를 파일로 저장
                                             String outputFileName = String.format("output-ole-object%d.%s", fileCounter, fileTypeString);
                                             try (FileOutputStream fileOutputStream = new FileOutputStream("C:\\files\\ole\\" + outputFileName)) {
                                                 fileOutputStream.write(extractedData);
                                                 log.info("OLE object saved to: C:\\files\\ole\\" + outputFileName);
-                                                /*startPatternIndex=-1;
-                                                endPatternIndex=-1;*/
                                             } catch (IOException e) {
                                                 ExceptionUtils.getStackTrace(e);
                                                 log.error("파일 저장 실패");
