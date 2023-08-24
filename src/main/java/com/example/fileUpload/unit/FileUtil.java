@@ -47,6 +47,45 @@ public class FileUtil {
         }
     }
 
+
+    public static void oleParser(String pathFile) {//ole를 추출하는 제일 첫번째 코드, 정규표현식 메서드 이용 후, 반환된 리스트로
+
+        try (POIFSFileSystem fs = new POIFSFileSystem(new File(pathFile))) {
+            DirectoryEntry root = fs.getRoot();
+
+            Pattern xlsPattern = Pattern.compile("MBD[A-Z0-9]{8}");
+            //Pattern docPattern = Pattern.compile("_\\d{10}");
+            Pattern docPattern = Pattern.compile("ObjectPool");
+            Pattern pptPattern = Pattern.compile("PowerPoint Document");
+
+            exploreDirectory(root, xlsPattern, docPattern, pptPattern);
+        } catch (IOException e) {
+            ExceptionUtils.getStackTrace(e);
+        }
+    }
+    //여기서 값들을 리스트로 저장 후, 상단의 코드로 넘겨서,
+    private static void exploreDirectory(DirectoryEntry directory, Pattern xlsPattern, Pattern docPattern, Pattern pptPattern) {
+        for (Entry entry : directory) {
+            String entryName = entry.getName();
+            Matcher xlsMatcher = xlsPattern.matcher(entryName);
+            Matcher docMatcher = docPattern.matcher(entryName);
+            Matcher pptMatcher = pptPattern.matcher(entryName);
+
+            if (xlsMatcher.matches()) {
+                System.out.println("Found MBD: " + entryName);
+            } else if (docMatcher.matches()) {
+                System.out.println("Found pool: " + entryName);
+            }else if (pptMatcher.matches()) {
+                System.out.println("Found pool: " + entryName);
+            }/*else{
+                log.info("연결되어 있는 외부객체가 없음");
+            }*/
+
+            /*if (entry instanceof DirectoryEntry) {
+                exploreDirectory((DirectoryEntry) entry, xlsPattern, docPattern, pptPattern);
+            }*/
+        }
+    }
     public static void docOleParser(String pathFile) throws IOException{
 
         Pattern pattern = Pattern.compile("_\\d{10}");
@@ -98,11 +137,11 @@ public class FileUtil {
                                     String compObjContents = new String(buffer);
 
                                     if (compObjContents.contains("PowerPoint")) {
-                                        fileTypeString = "pptx";
+                                        fileTypeString = FileType.PPTX.getValue();
                                     } else if (compObjContents.contains("Excel")) {
-                                        fileTypeString = "xlsx";
+                                        fileTypeString = FileType.XLSX.getValue();
                                     } else if (compObjContents.contains("Word")) {
-                                        fileTypeString = "docx";
+                                        fileTypeString = FileType.DOCX.getValue();
                                     }
 
                                     DocumentInputStream oleStream = new DocumentInputStream(fileEntry);
@@ -150,20 +189,20 @@ public class FileUtil {
                                                         startPatternIndex = headerIndex;
                                                         // 파일 유형에 따라 확장자 설정
                                                         if (Arrays.equals(headerPatterns[i], pngStartPattern)) {
-                                                            fileTypeString = "png";
+                                                            fileTypeString = FileType.PNG.getValue();
                                                             footerSize=pngEndPattern.length;
                                                             footerPatterns = Arrays.copyOfRange(pngEndPattern, 0, footerSize);
 
                                                         } else if (Arrays.equals(headerPatterns[i], pdfStartPattern)) {
-                                                            fileTypeString = "pdf";
+                                                            fileTypeString = FileType.PDF.getValue();
                                                             footerSize=pdfEndPattern.length;
                                                             footerPatterns = Arrays.copyOfRange(pdfEndPattern, 0, footerSize);
                                                         }else if (Arrays.equals(headerPatterns[i], jpgStartPattern)) {
-                                                            fileTypeString = "jpg";
+                                                            fileTypeString = FileType.JPG.getValue();
                                                             footerSize=jpgEndPattern.length;
                                                             footerPatterns = Arrays.copyOfRange(jpgEndPattern, 0, footerSize);
                                                         } else{
-                                                            fileTypeString=".bin";
+                                                            fileTypeString=FileType.BIN.getValue();
                                                         }
                                                         break;
                                                     }
@@ -204,8 +243,8 @@ public class FileUtil {
                                             try (FileOutputStream fileOutputStream = new FileOutputStream("C:\\files\\ole\\" + outputFileName)) {
                                                 fileOutputStream.write(extractedData);
                                                 log.info("OLE object saved to: C:\\files\\ole\\" + outputFileName);
-                                                startPatternIndex=-1;
-                                                endPatternIndex=-1;
+                                                /*startPatternIndex=-1;
+                                                endPatternIndex=-1;*/
                                             } catch (IOException e) {
                                                 ExceptionUtils.getStackTrace(e);
                                                 log.error("파일 저장 실패");
@@ -226,6 +265,8 @@ public class FileUtil {
             }
         }
     }
+
+
 
     public static List<String> getFolderFiles(String folderPath){
         File folder = new File(folderPath);

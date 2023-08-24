@@ -96,7 +96,8 @@ public class FileUploadController {
 
             getMessage.setMessage("OK");
             getMessage.setHttpStatus(200);
-            FileUtil.docOleParser(pathFile);
+            FileUtil.docOleParser(pathFile); //추출하는 기능이 있는 코드
+           // FileUtil.oleParser(pathFile); //그냥 출력만 해주는 코드
             //getMessage.setData();
         }
 
