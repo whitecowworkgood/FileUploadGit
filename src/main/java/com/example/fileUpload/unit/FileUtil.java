@@ -4,7 +4,17 @@ import com.example.fileUpload.dto.FileDto;
 import jdk.swing.interop.SwingInterOpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.poi.hslf.record.ExOleObjStg;
+import org.apache.poi.hslf.usermodel.HSLFObjectData;
+import org.apache.poi.hslf.usermodel.HSLFSlideShow;
+import org.apache.poi.hssf.usermodel.HSSFObjectData;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hwpf.HWPFDocument;
+import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.poifs.filesystem.*;
+import org.apache.poi.sl.usermodel.ObjectData;
+import org.apache.poi.xslf.usermodel.XMLSlideShow;
+import org.springframework.boot.autoconfigure.couchbase.CouchbaseProperties;
 
 import java.io.*;
 import java.util.*;
@@ -57,88 +67,105 @@ public class FileUtil {
 
 
     public static void oleParser(String pathFile, String fileType) {//ole를 추출하는 제일 첫번째 코드, 정규표현식 메서드 이용 후, 반환된 리스트로
+
+        List<String> legacyFileTypes = List.of(
+                        "application/vnd.ms-excel", "application/msword");
+
+        List<String> modernFileTypes = List.of("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                "application/vnd.openxmlformats-officedocument.presentationml.presentation",
+                "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+
         int fileCounter=0;
 
-        try (POIFSFileSystem fs = new POIFSFileSystem(new File(pathFile))) {
+        if(fileType.equals("application/vnd.ms-powerpoint")){
 
-            /*if(fileType.contains("application/msword")){
-                //doc파일이면
-            }else if(fileType.contains("application/vnd.ms-excel")){
-                //xls파일이면
-            }else if(fileType.contains("application/vnd.ms-powerpoint")){
-                //ppt파일이면
-            }else{
-                //외부객체가 없는 파일이면
-            }*/
-           //DirectoryEntry root = fs.getRoot();
+            try (FileInputStream inputStream = new FileInputStream(pathFile)) {
+                List<HSLFObjectData> objects;
 
-            List<DirectoryEntry> result = exploreDirectoryFiles(fs.getRoot());
+                HSLFSlideShow ppt = new HSLFSlideShow(inputStream);
 
-            for (DirectoryEntry ent : result) {
-                System.out.println(ent.getEntryNames());
+                objects = List.of(ppt.getEmbeddedObjects());
 
-                Iterator<Entry> entryIterator = ent.getEntries();
-                while (entryIterator.hasNext()) {
-                    Entry entry = entryIterator.next();
+                for(HSLFObjectData object: objects){
+                    POIFSFileSystem fs = new POIFSFileSystem(object.getInputStream());
+                    DirectoryEntry directoryEntry = fs.getRoot();
 
-                    if (entry.getName().startsWith("Package")) {
-                        System.out.println("Package entry found: " + entry.getName());
-                        DocumentEntry packageEntry = (DocumentEntry) ent.getEntry("Package");
-                        packageParser((DocumentEntry) ent.getEntry("\u0001CompObj"), packageEntry, fileCounter+1);
+                    Iterator<Entry> entryIterator = directoryEntry.getEntries();
+                    
+                    while (entryIterator.hasNext()) {
+                        Entry entry = entryIterator.next();
+
+                        if (entry.getName().startsWith("Package")) {
+                            DocumentEntry packageEntry = (DocumentEntry) directoryEntry.getEntry("Package");
+                            packageParser((DocumentEntry) directoryEntry.getEntry("\u0001CompObj"), packageEntry, fileCounter+1);
+                        }
+
+                        if (entry.getName().endsWith("Ole10Native")) {
+                            DocumentEntry ole10Native = (DocumentEntry) directoryEntry.getEntry(Ole10Native.OLE10_NATIVE);
+                            Ole10NativeParser(ole10Native, fileCounter+1);
+                        }
                     }
-
-                    if (entry.getName().endsWith("Ole10Native")) {
-                        System.out.println("Ole10Native-like entry found: " + entry.getName());
-                        DocumentEntry ole10Native = (DocumentEntry) ent.getEntry(Ole10Native.OLE10_NATIVE);
-                        Ole10NativeParser(ole10Native, fileCounter+1);
-
-                    }
+                    fileCounter++;
+                    fs.close();
                 }
-                fileCounter++;
+                ppt.close();
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        } else if (fileType.equals("application/vnd.ms-excel")) {
+            try (FileInputStream inputStream = new FileInputStream(pathFile)) {
+                HSSFWorkbook xls = new HSSFWorkbook(inputStream);
+
+                System.out.println("Embedding object: "+xls.getAllEmbeddedObjects());
+
+                for(HSSFObjectData entry: xls.getAllEmbeddedObjects()){
+                    System.out.println(entry.getDirectory().getEntryNames());
+                    //mbd엔트리 안까지 접근 완료, 이제 ppt랑똑같이 구별하는 기능 추가
+                }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
 
+        } else if (fileType.equals("application/vnd.ms-msword")) {
+            //doc파일 추출 관련 코드 추가하기
 
+        }/*else if (legacyFileTypes.contains(fileType)) {
+            //나중에 xls를 따로 뽑아내기
+            try (POIFSFileSystem fs = new POIFSFileSystem(new File(pathFile))) {
 
-            /*System.out.println("리스트 사이즈:"+result.size());
-            for(DirectoryEntry ent: result){
-                System.out.println(ent.getEntryNames());
+                //기존에 동작하는 코드
+                List<DirectoryEntry> result = exploreDirectoryFiles(fs.getRoot());
 
-                DocumentEntry packageEntry = (DocumentEntry) ent.getEntry("Package");
+                for (DirectoryEntry ent : result) {
+                    System.out.println(ent.getEntryNames());
 
-                System.out.println(packageEntry.getName());
+                    Iterator<Entry> entryIterator = ent.getEntries();
+                    while (entryIterator.hasNext()) {
+                        Entry entry = entryIterator.next();
 
-                for(int entryCount = 0; entryCount<ent.getEntryCount(); entryCount++){
-                    ent.getEntries()
+                        if (entry.getName().startsWith("Package")) {
+                            DocumentEntry packageEntry = (DocumentEntry) ent.getEntry("Package");
+                            packageParser((DocumentEntry) ent.getEntry("\u0001CompObj"), packageEntry, fileCounter+1);
+                        }
+
+                        if (entry.getName().endsWith("Ole10Native")) {
+                            DocumentEntry ole10Native = (DocumentEntry) ent.getEntry(Ole10Native.OLE10_NATIVE);
+                            Ole10NativeParser(ole10Native, fileCounter+1);
+
+                        }
+                    }
+                    fileCounter++;
                 }
-                System.out.println();
-                *//*DocumentEntry Ole10NativeEntry = (DocumentEntry) ent.getEntry();
-                System.out.println(Ole10NativeEntry.getName());*//*
-            }*/
 
-            /*for (DirectoryEntry ent: result) {
-                System.out.println("i: "+fileCounter);
-                System.out.println(ent.getEntryNames());
-
-                DocumentEntry Package = (DocumentEntry) ent.getEntry("Package");
-                //System.out.println(directoryEntry.getEntryNames()+":"+Package.getName());
-                 System.out.println("Package.getSize(): "+Package.getSize());
-
-                if(Package != null){
-                    packageParser((DocumentEntry) ent.getEntry("\u0001CompObj"), Package, fileCounter);
-                }
-
-
-                //package가 없을 경우 Ole10Native를 찾아 확인
-                DocumentEntry ole10Native = (DocumentEntry) ent.getEntry(Ole10Native.OLE10_NATIVE);
-                Ole10NativeParser(ole10Native, fileCounter);
-
-
-                fileCounter++;
-            }*/
-
-        } catch (IOException e) {
-            ExceptionUtils.getStackTrace(e);
+            } catch (IOException e) {
+                ExceptionUtils.getStackTrace(e);
+            }
+            
+        }*/ else if (modernFileTypes.contains(fileType)) {
+            log.info("아직 미구현");
         }
+
     }
     //여기서 값들을 리스트로 저장 후, 상단의 코드로 넘겨서, 구현 예정
     public static List<DirectoryEntry> exploreDirectoryFiles(DirectoryEntry directory) throws FileNotFoundException {

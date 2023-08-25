@@ -30,19 +30,23 @@
     //doc파일에 한해서, pptx, xlsx, docx문서를 비롯한, png, jpg, pdf를 추출하는데 성공 -> ppt, doc, xls를 추출하는 코드 추가하기
     //특이사항 -> xlsx는 추출을 하면, 데이터가 없어짐...? 시트도 없어짐 -> 저장된 데이터를 전부 가져오기에, 저장방식의 문제일 수 있음
     // -> 구현후, 공통 기능이 있을 수 있으므로, 모듈화 진행하기
-    // ppt, xls, doc의 경우 저장할때 헤더의 정보를 가져올 수 없음.
+    // ppt, xls, doc의 경우 저장할때 헤더의 정보를 가져올 수 없음. -> HSLFSlideShow로 테스트를 해도 데이터를 가져올 방법이 없음
 
-    //ppt -> ppt의 경우 PowerPoint Document에 모두 저장이 되지만, 별도의 파일 헤더와 푸터의 정보가 없음 -> 추출하는게 거의 불가능에 가까움
+    //ppt -> HSLFSlideShow를 통해 바이너리를 뽑아네는데 성공함, 해당 바이너리를 가지고, carving하면 끝날듯
+    // ppt가 성공하면, xls, doc에서 package, ole10Native를 찾는 과정을 생략하고 추출 가능
+    //대신에 pptx, docx, xlsx를 carving하기 위해, 헤더 푸터를 적용해줘야함.
+    //☆ ppt파일에서 pdf, png, jpg, docx, pptx, xlsx추출 성공☆
 
     //xls ->  MBD[A-Z0-9]{8}/Package에 ppt, doc, xls가 저장됨(doc처럼 ole문서크기만큼 저장이 아니라, 추가 데이터가 들어있음 주의)
     //JPG, PNG, PDF의 경우는 MBD[A-Z0-9]{8}/Ole10Native에 존재함(doc와 같은 코드를 사용해도 될 듯(엔트리 위치 지정 코드 추가?)
     //-> 구현완료
 
-    //docx  
-
+    //docx
     //pptx
-
     //xlsx
+    // 우선 embeddings라는 문자열이 있는지 검증 -> 그 다음 embedding이라는 폴더에 데이터들을 전부 다운로드(mordernFormat파일의 경우 헤더 푸터,
+    //97-03파일들과 jpg, png와 같은 파일들은 97-03과 같은 포맷)
+    //-> 똑같이 데이터 헤더와 푸터를 가지고 carving
 
     //확장자 저장은 열거형 상수로, 만약 문자열을 통해 ole디렉토리 체크시, db를 두어 가져와서 검증하는 방법도 있음
     //나중에 업로드된 파일명으로 따로 폴더를 생성하고, 거기에, ole추출코드 추가하기
