@@ -8,7 +8,10 @@ public enum FileType {
     DOCX("docx"),
     PPTX("pptx"),
     XLSX("xlsx"),
-    BIN("bin");
+    BIN("bin"),
+    POWERPOINT("PowerPoint"),
+    EXCEL("Excel"),
+    WORD("Word");
 
     private final String value;
     FileType(String value){
