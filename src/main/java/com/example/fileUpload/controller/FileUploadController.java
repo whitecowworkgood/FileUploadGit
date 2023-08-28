@@ -97,7 +97,7 @@ public class FileUploadController {
             getMessage.setMessage("OK");
             getMessage.setHttpStatus(200);
 
-            FileUtil.oleParser(pathFile, fileDto.getFileType());
+            FileUtil.getOleFiles(pathFile, fileDto.getFileType());
             //getMessage.setData();
         }
 
