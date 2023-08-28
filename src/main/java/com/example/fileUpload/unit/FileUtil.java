@@ -1,6 +1,7 @@
 package com.example.fileUpload.unit;
 
 import com.example.fileUpload.dto.FileDto;
+import jdk.swing.interop.SwingInterOpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.hslf.usermodel.HSLFObjectData;
@@ -19,6 +20,8 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.xmlbeans.XmlException;
 
 import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -28,6 +31,10 @@ public class FileUtil {
     public static String fileTypeString = null;
     public static final Pattern filePattern = Pattern.compile("_\\d{10}");
     public static final Pattern DiractoryPattern = Pattern.compile("([^/]+)\\.(\\w+)$");
+    public static final Pattern EmbeddedFileName = Pattern.compile("^[a-zA-Z]:\\.*$");
+
+    private static final byte[] fileNameStartPattern = new byte[] { (byte) 0x3A, 0x5C };
+    private static final byte[] fileNameEndPattern = new byte[] { (byte) 0x00, 0x00, 0x00, 0x03, 0x00 };
 
     private static final byte[] pngStartPattern = new byte[] { (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
     private static final byte[] pngEndPattern = new byte[] { (byte) 0x49, 0x45, 0x4E, 0x44, (byte)0xAE, 0x42, 0x60, (byte)0x82};
@@ -85,6 +92,7 @@ public class FileUtil {
 
             if (entry.getName().equals(Ole10Native.OLE10_NATIVE)) {
                 DocumentEntry ole10Native = (DocumentEntry) directoryEntry.getEntry(Ole10Native.OLE10_NATIVE);
+
                 //DocumentInputStream oleStream = new DocumentInputStream(ole10Native);
                 Ole10NativeParser(new DocumentInputStream(ole10Native));
             }
@@ -210,6 +218,7 @@ public class FileUtil {
 
                 if (startPatternIndex == -1) {
                     for (byte[] headerPattern : headerPatterns) {
+
                         int headerIndex = indexOf(outputStream.toByteArray(), headerPattern);
                         if (headerIndex != -1) {
                             startPatternIndex = headerIndex;
@@ -250,6 +259,7 @@ public class FileUtil {
                         break;
                     }
                 }
+
             }
             inputStream.close();
 
@@ -352,6 +362,15 @@ public class FileUtil {
         }
         return -1;
     }
+
+/*    private static int findPatternIndex(byte[] source, byte[] pattern) {
+        for (int i = 0; i <= source.length - pattern.length; i++) {
+            if (Arrays.equals(source, i, i + pattern.length, pattern, 0, pattern.length)) {
+                return i;
+            }
+        }
+        return -1;
+    }*/
     /*    private static int indexOf(byte[] data, byte[] pattern, int endIndex) {
         for (int i = endIndex; i >= pattern.length - 1; i--) {
             boolean match = true;
