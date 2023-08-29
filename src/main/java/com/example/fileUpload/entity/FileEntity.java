@@ -19,10 +19,16 @@ public class FileEntity {
     private String fileName;
 
     @Column(nullable = false, length = 1020)
+    private String fileSavePath;
+
+    @Column(nullable = false, length = 1020)
     private String fileType;
 
     @Column(nullable = false)
     private Long fileSize;
+
+    @Column(nullable = false, length = 1020)
+    private String fileOlePath;
 
     public FileEntity() {
 

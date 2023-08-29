@@ -6,10 +6,10 @@ import lombok.Data;
 public class PostDeleteMessage {
 
     private String message;
-    private int httpStatus;
+    //private int httpStatus;
 
     public PostDeleteMessage() {
         this.message = "UNPROCESSABLE_ENTITY";
-        this.httpStatus = 422;
+        //this.httpStatus = 422;
     }
 }

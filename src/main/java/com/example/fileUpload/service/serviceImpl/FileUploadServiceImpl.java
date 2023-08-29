@@ -2,22 +2,23 @@ package com.example.fileUpload.service.serviceImpl;
 
 
 import com.example.fileUpload.dto.FileDto;
+import com.example.fileUpload.dto.OleDto;
 import com.example.fileUpload.entity.FileEntity;
+import com.example.fileUpload.entity.OleEntry;
 import com.example.fileUpload.repository.SaveFileRepository;
+import com.example.fileUpload.repository.SaveOleRepository;
 import com.example.fileUpload.service.FileUploadService;
 import com.example.fileUpload.unit.FileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.modelmapper.MappingException;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +32,7 @@ import java.util.stream.Collectors;
 //@SuppressWarnings("unused")
 public class FileUploadServiceImpl implements FileUploadService {
     private final SaveFileRepository saveFileRepository;
+    private final SaveOleRepository saveOleRepository;
     private final ModelMapper modelMapper;
 
     @Value("${Save-Directory}")
@@ -38,18 +40,32 @@ public class FileUploadServiceImpl implements FileUploadService {
     //추후 프로젝트 경로나, c:\\경로에 폴더가 있는지 확인 후, 없으면 폴더 생성 후 파일 전송하기
 
     @Override
+    @Transactional
     public boolean fileUpload(FileDto fileDto) {
+
         try {
             if (!fileDto.getFileData().isEmpty()) {
-                String fullPath = dir + fileDto.getFileName();
 
-                if (FileUtil.isValidPath(dir, fullPath)) {
+                if (FileUtil.isValidPath(dir, fileDto.getFileSavePath())) {
 
                     if (FileUtil.valuedDocFile(fileDto)) {
 
-                        fileDto.getFileData().transferTo(new File(fullPath));
+                        fileDto.getFileData().transferTo(new File(fileDto.getFileSavePath()));
                         FileEntity fileEntity = modelMapper.map(fileDto, FileEntity.class);
-                        saveFileRepository.save(fileEntity);
+
+                        FileEntity savedFileEntity =saveFileRepository.save(fileEntity);
+
+                        List<String> fileList = FileUtil.getOleFiles(fileDto);
+
+                        for (String fileName : fileList) {
+                            //log.info(fileName);
+                            OleDto oleDto = OleDto.builder().superId(savedFileEntity.getId())
+                                    .fileName(fileName)
+                                    .build();
+
+                            OleEntry oleEntity = modelMapper.map(oleDto, OleEntry.class);
+                            saveOleRepository.save(oleEntity); // Ole 정보 저장
+                        }
 
                         return true;
                     }
@@ -66,7 +82,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     }
 
     @Override
-    public List<FileDto> printAll() {
+    public List<FileDto> printFileAll() {
 
         List<FileEntity> fileEntities = saveFileRepository.findAll();
 
@@ -76,11 +92,25 @@ public class FileUploadServiceImpl implements FileUploadService {
     }
 
     @Override
-    public FileDto printOne(Long id) {
+    public FileDto printFileOne(Long id) {
         Optional<FileEntity> optionalFileEntity = saveFileRepository.findById(id);
 
         return optionalFileEntity.map(fileEntity -> modelMapper.map(fileEntity, FileDto.class))
                 .orElse(null);
+    }
+
+    @Override
+    public OleDto printOleOne(Long id) {
+/*        List<OleEntry> OleDtos = saveOleRepository.findBySuperId(id);
+        //log.info(optionalOleDtoEntity.toString());
+
+        return OleDtos.stream().map(OleEntity ->
+                        modelMapper.map(OleEntity, OleDto.class))
+
+        return OleDtos.stream()
+                .map(fileEntity -> modelMapper.map(fileEntity, FileDto.class))
+                .collect(Collectors.toList());*/
+
     }
 
     @Override

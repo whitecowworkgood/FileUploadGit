@@ -17,6 +17,7 @@ import org.apache.poi.xslf.usermodel.XSLFSlideShow;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.xmlbeans.XmlException;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.util.*;
@@ -25,6 +26,9 @@ import java.util.regex.Pattern;
 
 @Slf4j
 public class FileUtil {
+
+
+    private static String savePath = null;
     public static String fileName = null;
     public static String fileTypeString = null;
     public static final Pattern filePattern = Pattern.compile("_\\d{10}");
@@ -77,7 +81,6 @@ public class FileUtil {
 
         while (directoryEntryIterator.hasNext()) {
             Entry entry = directoryEntryIterator.next();
-            //log.info(entry.getName());
 
             if (entry.getName().equals(OleEntry.PACKAGE.getValue())) {
                 DocumentEntry packageEntry = (DocumentEntry) directoryEntry.getEntry(OleEntry.PACKAGE.getValue());
@@ -87,17 +90,28 @@ public class FileUtil {
             if (entry.getName().equals(Ole10Native.OLE10_NATIVE)) {
                 DocumentEntry ole10Native = (DocumentEntry) directoryEntry.getEntry(Ole10Native.OLE10_NATIVE);
 
-                //DocumentInputStream oleStream = new DocumentInputStream(ole10Native);
                 Ole10NativeParser(new DocumentInputStream(ole10Native));
             }
         }
     }
-    public static void getOleFiles(String pathFile, String fileType) {
+    public static List<String> getOleFiles(FileDto fileDto) {
 
-        try (FileInputStream inputStream = new FileInputStream(pathFile)) {
+        List<String> fileList = new ArrayList<>();
+        savePath = fileDto.getFileOlePath();
 
+        try (FileInputStream inputStream = new FileInputStream(fileDto.getFileSavePath())) {
+            File Folder = new File(savePath);
 
-            switch (fileType) {
+            if(!Folder.exists()){
+                try{
+                    Folder.mkdir(); //폴더 생성합니다.
+                }
+                catch(Exception e){
+                    ExceptionUtils.getStackTrace(e);
+                }
+            }
+
+            switch (fileDto.getFileType()) {
                 case "application/vnd.ms-powerpoint" -> {
 
                     HSLFSlideShow hslfSlideShow = new HSLFSlideShow(inputStream);
@@ -160,9 +174,17 @@ public class FileUtil {
                     xlsx.close();
                 }
             }
+            File[] files = Folder.listFiles();
+
+            for(File file : Objects.requireNonNull(files)){
+                fileList.add(savePath+"\\"+file.getName());
+            }
         } catch (IOException | OpenXML4JException | XmlException e) {
+            ExceptionUtils.getStackTrace(e);
             throw new RuntimeException(e);
         }
+
+        return fileList;
     }
 
     private static void getParseFile(List<PackagePart> picture) throws IOException {
@@ -178,7 +200,7 @@ public class FileUtil {
             if(matcher.find()){
                 String fileNameAndExtension = matcher.group(0);
 
-                try (FileOutputStream fileOutputStream = new FileOutputStream("C:\\files\\ole\\" + fileNameAndExtension)) {
+                try (FileOutputStream fileOutputStream = new FileOutputStream(savePath +"\\"+ fileNameAndExtension)) {
                     fileOutputStream.write(picture.get(i).getInputStream().readAllBytes());
                 } catch (IOException e) {
                     ExceptionUtils.getStackTrace(e);
@@ -210,17 +232,11 @@ public class FileUtil {
             while ((bytesRead = inputStream.read(buffer)) != -1) {
                 outputStream.write(buffer, 0, bytesRead);
 
-                //System.out.println("byte: "+ outputStream.toString("euc-kr").replaceAll("\\s", ""));
                 Matcher matcher = EmbeddedFileName.matcher(outputStream.toString("euc-kr").replaceAll("\\s", ""));
-                //System.out.println(matcher.find());
+
                 if(matcher.find()){
-
-
                     String[] pathParts = matcher.group().substring(1).split("[\\\\/]");
-
-                    // Extract the last part of the path
                     fileName = pathParts[pathParts.length - 1];
-
                 }
 
                 if (startPatternIndex == -1) {
@@ -231,16 +247,12 @@ public class FileUtil {
                             startPatternIndex = headerIndex;
                             // 파일 유형에 따라 확장자 설정
                             if (Arrays.equals(headerPattern, pngStartPattern)) {
-                                //fileTypeString = FileType.PNG.getValue();
                                 footerSize = pngEndPattern.length;
                                 footerPatterns = Arrays.copyOfRange(pngEndPattern, 0, footerSize);
-
                             } else if (Arrays.equals(headerPattern, pdfStartPattern)) {
-                                //fileTypeString = FileType.PDF.getValue();
                                 footerSize = pdfEndPattern.length;
                                 footerPatterns = Arrays.copyOfRange(pdfEndPattern, 0, footerSize);
                             } else if (Arrays.equals(headerPattern, jpg1StartPattern) || Arrays.equals(headerPattern, jpg2StartPattern)) {
-                                //fileTypeString = FileType.JPG.getValue();
                                 footerSize = jpgEndPattern.length;
                                 footerPatterns = Arrays.copyOfRange(jpgEndPattern, 0, footerSize);
                             } else {
@@ -260,13 +272,10 @@ public class FileUtil {
                         boolean isValidFooter = Arrays.equals(Arrays.copyOfRange(outputStream.toByteArray(), footerIndex, footerIndex + footerSize), footerPatterns);
                         if (!isValidFooter) {
                             log.error("푸터 유효성 검증 실패");
-                            //endPatternIndex = -1; // 푸터 검증 실패 시 푸터 인덱스 초기화
                         }
-
                         break;
                     }
                 }
-
             }
             inputStream.close();
 
@@ -277,9 +286,8 @@ public class FileUtil {
                     String fileName = String.format("%s.%s",  FileUtil.getRtNum(), fileTypeString);
                 }
 
-                try (FileOutputStream fileOutputStream = new FileOutputStream("C:\\files\\ole\\" + fileName)) {
+                try (FileOutputStream fileOutputStream = new FileOutputStream(savePath +"\\"+ fileName)) {
                     fileOutputStream.write(extractedData);
-                    //log.info("OLE object saved to: C:\\files\\ole\\" + outputFileName);
                 } catch (IOException e) {
                     ExceptionUtils.getStackTrace(e);
                     log.error("파일 저장 실패");
@@ -318,7 +326,7 @@ public class FileUtil {
         oleStream.close();
 
         String outputFileName = String.format("%s.%s",  FileUtil.getRtNum(), fileTypeString);
-        try (FileOutputStream outputStream = new FileOutputStream("C:\\files\\ole\\" + outputFileName)) {
+        try (FileOutputStream outputStream = new FileOutputStream(savePath +"\\"+ outputFileName)) {
             outputStream.write(oleData);
         } catch (IOException e) {
             ExceptionUtils.getStackTrace(e);
@@ -373,148 +381,6 @@ public class FileUtil {
         return -1;
     }
 
-/*    private static int findPatternIndex(byte[] source, byte[] pattern) {
-        for (int i = 0; i <= source.length - pattern.length; i++) {
-            if (Arrays.equals(source, i, i + pattern.length, pattern, 0, pattern.length)) {
-                return i;
-            }
-        }
-        return -1;
-    }*/
-    /*    private static int indexOf(byte[] data, byte[] pattern, int endIndex) {
-        for (int i = endIndex; i >= pattern.length - 1; i--) {
-            boolean match = true;
-            for (int j = 0; j < pattern.length; j++) {
-                if (data[i - j] != pattern[pattern.length - j - 1]) {
-                    match = false;
-                    break;
-                }
-            }
-            if (match) {
-                return i - pattern.length + 1;
-            }
-        }
-        return -1;
-    }*/
-
- /*   private static int indexOf(byte[] data, byte[] pattern, int endIndex) {
-        for (int i = endIndex - pattern.length + 1; i >= 0; i--) {
-            boolean match = true;
-            for (int j = 0; j < pattern.length; j++) {
-                if (data[i + j] != pattern[j]) {
-                    match = false;
-                    break;
-                }
-            }
-            if (match) {
-                return i;
-            }
-        }
-        return -1;
-    }*/
-
-/*    private static int indexOf(byte[] data, byte[] pattern, int endIndex) {
-        for (int i = endIndex - pattern.length + 1; i >= 0; i--) {
-            boolean match = true;
-            for (int j = 0; j < pattern.length; j++) {
-                if (data[i + j] != pattern[j]) {
-                    match = false;
-                    break;
-                }
-            }
-            if (match) {
-                return i;
-            }
-        }
-        return -1;
-    }*/
-
-    /*    private static void Ole10NativeParser( DocumentEntry ole10Native){
-
-        try (DocumentInputStream oleStream = new DocumentInputStream(ole10Native)) {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            int footerSize = -1;
-            int startPatternIndex = -1;  // 헤더 시작 위치를 기억하는 변수
-            int endPatternIndex = -1;    // 푸터 시작 위치를 기억하는 변수
-
-            // 검사할 파일 유형들의 헤더와 푸터 패턴을 배열로 정의
-            byte[][] headerPatterns = new byte[][] {
-                    pngStartPattern,
-                    pdfStartPattern,
-                    jpg1StartPattern,
-                    jpg2StartPattern
-            };
-
-            byte[] footerPatterns = new byte[]{};
-
-            while ((bytesRead = oleStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-
-                if (startPatternIndex == -1) {
-                    for (byte[] headerPattern : headerPatterns) {
-                        int headerIndex = indexOf(outputStream.toByteArray(), headerPattern);
-                        if (headerIndex != -1) {
-                            startPatternIndex = headerIndex;
-                            // 파일 유형에 따라 확장자 설정
-                            if (Arrays.equals(headerPattern, pngStartPattern)) {
-                                fileTypeString = FileType.PNG.getValue();
-                                footerSize = pngEndPattern.length;
-                                footerPatterns = Arrays.copyOfRange(pngEndPattern, 0, footerSize);
-
-                            } else if (Arrays.equals(headerPattern, pdfStartPattern)) {
-                                fileTypeString = FileType.PDF.getValue();
-                                footerSize = pdfEndPattern.length;
-                                footerPatterns = Arrays.copyOfRange(pdfEndPattern, 0, footerSize);
-                            } else if (Arrays.equals(headerPattern, jpg1StartPattern) || Arrays.equals(headerPattern, jpg2StartPattern)) {
-                                fileTypeString = FileType.JPG.getValue();
-                                footerSize = jpgEndPattern.length;
-                                footerPatterns = Arrays.copyOfRange(jpgEndPattern, 0, footerSize);
-                            } else {
-                                fileTypeString = FileType.BIN.getValue();
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                if(startPatternIndex != -1) {
-                    int footerIndex = indexOf(outputStream.toByteArray(), footerPatterns, outputStream.size() - 1);
-                    if (footerIndex != -1) {
-                        endPatternIndex = footerIndex;
-
-                        // 푸터를 찾았으니 파일 유형이 맞는지 검증
-                        boolean isValidFooter = Arrays.equals(Arrays.copyOfRange(outputStream.toByteArray(), footerIndex, footerIndex + footerSize), footerPatterns);
-                        if (!isValidFooter) {
-                            log.error("푸터 유효성 검증 실패");
-                            //endPatternIndex = -1; // 푸터 검증 실패 시 푸터 인덱스 초기화
-                        }
-
-                        break;
-                    }
-                }
-            }
-
-            if (startPatternIndex != -1 && endPatternIndex != -1) {
-                byte[] extractedData = Arrays.copyOfRange(outputStream.toByteArray(), startPatternIndex, endPatternIndex + footerSize);
-
-                String outputFileName = String.format("%s.%s",  FileUtil.getRtNum(), fileTypeString);
-                try (FileOutputStream fileOutputStream = new FileOutputStream("C:\\files\\ole\\" + outputFileName)) {
-                    fileOutputStream.write(extractedData);
-                    //log.info("OLE object saved to: C:\\files\\ole\\" + outputFileName);
-                } catch (IOException e) {
-                    ExceptionUtils.getStackTrace(e);
-                    log.error("파일 저장 실패");
-                }
-            } else {
-                log.error("헤더 또는 푸터를 찾을 수 없음");
-            }
-        } catch (IOException e) {
-            ExceptionUtils.getStackTrace(e);
-            log.error("IO 오류 발생");
-        }
-    }*/
 
     private FileUtil() {
     }

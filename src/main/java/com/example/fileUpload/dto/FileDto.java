@@ -13,6 +13,8 @@ public class FileDto {
     private String fileName;
     private String fileType;
     private Long fileSize;
+    private String fileSavePath;
+    private String fileOlePath;
     private MultipartFile fileData;
 
     //private OleDto oleDto;
