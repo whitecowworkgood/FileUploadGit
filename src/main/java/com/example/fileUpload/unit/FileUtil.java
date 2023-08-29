@@ -1,7 +1,6 @@
 package com.example.fileUpload.unit;
 
 import com.example.fileUpload.dto.FileDto;
-import jdk.swing.interop.SwingInterOpUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.hslf.usermodel.HSLFObjectData;
@@ -20,22 +19,17 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.xmlbeans.XmlException;
 
 import java.io.*;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 @Slf4j
 public class FileUtil {
+    public static String fileName = null;
     public static String fileTypeString = null;
     public static final Pattern filePattern = Pattern.compile("_\\d{10}");
     public static final Pattern DiractoryPattern = Pattern.compile("([^/]+)\\.(\\w+)$");
-    public static final Pattern EmbeddedFileName = Pattern.compile("^[a-zA-Z]:\\.*$");
-
-    private static final byte[] fileNameStartPattern = new byte[] { (byte) 0x3A, 0x5C };
-    private static final byte[] fileNameEndPattern = new byte[] { (byte) 0x00, 0x00, 0x00, 0x03, 0x00 };
-
+    public static final Pattern EmbeddedFileName = Pattern.compile(":[\\\\/][^:]+\\.[A-Za-z0-9]+");
     private static final byte[] pngStartPattern = new byte[] { (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
     private static final byte[] pngEndPattern = new byte[] { (byte) 0x49, 0x45, 0x4E, 0x44, (byte)0xAE, 0x42, 0x60, (byte)0x82};
     private static final byte[] jpg1StartPattern = new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0 };
@@ -216,6 +210,19 @@ public class FileUtil {
             while ((bytesRead = inputStream.read(buffer)) != -1) {
                 outputStream.write(buffer, 0, bytesRead);
 
+                //System.out.println("byte: "+ outputStream.toString("euc-kr").replaceAll("\\s", ""));
+                Matcher matcher = EmbeddedFileName.matcher(outputStream.toString("euc-kr").replaceAll("\\s", ""));
+                //System.out.println(matcher.find());
+                if(matcher.find()){
+
+
+                    String[] pathParts = matcher.group().substring(1).split("[\\\\/]");
+
+                    // Extract the last part of the path
+                    fileName = pathParts[pathParts.length - 1];
+
+                }
+
                 if (startPatternIndex == -1) {
                     for (byte[] headerPattern : headerPatterns) {
 
@@ -224,16 +231,16 @@ public class FileUtil {
                             startPatternIndex = headerIndex;
                             // 파일 유형에 따라 확장자 설정
                             if (Arrays.equals(headerPattern, pngStartPattern)) {
-                                fileTypeString = FileType.PNG.getValue();
+                                //fileTypeString = FileType.PNG.getValue();
                                 footerSize = pngEndPattern.length;
                                 footerPatterns = Arrays.copyOfRange(pngEndPattern, 0, footerSize);
 
                             } else if (Arrays.equals(headerPattern, pdfStartPattern)) {
-                                fileTypeString = FileType.PDF.getValue();
+                                //fileTypeString = FileType.PDF.getValue();
                                 footerSize = pdfEndPattern.length;
                                 footerPatterns = Arrays.copyOfRange(pdfEndPattern, 0, footerSize);
                             } else if (Arrays.equals(headerPattern, jpg1StartPattern) || Arrays.equals(headerPattern, jpg2StartPattern)) {
-                                fileTypeString = FileType.JPG.getValue();
+                                //fileTypeString = FileType.JPG.getValue();
                                 footerSize = jpgEndPattern.length;
                                 footerPatterns = Arrays.copyOfRange(jpgEndPattern, 0, footerSize);
                             } else {
@@ -266,8 +273,11 @@ public class FileUtil {
             if (startPatternIndex != -1 && endPatternIndex != -1) {
                 byte[] extractedData = Arrays.copyOfRange(outputStream.toByteArray(), startPatternIndex, endPatternIndex + footerSize);
 
-                String outputFileName = String.format("%s.%s",  FileUtil.getRtNum(), fileTypeString);
-                try (FileOutputStream fileOutputStream = new FileOutputStream("C:\\files\\ole\\" + outputFileName)) {
+                if(fileName == null){
+                    String fileName = String.format("%s.%s",  FileUtil.getRtNum(), fileTypeString);
+                }
+
+                try (FileOutputStream fileOutputStream = new FileOutputStream("C:\\files\\ole\\" + fileName)) {
                     fileOutputStream.write(extractedData);
                     //log.info("OLE object saved to: C:\\files\\ole\\" + outputFileName);
                 } catch (IOException e) {
