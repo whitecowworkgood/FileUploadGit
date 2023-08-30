@@ -100,17 +100,12 @@ public class FileUploadServiceImpl implements FileUploadService {
     }
 
     @Override
-    public OleDto printOleOne(Long id) {
-/*        List<OleEntry> OleDtos = saveOleRepository.findBySuperId(id);
-        //log.info(optionalOleDtoEntity.toString());
+    public List<OleDto> printOleOne(Long id) {
+        List<OleEntry> oleEntries = saveOleRepository.findBySuperId(id);
 
-        return OleDtos.stream().map(OleEntity ->
-                        modelMapper.map(OleEntity, OleDto.class))
-
-        return OleDtos.stream()
-                .map(fileEntity -> modelMapper.map(fileEntity, FileDto.class))
-                .collect(Collectors.toList());*/
-
+        return oleEntries.stream()
+                .map(oleEntry -> modelMapper.map(oleEntry, OleDto.class))
+                .collect(Collectors.toList());
     }
 
     @Override

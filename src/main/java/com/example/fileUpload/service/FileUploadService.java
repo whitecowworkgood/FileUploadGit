@@ -13,7 +13,7 @@ public interface FileUploadService {
 
     public FileDto printFileOne(Long id);
 
-    public OleDto printOleOne(Long id);
+    public List<OleDto> printOleOne(Long id);
 
     boolean deleteOne(Long id);
 }
