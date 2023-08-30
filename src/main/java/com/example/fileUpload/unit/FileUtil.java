@@ -17,9 +17,10 @@ import org.apache.poi.xslf.usermodel.XSLFSlideShow;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.xmlbeans.XmlException;
-import org.springframework.web.multipart.MultipartFile;
+
 
 import java.io.*;
+import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -30,17 +31,18 @@ public class FileUtil {
 
     private static String savePath = null;
     public static String fileName = null;
+
     public static String fileTypeString = null;
     public static final Pattern filePattern = Pattern.compile("_\\d{10}");
     public static final Pattern DiractoryPattern = Pattern.compile("([^/]+)\\.(\\w+)$");
-    public static final Pattern EmbeddedFileName = Pattern.compile(":[\\\\/][^:]+\\.[A-Za-z0-9]+");
+    /*public static final Pattern EmbeddedFileName = Pattern.compile(":[\\\\/][^:]+\\.[A-Za-z0-9]+");
     private static final byte[] pngStartPattern = new byte[] { (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
     private static final byte[] pngEndPattern = new byte[] { (byte) 0x49, 0x45, 0x4E, 0x44, (byte)0xAE, 0x42, 0x60, (byte)0x82};
     private static final byte[] jpg1StartPattern = new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0 };
     private static final byte[] jpg2StartPattern = new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE1 };
     private static final byte[] jpgEndPattern = new byte[] { (byte) 0xff, (byte)0xD9 };
     private static final byte[] pdfStartPattern = new byte[]{ (byte) 0x25, 0x50, 0x44, 0x46};
-    private static final byte[] pdfEndPattern = new byte[]{ (byte) 0x25, 0x25, 0x45, 0x4F, 0x46};
+    private static final byte[] pdfEndPattern = new byte[]{ (byte) 0x25, 0x25, 0x45, 0x4F, 0x46};*/
 
     public static boolean valuedDocFile(FileDto fileDto){
 
@@ -159,6 +161,7 @@ public class FileUtil {
                 case "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ->{
 
                     XWPFDocument docx = new XWPFDocument(inputStream);
+
                     getParseFile(docx.getAllEmbeddedParts());
                     docx.close();
                 }
@@ -191,7 +194,14 @@ public class FileUtil {
         for(int i=0; i<picture.size(); i++) {
             if(picture.get(i).getContentType().equals(MimeType.OLEOBJECT.getValue())){
 
-                Ole10NativeParser(picture.get(i).getInputStream());
+                POIFSFileSystem poifs = new POIFSFileSystem(picture.get(i).getInputStream());
+                DirectoryEntry root = poifs.getRoot();
+                DocumentEntry ole10NativeEntry = (DocumentEntry)root.getEntry(Ole10Native.OLE10_NATIVE);
+
+                InputStream oleInputStream = poifs.createDocumentInputStream(ole10NativeEntry.getName());
+                Ole10NativeParser(oleInputStream);
+
+                poifs.close();
                 continue;
             }
 
@@ -206,16 +216,77 @@ public class FileUtil {
                     ExceptionUtils.getStackTrace(e);
                     log.error("파일 저장 실패");
                 }
+
             }
         }
     }
     private static void Ole10NativeParser(InputStream inputStream){
 
-        try {
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-            int footerSize = -1;
+        try (ByteArrayOutputStream variableData = new ByteArrayOutputStream()){
+            inputStream.skip(6);
+
+            int byteRead;
+            while ((byteRead = inputStream.read()) != -1) {
+                if (byteRead == 0x00) {
+                    break;
+                }
+                variableData.write(byteRead);
+            }
+            fileName = variableData.toString(Charset.forName("euc-kr"));
+            //log.info(fileName);
+
+            while (true) {
+                byteRead = inputStream.read();
+                if (byteRead == -1) {
+                    break;
+                }
+                variableData.write(byteRead);
+                if (variableData.size() >= 5
+                        && variableData.toByteArray()[variableData.size() - 5] == 0x00
+                        && variableData.toByteArray()[variableData.size() - 4] == 0x00
+                        && variableData.toByteArray()[variableData.size() - 3] == 0x00
+                        && variableData.toByteArray()[variableData.size() - 2] == 0x03
+                        && variableData.toByteArray()[variableData.size() - 1] == 0x00) {
+                    //log.info("0x 00 00 00 03 00발견!!");
+                    break;
+                }
+            }
+
+            byte[] tempPathSizeBytes = new byte[4];
+            inputStream.read(tempPathSizeBytes);
+
+            int dataSize = (tempPathSizeBytes[3] & 0xFF) << 24 |
+                    (tempPathSizeBytes[2] & 0xFF) << 16 |
+                    (tempPathSizeBytes[1] & 0xFF) << 8 |
+                    (tempPathSizeBytes[0] & 0xFF);
+
+            inputStream.skip(dataSize);
+
+            byte[] embeddedDataSize = new byte[4];
+            inputStream.read(embeddedDataSize);
+            int realSize = (embeddedDataSize[3] & 0xFF) << 24 |
+                    (embeddedDataSize[2] & 0xFF) << 16 |
+                    (embeddedDataSize[1] & 0xFF) << 8 |
+                    (embeddedDataSize[0] & 0xFF);
+
+
+            byte[] embeddedData = new byte[realSize];
+            inputStream.read(embeddedData);
+
+            File outputFile = new File(savePath +"\\"+ fileName);
+            try (FileOutputStream fileOutputStream = new FileOutputStream(outputFile)) {
+                fileOutputStream.write(embeddedData);
+                //System.out.println("File saved: " + outputFile.getAbsolutePath());
+            } catch (IOException e) {
+                ExceptionUtils.getStackTrace(e);
+            }
+
+
+            /*byte[] buffer = new byte[1024];
+            int bytesRead;*/
+
+
+            /*int footerSize = -1;
             int startPatternIndex = -1;  // 헤더 시작 위치를 기억하는 변수
             int endPatternIndex = -1;    // 푸터 시작 위치를 기억하는 변수
 
@@ -294,7 +365,7 @@ public class FileUtil {
                 }
             } else {
                 log.error("헤더 또는 푸터를 찾을 수 없음");
-            }
+            }*/
         } catch (IOException e) {
             ExceptionUtils.getStackTrace(e);
             log.error("IO 오류 발생");

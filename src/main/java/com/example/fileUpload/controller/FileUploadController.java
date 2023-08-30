@@ -83,15 +83,11 @@ public class FileUploadController {
     @GetMapping("/upload/{id}/ole")
     @ResponseBody
     public ResponseEntity<GetMessage> printOle(@PathVariable("id") Long id) {
-        List<OleDto> oleDtoList = (List<OleDto>) fileUploadService.printOleOne(id);
+        List<OleDto> oleDtoList = fileUploadService.printOleAll(id);
         GetMessage getMessage = new GetMessage();
 
         if(!oleDtoList.isEmpty()){
-           // String pathFile = dir+fileDto.getFileName();
-            //log.info(oleDtoList.get(0).getFileName());
-
             getMessage.setMessage("FileOle");
-            //getMessage.setHttpStatus(200);
             getMessage.setData(oleDtoList);
         }
         return ResponseEntity.status(HttpStatus.OK).body(getMessage);

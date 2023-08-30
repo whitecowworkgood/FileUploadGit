@@ -100,7 +100,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     }
 
     @Override
-    public List<OleDto> printOleOne(Long id) {
+    public List<OleDto> printOleAll(Long id) {
         List<OleEntry> oleEntries = saveOleRepository.findBySuperId(id);
 
         return oleEntries.stream()
