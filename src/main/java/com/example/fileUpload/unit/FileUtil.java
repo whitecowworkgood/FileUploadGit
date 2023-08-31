@@ -1,6 +1,9 @@
 package com.example.fileUpload.unit;
 
 import com.example.fileUpload.dto.FileDto;
+import kr.dogfoot.hwplib.object.bindata.BinData;
+import kr.dogfoot.hwplib.object.bindata.EmbeddedBinaryData;
+import kr.dogfoot.hwplib.reader.HWPReader;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.hslf.usermodel.HSLFObjectData;
@@ -35,14 +38,6 @@ public class FileUtil {
     public static String fileTypeString = null;
     public static final Pattern filePattern = Pattern.compile("_\\d{10}");
     public static final Pattern DiractoryPattern = Pattern.compile("([^/]+)\\.(\\w+)$");
-    /*public static final Pattern EmbeddedFileName = Pattern.compile(":[\\\\/][^:]+\\.[A-Za-z0-9]+");
-    private static final byte[] pngStartPattern = new byte[] { (byte) 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A };
-    private static final byte[] pngEndPattern = new byte[] { (byte) 0x49, 0x45, 0x4E, 0x44, (byte)0xAE, 0x42, 0x60, (byte)0x82};
-    private static final byte[] jpg1StartPattern = new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE0 };
-    private static final byte[] jpg2StartPattern = new byte[] { (byte) 0xFF, (byte) 0xD8, (byte) 0xFF, (byte) 0xE1 };
-    private static final byte[] jpgEndPattern = new byte[] { (byte) 0xff, (byte)0xD9 };
-    private static final byte[] pdfStartPattern = new byte[]{ (byte) 0x25, 0x50, 0x44, 0x46};
-    private static final byte[] pdfEndPattern = new byte[]{ (byte) 0x25, 0x25, 0x45, 0x4F, 0x46};*/
 
     public static boolean valuedDocFile(FileDto fileDto){
 
@@ -100,6 +95,7 @@ public class FileUtil {
 
         List<String> fileList = new ArrayList<>();
         savePath = fileDto.getFileOlePath();
+        File[] files;
 
         try (FileInputStream inputStream = new FileInputStream(fileDto.getFileSavePath())) {
             File Folder = new File(savePath);
@@ -176,8 +172,18 @@ public class FileUtil {
 
                     xlsx.close();
                 }
+                case "application/octet-stream" -> {
+                    log.info("한컴 대기중");
+                    BinData hwpFile = HWPReader.fromInputStream(inputStream).getBinData();
+
+                    for(EmbeddedBinaryData data:hwpFile.getEmbeddedBinaryDataList()){
+                        if(data.getName().endsWith(".OLE")){
+                            hwpParser(new ByteArrayInputStream(data.getData()));
+                        }
+                    }
+                }
             }
-            File[] files = Folder.listFiles();
+            files = Folder.listFiles();
 
             for(File file : Objects.requireNonNull(files)){
                 fileList.add(savePath+"\\"+file.getName());
@@ -185,11 +191,37 @@ public class FileUtil {
         } catch (IOException | OpenXML4JException | XmlException e) {
             ExceptionUtils.getStackTrace(e);
             throw new RuntimeException(e);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         return fileList;
     }
+    private static void hwpParser(InputStream inputStream){
+        try {
+            // 앞의 4바이트를 제외하고 남은 데이터를 POI로 읽기
+            inputStream.skip(4); // 앞의 4바이트를 건너뜀
+            POIFSFileSystem poif = new POIFSFileSystem(inputStream);
+            inputStream.close();
 
+            DirectoryEntry root = poif.getRoot();
+            for (Iterator<Entry> it = root.getEntries(); it.hasNext(); ) {
+                Entry entry = it.next();
+                //System.out.println("Entry: " + entry);
+
+                if(entry.getName().equals(Ole10Native.OLE10_NATIVE)){
+                    DocumentEntry ole10Native = (DocumentEntry) root.getEntry(Ole10Native.OLE10_NATIVE);
+                    Ole10NativeParser(new DocumentInputStream(ole10Native));
+                }
+            }
+            System.out.println();
+
+            poif.close();
+        } catch (IOException e) {
+            ExceptionUtils.getStackTrace(e);
+        }
+
+    }
     private static void getParseFile(List<PackagePart> picture) throws IOException {
         for(int i=0; i<picture.size(); i++) {
             if(picture.get(i).getContentType().equals(MimeType.OLEOBJECT.getValue())){
@@ -281,91 +313,6 @@ public class FileUtil {
                 ExceptionUtils.getStackTrace(e);
             }
 
-
-            /*byte[] buffer = new byte[1024];
-            int bytesRead;*/
-
-
-            /*int footerSize = -1;
-            int startPatternIndex = -1;  // 헤더 시작 위치를 기억하는 변수
-            int endPatternIndex = -1;    // 푸터 시작 위치를 기억하는 변수
-
-            // 검사할 파일 유형들의 헤더와 푸터 패턴을 배열로 정의
-            byte[][] headerPatterns = new byte[][] {
-                    pngStartPattern,
-                    pdfStartPattern,
-                    jpg1StartPattern,
-                    jpg2StartPattern
-            };
-
-            byte[] footerPatterns = new byte[]{};
-
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-
-                Matcher matcher = EmbeddedFileName.matcher(outputStream.toString("euc-kr").replaceAll("\\s", ""));
-
-                if(matcher.find()){
-                    String[] pathParts = matcher.group().substring(1).split("[\\\\/]");
-                    fileName = pathParts[pathParts.length - 1];
-                }
-
-                if (startPatternIndex == -1) {
-                    for (byte[] headerPattern : headerPatterns) {
-
-                        int headerIndex = indexOf(outputStream.toByteArray(), headerPattern);
-                        if (headerIndex != -1) {
-                            startPatternIndex = headerIndex;
-                            // 파일 유형에 따라 확장자 설정
-                            if (Arrays.equals(headerPattern, pngStartPattern)) {
-                                footerSize = pngEndPattern.length;
-                                footerPatterns = Arrays.copyOfRange(pngEndPattern, 0, footerSize);
-                            } else if (Arrays.equals(headerPattern, pdfStartPattern)) {
-                                footerSize = pdfEndPattern.length;
-                                footerPatterns = Arrays.copyOfRange(pdfEndPattern, 0, footerSize);
-                            } else if (Arrays.equals(headerPattern, jpg1StartPattern) || Arrays.equals(headerPattern, jpg2StartPattern)) {
-                                footerSize = jpgEndPattern.length;
-                                footerPatterns = Arrays.copyOfRange(jpgEndPattern, 0, footerSize);
-                            } else {
-                                fileTypeString = FileType.BIN.getValue();
-                            }
-                            break;
-                        }
-                    }
-                }
-
-                if(startPatternIndex != -1) {
-                    int footerIndex = indexOf(outputStream.toByteArray(), footerPatterns, outputStream.size() - 1);
-                    if (footerIndex != -1) {
-                        endPatternIndex = footerIndex;
-
-                        // 푸터를 찾았으니 파일 유형이 맞는지 검증
-                        boolean isValidFooter = Arrays.equals(Arrays.copyOfRange(outputStream.toByteArray(), footerIndex, footerIndex + footerSize), footerPatterns);
-                        if (!isValidFooter) {
-                            log.error("푸터 유효성 검증 실패");
-                        }
-                        break;
-                    }
-                }
-            }
-            inputStream.close();
-
-            if (startPatternIndex != -1 && endPatternIndex != -1) {
-                byte[] extractedData = Arrays.copyOfRange(outputStream.toByteArray(), startPatternIndex, endPatternIndex + footerSize);
-
-                if(fileName == null){
-                    String fileName = String.format("%s.%s",  FileUtil.getRtNum(), fileTypeString);
-                }
-
-                try (FileOutputStream fileOutputStream = new FileOutputStream(savePath +"\\"+ fileName)) {
-                    fileOutputStream.write(extractedData);
-                } catch (IOException e) {
-                    ExceptionUtils.getStackTrace(e);
-                    log.error("파일 저장 실패");
-                }
-            } else {
-                log.error("헤더 또는 푸터를 찾을 수 없음");
-            }*/
         } catch (IOException e) {
             ExceptionUtils.getStackTrace(e);
             log.error("IO 오류 발생");
@@ -418,6 +365,7 @@ public class FileUtil {
     }
 
 
+/*
     private static int indexOf(byte[] source, byte[] pattern) {
         for (int i = 0; i <= source.length - pattern.length; i++) {
             boolean match = true;
@@ -451,6 +399,7 @@ public class FileUtil {
         }
         return -1;
     }
+*/
 
 
     private FileUtil() {

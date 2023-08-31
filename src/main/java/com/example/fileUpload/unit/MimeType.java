@@ -8,7 +8,8 @@ public enum MimeType {
     PPT("application/vnd.ms-powerpoint"),
     XLS("application/vnd.ms-excel"),
     DOC("application/msword"),
-    OLEOBJECT("application/vnd.openxmlformats-officedocument.oleObject");
+    OLEOBJECT("application/vnd.openxmlformats-officedocument.oleObject"),
+    HWP("application/octet-stream");
 
     private final String value;
     MimeType(String value){
