@@ -178,7 +178,18 @@ public class FileUtil {
 
                     for(EmbeddedBinaryData data:hwpFile.getEmbeddedBinaryDataList()){
                         if(data.getName().endsWith(".OLE")){
-                            hwpParser(new ByteArrayInputStream(data.getData()));
+
+                            //OLE를 추출하는 코드
+                            //hwpParser(new ByteArrayInputStream(data.getData()));
+
+
+                            //스트림 바로 저장하는 코드를 확인차 추가함.
+                            try (FileOutputStream fileOutputStream = new FileOutputStream(savePath +"\\"+ data.getName())) {
+                                fileOutputStream.write(data.getData());
+                            } catch (IOException e) {
+                                ExceptionUtils.getStackTrace(e);
+                                log.error("파일 저장 실패");
+                            }
                         }
                     }
                 }
@@ -213,6 +224,8 @@ public class FileUtil {
                     DocumentEntry ole10Native = (DocumentEntry) root.getEntry(Ole10Native.OLE10_NATIVE);
                     Ole10NativeParser(new DocumentInputStream(ole10Native));
                 }
+                //여기에 WordDocument엔트리 확인하는 코드를 넣어서 추출하는 조건문 추가
+                //POIFSYSTEM을 통해 새로 만들고 덮어쓰든지 하는 코드 추가하기.
             }
             System.out.println();
 
