@@ -11,5 +11,6 @@ import java.util.Optional;
 @Repository
 public interface SaveOleRepository extends JpaRepository<OleEntry, Long> {
     List<OleEntry> findBySuperId(Long superId);
+    void deleteAllBySuperId(Long superId);
 
 }

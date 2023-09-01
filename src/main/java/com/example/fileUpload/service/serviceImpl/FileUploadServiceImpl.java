@@ -117,6 +117,7 @@ public class FileUploadServiceImpl implements FileUploadService {
         }
 
         String fileName = fileEntity.getFileName();
+        String savePath = fileEntity.getFileOlePath();
         String fullPath = dir + fileName;
 
         if (!FileUtil.isValidPath(dir, fullPath)) {
@@ -129,7 +130,13 @@ public class FileUploadServiceImpl implements FileUploadService {
             log.warn(fileName + " 파일 삭제 오류 발생 또는 파일이 없음, DB에서 정보 삭제");
             //return true;
         }
+        File folder = new File(savePath);
+
         saveFileRepository.deleteById(fileEntity.getId());
+
+        FileUtil.deleteFolder(folder);
+        folder.delete();
+        saveOleRepository.deleteAllBySuperId(fileEntity.getId());
         return true;
     }
 }

@@ -27,6 +27,8 @@ import java.nio.charset.Charset;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.Inflater;
+import java.util.zip.InflaterInputStream;
 
 @Slf4j
 public class FileUtil {
@@ -36,7 +38,7 @@ public class FileUtil {
     public static String fileName = null;
 
     public static String fileTypeString = null;
-    public static final Pattern filePattern = Pattern.compile("_\\d{10}");
+    //public static final Pattern filePattern = Pattern.compile("_\\d{10}");
     public static final Pattern DiractoryPattern = Pattern.compile("([^/]+)\\.(\\w+)$");
 
     public static boolean valuedDocFile(FileDto fileDto){
@@ -73,24 +75,20 @@ public class FileUtil {
         }
     }
 
-    private static void getPackageOrNativeFiles(DirectoryEntry directoryEntry) throws IOException {
-        Iterator<Entry> directoryEntryIterator = directoryEntry.getEntries();
+    private static void selectOleFile(DirectoryEntry directoryEntry) throws IOException {
 
-        while (directoryEntryIterator.hasNext()) {
-            Entry entry = directoryEntryIterator.next();
+        if (directoryEntry.hasEntry(OleEntry.PACKAGE.getValue())) {
+            DocumentEntry packageEntry = (DocumentEntry) directoryEntry.getEntry(OleEntry.PACKAGE.getValue());
+            packageParser((DocumentEntry) directoryEntry.getEntry(OleEntry.COMPOBJ.getValue()), packageEntry);
 
-            if (entry.getName().equals(OleEntry.PACKAGE.getValue())) {
-                DocumentEntry packageEntry = (DocumentEntry) directoryEntry.getEntry(OleEntry.PACKAGE.getValue());
-                packageParser((DocumentEntry) directoryEntry.getEntry("\u0001CompObj"), packageEntry);
+        } else if (directoryEntry.hasEntry(Ole10Native.OLE10_NATIVE)) {
+            DocumentEntry ole10Native = (DocumentEntry) directoryEntry.getEntry(Ole10Native.OLE10_NATIVE);
+            Ole10NativeParser(new DocumentInputStream(ole10Native));
             }
-
-            if (entry.getName().equals(Ole10Native.OLE10_NATIVE)) {
-                DocumentEntry ole10Native = (DocumentEntry) directoryEntry.getEntry(Ole10Native.OLE10_NATIVE);
-
-                Ole10NativeParser(new DocumentInputStream(ole10Native));
-            }
-        }
     }
+    /*
+    여기가 서비스나 컨트롤러에 사용되는 큰 범주의 메서드
+     */
     public static List<String> getOleFiles(FileDto fileDto) {
 
         List<String> fileList = new ArrayList<>();
@@ -117,7 +115,7 @@ public class FileUtil {
                     for (HSLFObjectData object : objects) {
                         POIFSFileSystem fs = new POIFSFileSystem(object.getInputStream());
 
-                        getPackageOrNativeFiles(fs.getRoot());
+                        selectOleFile(fs.getRoot());
                         fs.close();
                     }
                     hslfSlideShow.close();
@@ -126,7 +124,7 @@ public class FileUtil {
                     HSSFWorkbook hssfWorkbook = new HSSFWorkbook(inputStream);
                     for (HSSFObjectData hssfObjectData : hssfWorkbook.getAllEmbeddedObjects()) {
 
-                        getPackageOrNativeFiles(hssfObjectData.getDirectory());
+                        selectOleFile(hssfObjectData.getDirectory());
 
                     }
                     hssfWorkbook.close();
@@ -134,24 +132,17 @@ public class FileUtil {
                 case "application/msword" -> {
                     HWPFDocumentCore hwpfDocument = new HWPFDocument(inputStream);
 
-                    Iterator<Entry> hwpfDocumentIterator = hwpfDocument.getDirectory().getEntries();
-                    while (hwpfDocumentIterator.hasNext()) {
-                        Entry hwpfDocumententry = hwpfDocumentIterator.next();
+                    hwpfDocument.getDirectory().hasEntry(OleEntry.OBJECTPOOL.getValue());
 
-                        if (hwpfDocumententry.getName().equals(OleEntry.OBJECTPOOL.getValue())) {
+                        if (hwpfDocument.getDirectory().hasEntry(OleEntry.OBJECTPOOL.getValue())) {
                             DirectoryEntry objectPool = (DirectoryEntry) hwpfDocument.getDirectory().getEntry(OleEntry.OBJECTPOOL.getValue());
 
-                            Iterator<Entry> objectPoolEntries = objectPool.getEntries();
-                            while (objectPoolEntries.hasNext()) {
-                                Entry objectPoolentry = objectPoolEntries.next();
-
-                                if (filePattern.matcher(objectPoolentry.getName()).matches()) {
-
-                                    getPackageOrNativeFiles((DirectoryEntry) objectPool.getEntry(objectPoolentry.getName()));
-                                }
+                            for (Iterator<Entry> it = objectPool.getEntries(); it.hasNext(); ) {
+                                Entry entry = it.next();
+                                selectOleFile((DirectoryEntry) objectPool.getEntry(entry.getName()));
                             }
                         }
-                    }
+
                     hwpfDocument.close();
                 }
                 case "application/vnd.openxmlformats-officedocument.wordprocessingml.document" ->{
@@ -174,15 +165,38 @@ public class FileUtil {
                 }
                 case "application/octet-stream" -> {
                     log.info("한컴 대기중");
-                    BinData hwpFile = HWPReader.fromInputStream(inputStream).getBinData();
+                    POIFSFileSystem poifs = new POIFSFileSystem(inputStream);
+                    DirectoryEntry root = poifs.getRoot();
+                    DirectoryEntry binData = (DirectoryEntry)root.getEntry("BinData");
+
+                    System.out.println(binData.getEntryNames());
+
+
+                    //구현해야 하는 코드 POIFS로 HWP를 읽어서 암호화를 해제하는 코드 구현해 보기
+                   /* Entry bin = binData.getEntry("BIN0004.OLE");
+
+                    //스트림 바로 저장하는 코드를 확인차 추가함.
+                    try (FileOutputStream fileOutputStream = new FileOutputStream(savePath +"\\"+ bin.getName())) {
+                        fileOutputStream.write(zlibDecompression(bin.));
+                    } catch (IOException e) {
+                        ExceptionUtils.getStackTrace(e);
+                        log.error("파일 저장 실패");
+                    }*/
+
+
+                    //--------------- zlib로 압축 해제 코드 짜보기-------------
+
+                    /*BinData hwpFile = HWPReader.fromInputStream(inputStream).getBinData();
 
                     for(EmbeddedBinaryData data:hwpFile.getEmbeddedBinaryDataList()){
-                        if(data.getName().endsWith(".OLE")){
 
-                            //OLE를 추출하는 코드
+                        if(data.getName().endsWith(".OLE")){
+                            log.info("{}에서 사용된 압축방법: {}",data.getName(),data.getCompressMethod());
+
+                            //hwp에서 OLE 추출하는 코드
                             //hwpParser(new ByteArrayInputStream(data.getData()));
 
-
+                            //zlibDecompression(data.getData());
                             //스트림 바로 저장하는 코드를 확인차 추가함.
                             try (FileOutputStream fileOutputStream = new FileOutputStream(savePath +"\\"+ data.getName())) {
                                 fileOutputStream.write(data.getData());
@@ -191,7 +205,7 @@ public class FileUtil {
                                 log.error("파일 저장 실패");
                             }
                         }
-                    }
+                    }*/
                 }
             }
             files = Folder.listFiles();
@@ -208,28 +222,98 @@ public class FileUtil {
 
         return fileList;
     }
+
+
+    private static void writeOleToFile(){
+
+    }
     private static void hwpParser(InputStream inputStream){
         try {
-            // 앞의 4바이트를 제외하고 남은 데이터를 POI로 읽기
-            inputStream.skip(4); // 앞의 4바이트를 건너뜀
-            POIFSFileSystem poif = new POIFSFileSystem(inputStream);
+            // 앞의 4바이트를 제외하고 남은 데이터를 POI 읽기
+            inputStream.skip(4);// 앞의 4바이트를 건너뜀
+            POIFSFileSystem pof = new POIFSFileSystem(inputStream);
             inputStream.close();
 
-            DirectoryEntry root = poif.getRoot();
-            for (Iterator<Entry> it = root.getEntries(); it.hasNext(); ) {
-                Entry entry = it.next();
-                //System.out.println("Entry: " + entry);
+            DirectoryEntry root = pof.getRoot();
 
-                if(entry.getName().equals(Ole10Native.OLE10_NATIVE)){
-                    DocumentEntry ole10Native = (DocumentEntry) root.getEntry(Ole10Native.OLE10_NATIVE);
-                    Ole10NativeParser(new DocumentInputStream(ole10Native));
+            if(root.hasEntry("WordDocument")){
+                log.info("이 파일은 97-03버전의 Document");
+
+                //Ole, OlePrev000등을 삭제하는 코드 -> 삭제가 불필요하면 제거하기
+                List<Entry> entriesToDelete = new ArrayList<>();
+                Iterator<Entry> entries = root.getEntries();
+                while (entries.hasNext()) {
+                    Entry entry = entries.next();
+                    if (entry.getName().startsWith("Ole", 1)) {
+                        //System.out.println(entry.getName() + " 삭제 대상");
+                        entriesToDelete.add(entry);
+                    }
                 }
-                //여기에 WordDocument엔트리 확인하는 코드를 넣어서 추출하는 조건문 추가
-                //POIFSYSTEM을 통해 새로 만들고 덮어쓰든지 하는 코드 추가하기.
-            }
-            System.out.println();
 
-            poif.close();
+                for (Entry entry : entriesToDelete) {
+                    //System.out.println(entry.getName() + " 삭제");
+                    root.getEntry(entry.getName()).delete();
+                }
+
+                FileOutputStream fos = new FileOutputStream(savePath+"\\"+getRtNum()+FileType.DOC.getValue());
+                pof.writeFilesystem(fos);
+
+                fos.close();
+
+            }else if(root.hasEntry("PowerPoint Document")){
+                log.info("이 파일은 97-03버전의 ppt");
+                //Ole, OlePrev000등을 삭제하는 코드 -> 삭제가 불필요하면 제거하기
+                List<Entry> entriesToDelete = new ArrayList<>();
+                Iterator<Entry> entries = root.getEntries();
+                while (entries.hasNext()) {
+                    Entry entry = entries.next();
+                    if (entry.getName().startsWith("Ole", 1)) {
+                        //System.out.println(entry.getName() + " 삭제 대상");
+                        entriesToDelete.add(entry);
+                    }
+                }
+
+                for (Entry entry : entriesToDelete) {
+                    //System.out.println(entry.getName() + " 삭제");
+                    root.getEntry(entry.getName()).delete();
+                }
+
+                FileOutputStream fos = new FileOutputStream(savePath+"\\"+getRtNum()+FileType.PPT.getValue());
+                pof.writeFilesystem(fos);
+
+                fos.close();
+
+            } else if (root.hasEntry("Workbook")) {
+                log.info("이 파일은 97-03버전의 xlsx");
+                //Ole, OlePrev000등을 삭제하는 코드 -> 삭제가 불필요하면 제거하기
+                List<Entry> entriesToDelete = new ArrayList<>();
+                Iterator<Entry> entries = root.getEntries();
+                while (entries.hasNext()) {
+                    Entry entry = entries.next();
+                    if (entry.getName().startsWith("Ole", 1)) {
+                        //System.out.println(entry.getName() + " 삭제 대상");
+                        entriesToDelete.add(entry);
+                    }
+                }
+
+                for (Entry entry : entriesToDelete) {
+                    //System.out.println(entry.getName() + " 삭제");
+                    root.getEntry(entry.getName()).delete();
+                }
+
+                FileOutputStream fos = new FileOutputStream(savePath+"\\"+getRtNum()+FileType.XLS.getValue());
+                pof.writeFilesystem(fos);
+
+                fos.close();
+
+            } else if (root.hasEntry(Ole10Native.OLE10_NATIVE)) {
+                DocumentEntry ole10Native = (DocumentEntry) root.getEntry(Ole10Native.OLE10_NATIVE);
+                Ole10NativeParser(new DocumentInputStream(ole10Native));
+            }else{
+                log.info("Embedded 추출이 지원이 안되는 파일(ex: docx)파일이 존재합니다.");
+            }
+
+            pof.close();
         } catch (IOException e) {
             ExceptionUtils.getStackTrace(e);
         }
@@ -300,6 +384,7 @@ public class FileUtil {
             byte[] tempPathSizeBytes = new byte[4];
             inputStream.read(tempPathSizeBytes);
 
+
             int dataSize = (tempPathSizeBytes[3] & 0xFF) << 24 |
                     (tempPathSizeBytes[2] & 0xFF) << 16 |
                     (tempPathSizeBytes[1] & 0xFF) << 8 |
@@ -309,6 +394,7 @@ public class FileUtil {
 
             byte[] embeddedDataSize = new byte[4];
             inputStream.read(embeddedDataSize);
+
             int realSize = (embeddedDataSize[3] & 0xFF) << 24 |
                     (embeddedDataSize[2] & 0xFF) << 16 |
                     (embeddedDataSize[1] & 0xFF) << 8 |
@@ -356,8 +442,8 @@ public class FileUtil {
         oleStream.read(oleData);
         oleStream.close();
 
-        String outputFileName = String.format("%s.%s",  FileUtil.getRtNum(), fileTypeString);
-        try (FileOutputStream outputStream = new FileOutputStream(savePath +"\\"+ outputFileName)) {
+        //String outputFileName = String.format("%s.%s",  FileUtil.getRtNum(), fileTypeString);
+        try (FileOutputStream outputStream = new FileOutputStream(savePath +"\\"+ FileUtil.getRtNum()+fileTypeString)) {
             outputStream.write(oleData);
         } catch (IOException e) {
             ExceptionUtils.getStackTrace(e);
@@ -377,43 +463,46 @@ public class FileUtil {
         return strKey.toString();
     }
 
-
-/*
-    private static int indexOf(byte[] source, byte[] pattern) {
-        for (int i = 0; i <= source.length - pattern.length; i++) {
-            boolean match = true;
-            for (int j = 0; j < pattern.length; j++) {
-                if (source[i + j] != pattern[j]) {
-                    match = false;
-                    break;
+    public static void deleteFolder(File folder) {
+        if (folder.isDirectory()) {
+            File[] files = folder.listFiles();
+            if (files != null) {
+                for (File file : files) {
+                    if (file.isDirectory()) {
+                        // 서브폴더인 경우 재귀 호출로 서브폴더 삭제
+                        deleteFolder(file);
+                    } else {
+                        // 파일인 경우 삭제
+                        file.delete();
+                    }
                 }
             }
-            if (match) {
-                return i;
-            }
         }
-        return -1;
     }
 
-    private static int indexOf(byte[] data, byte[] pattern, int endIndex) {
-        int patternEndIndex = pattern.length - 1;
+    public static byte[] zlibDecompression(byte[] inputStream) throws IOException {
 
-        for (int i = endIndex; i >= patternEndIndex; i--) {
-            boolean match = true;
-            for (int j = patternEndIndex; j >= 0; j--) {
-                if (data[i - (patternEndIndex - j)] != pattern[j]) {
-                    match = false;
-                    break;
-                }
+        // 압축 해제
+        Inflater inflater = new Inflater();
+        inflater.setInput(inputStream);
+
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        byte[] buffer = new byte[1024];
+        int bytesRead;
+
+        try (InflaterInputStream inflaterInputStream = new InflaterInputStream(new ByteArrayInputStream(inputStream))) {
+            while ((bytesRead = inflaterInputStream.read(buffer)) != -1) {
+                outputStream.write(buffer, 0, bytesRead);
             }
-            if (match) {
-                return i - patternEndIndex;
-            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        return -1;
-    }
-*/
 
+        byte[] decompressedData = outputStream.toByteArray();
+
+        //log.info(Arrays.toString(decompressedData));
+        return decompressedData;
+    }
 
     private FileUtil() {
     }

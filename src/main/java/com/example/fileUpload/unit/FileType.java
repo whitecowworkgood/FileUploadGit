@@ -2,13 +2,16 @@ package com.example.fileUpload.unit;
 
 public enum FileType {
 
-    PDF("pdf"),
+/*    PDF("pdf"),
     PNG("png"),
-    JPG("jpg"),
-    DOCX("docx"),
-    PPTX("pptx"),
-    XLSX("xlsx"),
-    BIN("bin"),
+    JPG("jpg"),*/
+    DOCX(".docx"),
+    PPTX(".pptx"),
+    XLSX(".xlsx"),
+    DOC(".doc"),
+    PPT(".ppt"),
+    XLS(".xls"),
+/*    BIN("bin"),*/
     POWERPOINT("PowerPoint"),
     EXCEL("Excel"),
     WORD("Word");
