@@ -24,6 +24,7 @@ import org.apache.xmlbeans.XmlException;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -164,48 +165,15 @@ public class FileUtil {
                     xlsx.close();
                 }
                 case "application/octet-stream" -> {
-                    log.info("한컴 대기중");
-                    POIFSFileSystem poifs = new POIFSFileSystem(inputStream);
-                    DirectoryEntry root = poifs.getRoot();
-                    DirectoryEntry binData = (DirectoryEntry)root.getEntry("BinData");
 
-                    System.out.println(binData.getEntryNames());
-
-
-                    //구현해야 하는 코드 POIFS로 HWP를 읽어서 암호화를 해제하는 코드 구현해 보기
-                   /* Entry bin = binData.getEntry("BIN0004.OLE");
-
-                    //스트림 바로 저장하는 코드를 확인차 추가함.
-                    try (FileOutputStream fileOutputStream = new FileOutputStream(savePath +"\\"+ bin.getName())) {
-                        fileOutputStream.write(zlibDecompression(bin.));
-                    } catch (IOException e) {
-                        ExceptionUtils.getStackTrace(e);
-                        log.error("파일 저장 실패");
-                    }*/
-
-
-                    //--------------- zlib로 압축 해제 코드 짜보기-------------
-
-                    /*BinData hwpFile = HWPReader.fromInputStream(inputStream).getBinData();
+                    BinData hwpFile = HWPReader.fromInputStream(inputStream).getBinData();
 
                     for(EmbeddedBinaryData data:hwpFile.getEmbeddedBinaryDataList()){
 
                         if(data.getName().endsWith(".OLE")){
-                            log.info("{}에서 사용된 압축방법: {}",data.getName(),data.getCompressMethod());
-
-                            //hwp에서 OLE 추출하는 코드
-                            //hwpParser(new ByteArrayInputStream(data.getData()));
-
-                            //zlibDecompression(data.getData());
-                            //스트림 바로 저장하는 코드를 확인차 추가함.
-                            try (FileOutputStream fileOutputStream = new FileOutputStream(savePath +"\\"+ data.getName())) {
-                                fileOutputStream.write(data.getData());
-                            } catch (IOException e) {
-                                ExceptionUtils.getStackTrace(e);
-                                log.error("파일 저장 실패");
-                            }
+                            hwpParser(new ByteArrayInputStream(data.getData()));
                         }
-                    }*/
+                    }
                 }
             }
             files = Folder.listFiles();
@@ -223,10 +191,6 @@ public class FileUtil {
         return fileList;
     }
 
-
-    private static void writeOleToFile(){
-
-    }
     private static void hwpParser(InputStream inputStream){
         try {
             // 앞의 4바이트를 제외하고 남은 데이터를 POI 읽기
@@ -245,13 +209,11 @@ public class FileUtil {
                 while (entries.hasNext()) {
                     Entry entry = entries.next();
                     if (entry.getName().startsWith("Ole", 1)) {
-                        //System.out.println(entry.getName() + " 삭제 대상");
                         entriesToDelete.add(entry);
                     }
                 }
 
                 for (Entry entry : entriesToDelete) {
-                    //System.out.println(entry.getName() + " 삭제");
                     root.getEntry(entry.getName()).delete();
                 }
 
@@ -268,13 +230,11 @@ public class FileUtil {
                 while (entries.hasNext()) {
                     Entry entry = entries.next();
                     if (entry.getName().startsWith("Ole", 1)) {
-                        //System.out.println(entry.getName() + " 삭제 대상");
                         entriesToDelete.add(entry);
                     }
                 }
 
                 for (Entry entry : entriesToDelete) {
-                    //System.out.println(entry.getName() + " 삭제");
                     root.getEntry(entry.getName()).delete();
                 }
 
@@ -291,13 +251,11 @@ public class FileUtil {
                 while (entries.hasNext()) {
                     Entry entry = entries.next();
                     if (entry.getName().startsWith("Ole", 1)) {
-                        //System.out.println(entry.getName() + " 삭제 대상");
                         entriesToDelete.add(entry);
                     }
                 }
 
                 for (Entry entry : entriesToDelete) {
-                    //System.out.println(entry.getName() + " 삭제");
                     root.getEntry(entry.getName()).delete();
                 }
 
@@ -307,10 +265,16 @@ public class FileUtil {
                 fos.close();
 
             } else if (root.hasEntry(Ole10Native.OLE10_NATIVE)) {
+                log.info("Ole10Native있음");
                 DocumentEntry ole10Native = (DocumentEntry) root.getEntry(Ole10Native.OLE10_NATIVE);
                 Ole10NativeParser(new DocumentInputStream(ole10Native));
+
+            }else if (root.hasEntry(OleEntry.PACKAGE.getValue())) {
+                log.info("Package있음");
+                DocumentEntry packageEntry = (DocumentEntry) root.getEntry((OleEntry.PACKAGE.getValue()));
+                packageParser((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()), packageEntry);
             }else{
-                log.info("Embedded 추출이 지원이 안되는 파일(ex: docx)파일이 존재합니다.");
+                log.info("지원이 안되는 파일이 있습니다.");
             }
 
             pof.close();
