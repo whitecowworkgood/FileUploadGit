@@ -13,17 +13,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-@NoArgsConstructor(force = true)
-@RequiredArgsConstructor
+@NoArgsConstructor
 public class XWordParser extends FileParser {
-    private final XOfficeEntryHandler xOfficeEntryHandler;
+
 
     @Override
     public void parse(FileDto fileDto) throws IOException, OpenXML4JException {
         FileInputStream fs = new FileInputStream(fileDto.getFileSavePath());
         XWPFDocument docx = new XWPFDocument(fs);
 
-        xOfficeEntryHandler.getParseFile(docx.getAllEmbeddedParts(), fileDto.getFileOlePath());
+        XOfficeEntryHandler.getParseFile(docx.getAllEmbeddedParts(), fileDto.getFileOlePath());
         docx.close();
 
     }

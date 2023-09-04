@@ -19,11 +19,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 @Slf4j
-@RequiredArgsConstructor
-@NoArgsConstructor(force = true)
+@NoArgsConstructor
 public class WordParser extends FileParser {
 
-    private final OfficeEntryHandler officeEntryHandler;
 
     @Override
     public void parse(FileDto fileDto) throws IOException {

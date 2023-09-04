@@ -16,10 +16,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
-@RequiredArgsConstructor
-@NoArgsConstructor(force = true)
+
+@NoArgsConstructor
 public class PowerPointParser extends FileParser {
-    private final OfficeEntryHandler officeEntryHandler;
 
     @Override
     public void parse(FileDto fileDto) throws IOException {
@@ -30,7 +29,7 @@ public class PowerPointParser extends FileParser {
         for (HSLFObjectData object : objects) {
             POIFSFileSystem poifs = new POIFSFileSystem(object.getInputStream());
 
-            officeEntryHandler.getParser(poifs.getRoot(), fileDto.getFileOlePath());
+            OfficeEntryHandler.getParser(poifs.getRoot(), fileDto.getFileOlePath());
             fs.close();
         }
         hslfSlideShow.close();

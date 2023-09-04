@@ -1,10 +1,13 @@
 package com.example.fileUpload.documentParser.module;
 
+import com.example.fileUpload.unit.FileUtil;
 import com.example.fileUpload.unit.MimeType;
+import com.example.fileUpload.unit.OleEntry;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.poi.hslf.record.ExOleObjAtom;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.poifs.filesystem.DirectoryEntry;
 import org.apache.poi.poifs.filesystem.DocumentEntry;
@@ -20,9 +23,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-@RequiredArgsConstructor
 @Slf4j
-@Component
 public class XOfficeEntryHandler {
 
     public static final Pattern DiractoryPattern = Pattern.compile("([^/]+)\\.(\\w+)$");
@@ -33,12 +34,24 @@ public class XOfficeEntryHandler {
 
                 POIFSFileSystem poifs = new POIFSFileSystem(picture.get(i).getInputStream());
                 DirectoryEntry root = poifs.getRoot();
-                DocumentEntry ole10NativeEntry = (DocumentEntry)root.getEntry(Ole10Native.OLE10_NATIVE);
 
-                InputStream oleInputStream = poifs.createDocumentInputStream(ole10NativeEntry.getName());
+                if(root.hasEntry(Ole10Native.OLE10_NATIVE)){
+                    DocumentEntry ole10NativeEntry = (DocumentEntry)root.getEntry(Ole10Native.OLE10_NATIVE);
+                    InputStream oleInputStream = poifs.createDocumentInputStream(ole10NativeEntry.getName());
+                    EmbeddedFileExtractor.parseOle10NativeEntry(oleInputStream, fileOlePath);
+                //가끔가다 한컴워드인 경우 bin파일에 package가 있을때가 있음(다는 아니고, 가끔?)
+                }else if(root.hasEntry(OleEntry.PACKAGE.getValue())){
+                    DocumentEntry Package = (DocumentEntry)root.getEntry(OleEntry.PACKAGE.getValue());
+                    InputStream oleInputStream = poifs.createDocumentInputStream(Package.getName());
+                    //EmbeddedFileExtractor.parsePackageEntry((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()), Package, fileOlePath);
 
-                EmbeddedFileExtractor.parseOle10NativeEntry(oleInputStream, fileOlePath);
-
+                    try (FileOutputStream outputStream = new FileOutputStream(fileOlePath +"\\"+ FileUtil.getRtNum()+".bin")) {
+                        outputStream.write(oleInputStream.readAllBytes());
+                    } catch (IOException e) {
+                        ExceptionUtils.getStackTrace(e);
+                        log.error("파일 저장 실패");
+                    }
+                }
                 poifs.close();
                 continue;
             }

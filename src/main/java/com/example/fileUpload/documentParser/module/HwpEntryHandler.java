@@ -2,11 +2,12 @@ package com.example.fileUpload.documentParser.module;
 
 import com.example.fileUpload.unit.FileType;
 import com.example.fileUpload.unit.OleEntry;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.poifs.filesystem.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -18,7 +19,6 @@ import java.util.List;
 import static com.example.fileUpload.unit.FileUtil.getRtNum;
 
 @Slf4j
-@RequiredArgsConstructor
 public class HwpEntryHandler {
 
     public static void parseHwp(InputStream inputStream, String fileOlePath) {

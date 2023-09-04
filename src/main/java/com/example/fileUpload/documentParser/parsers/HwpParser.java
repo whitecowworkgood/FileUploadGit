@@ -17,12 +17,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-@RequiredArgsConstructor
-@NoArgsConstructor(force = true)
+
+@NoArgsConstructor
 @Slf4j
 public class HwpParser extends FileParser {
 
-    private final HwpEntryHandler hwpEntryHandler;
     @Override
     public void parse(FileDto fileDto) throws Exception {
         //log.info("path{}", fileDto.getFileOlePath());
@@ -33,7 +32,7 @@ public class HwpParser extends FileParser {
 
             if(data.getName().endsWith(".OLE")){
 
-               hwpEntryHandler.parseHwp(new ByteArrayInputStream(data.getData()), fileDto.getFileOlePath());
+               HwpEntryHandler.parseHwp(new ByteArrayInputStream(data.getData()), fileDto.getFileOlePath());
 
             }
         }

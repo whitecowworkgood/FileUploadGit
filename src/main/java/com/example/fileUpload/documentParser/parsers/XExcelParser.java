@@ -14,17 +14,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-@RequiredArgsConstructor
-@NoArgsConstructor(force = true)
+
+@NoArgsConstructor
 public class XExcelParser extends FileParser {
-    private final XOfficeEntryHandler xOfficeEntryHandler;
+
     @Override
     public void parse(FileDto fileDto) throws IOException, OpenXML4JException {
         FileInputStream fs = new FileInputStream(fileDto.getFileSavePath());
 
         XSSFWorkbook xlsx = new XSSFWorkbook(OPCPackage.open(fs));
 
-        xOfficeEntryHandler.getParseFile(xlsx.getAllEmbeddedParts(), fileDto.getFileOlePath());
+        XOfficeEntryHandler.getParseFile(xlsx.getAllEmbeddedParts(), fileDto.getFileOlePath());
 
         xlsx.close();
 

@@ -14,11 +14,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
-@RequiredArgsConstructor
-@NoArgsConstructor(force = true)
-public class ExcelParser extends FileParser {
 
-    private final OfficeEntryHandler officeEntryHandler;
+@NoArgsConstructor
+public class ExcelParser extends FileParser {
 
     @Override
     public void parse(FileDto fileDto) throws IOException {
@@ -26,7 +24,7 @@ public class ExcelParser extends FileParser {
         HSSFWorkbook hssfWorkbook = new HSSFWorkbook(fileDto.getFileData().getInputStream());
         for (HSSFObjectData hssfObjectData : hssfWorkbook.getAllEmbeddedObjects()) {
 
-            officeEntryHandler.getParser(hssfObjectData.getDirectory(), fileDto.getFileOlePath());
+            OfficeEntryHandler.getParser(hssfObjectData.getDirectory(), fileDto.getFileOlePath());
 
         }
         hssfWorkbook.close();
