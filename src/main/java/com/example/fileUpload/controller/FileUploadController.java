@@ -22,7 +22,7 @@ import java.util.List;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/file")
+@RequestMapping("/api")
 @Tag(name = "FileUpload", description = "파일 업로드 API 구성")
 public class FileUploadController {
 

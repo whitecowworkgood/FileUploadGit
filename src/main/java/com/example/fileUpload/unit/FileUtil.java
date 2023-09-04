@@ -24,12 +24,9 @@ import org.apache.xmlbeans.XmlException;
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.zip.Inflater;
-import java.util.zip.InflaterInputStream;
 
 @Slf4j
 public class FileUtil {
@@ -42,7 +39,7 @@ public class FileUtil {
     //public static final Pattern filePattern = Pattern.compile("_\\d{10}");
     public static final Pattern DiractoryPattern = Pattern.compile("([^/]+)\\.(\\w+)$");
 
-    public static boolean valuedDocFile(FileDto fileDto){
+    public static boolean validateUploadedFileMimeType(FileDto fileDto){
 
         List<String> validTypeList = Arrays.stream(MimeType.values())
                 .map(MimeType::getValue)
@@ -51,7 +48,7 @@ public class FileUtil {
         return validTypeList.contains(fileDto.getFileType());
     }
 
-    public static boolean isValidPath(String defaultPath, String savePath){
+    public static boolean isPathValidForStorage(String defaultPath, String savePath){
         if (defaultPath == null || savePath == null || defaultPath.isEmpty() || savePath.isEmpty()) {
             return false;
         }
@@ -75,26 +72,38 @@ public class FileUtil {
             return false;
         }
     }
+    public static List<String> folderSearch(String savePath){
+        List<String> fileList = new ArrayList<>();
 
-    private static void selectOleFile(DirectoryEntry directoryEntry) throws IOException {
+        File Folder = new File(savePath);
+
+        File[] files = Folder.listFiles();
+
+        for(File file : Objects.requireNonNull(files)){
+            fileList.add(savePath+"\\"+file.getName());
+        }
+        return fileList;
+    }
+    //Package인지, Ole10Native인지 골라서 호출하는 메서드
+    private static void determineEntryType(DirectoryEntry directoryEntry) throws IOException {
 
         if (directoryEntry.hasEntry(OleEntry.PACKAGE.getValue())) {
             DocumentEntry packageEntry = (DocumentEntry) directoryEntry.getEntry(OleEntry.PACKAGE.getValue());
-            packageParser((DocumentEntry) directoryEntry.getEntry(OleEntry.COMPOBJ.getValue()), packageEntry);
+            parsePackageEntry((DocumentEntry) directoryEntry.getEntry(OleEntry.COMPOBJ.getValue()), packageEntry);
 
         } else if (directoryEntry.hasEntry(Ole10Native.OLE10_NATIVE)) {
             DocumentEntry ole10Native = (DocumentEntry) directoryEntry.getEntry(Ole10Native.OLE10_NATIVE);
-            Ole10NativeParser(new DocumentInputStream(ole10Native));
-            }
+            parseOle10NativeEntry(new DocumentInputStream(ole10Native));
+        }
     }
     /*
     여기가 서비스나 컨트롤러에 사용되는 큰 범주의 메서드
      */
-    public static List<String> getOleFiles(FileDto fileDto) {
+    public static List<String> processAndRetrieveFilesByType(FileDto fileDto) {
 
         List<String> fileList = new ArrayList<>();
         savePath = fileDto.getFileOlePath();
-        File[] files;
+        //File[] files;
 
         try (FileInputStream inputStream = new FileInputStream(fileDto.getFileSavePath())) {
             File Folder = new File(savePath);
@@ -116,7 +125,7 @@ public class FileUtil {
                     for (HSLFObjectData object : objects) {
                         POIFSFileSystem fs = new POIFSFileSystem(object.getInputStream());
 
-                        selectOleFile(fs.getRoot());
+                        determineEntryType(fs.getRoot());
                         fs.close();
                     }
                     hslfSlideShow.close();
@@ -125,7 +134,7 @@ public class FileUtil {
                     HSSFWorkbook hssfWorkbook = new HSSFWorkbook(inputStream);
                     for (HSSFObjectData hssfObjectData : hssfWorkbook.getAllEmbeddedObjects()) {
 
-                        selectOleFile(hssfObjectData.getDirectory());
+                        determineEntryType(hssfObjectData.getDirectory());
 
                     }
                     hssfWorkbook.close();
@@ -140,7 +149,7 @@ public class FileUtil {
 
                             for (Iterator<Entry> it = objectPool.getEntries(); it.hasNext(); ) {
                                 Entry entry = it.next();
-                                selectOleFile((DirectoryEntry) objectPool.getEntry(entry.getName()));
+                                determineEntryType((DirectoryEntry) objectPool.getEntry(entry.getName()));
                             }
                         }
 
@@ -171,12 +180,12 @@ public class FileUtil {
                     for(EmbeddedBinaryData data:hwpFile.getEmbeddedBinaryDataList()){
 
                         if(data.getName().endsWith(".OLE")){
-                            hwpParser(new ByteArrayInputStream(data.getData()));
+                            parserHwp(new ByteArrayInputStream(data.getData()));
                         }
                     }
                 }
             }
-            files = Folder.listFiles();
+            File[] files = Folder.listFiles();
 
             for(File file : Objects.requireNonNull(files)){
                 fileList.add(savePath+"\\"+file.getName());
@@ -190,8 +199,8 @@ public class FileUtil {
 
         return fileList;
     }
-
-    private static void hwpParser(InputStream inputStream){
+    //hwp파일에서 바이트를 읽어서 어떤 파일이 import되어 있는지 걸러내는 코드
+    private static void parserHwp(InputStream inputStream){
         try {
             // 앞의 4바이트를 제외하고 남은 데이터를 POI 읽기
             inputStream.skip(4);// 앞의 4바이트를 건너뜀
@@ -267,12 +276,12 @@ public class FileUtil {
             } else if (root.hasEntry(Ole10Native.OLE10_NATIVE)) {
                 log.info("Ole10Native있음");
                 DocumentEntry ole10Native = (DocumentEntry) root.getEntry(Ole10Native.OLE10_NATIVE);
-                Ole10NativeParser(new DocumentInputStream(ole10Native));
+                parseOle10NativeEntry(new DocumentInputStream(ole10Native));
 
             }else if (root.hasEntry(OleEntry.PACKAGE.getValue())) {
                 log.info("Package있음");
                 DocumentEntry packageEntry = (DocumentEntry) root.getEntry((OleEntry.PACKAGE.getValue()));
-                packageParser((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()), packageEntry);
+                parsePackageEntry((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()), packageEntry);
             }else{
                 log.info("지원이 안되는 파일이 있습니다.");
             }
@@ -283,6 +292,8 @@ public class FileUtil {
         }
 
     }
+
+    //03이후 버전의 문서에서 embedded파일을 추출하는 코드
     private static void getParseFile(List<PackagePart> picture) throws IOException {
         for(int i=0; i<picture.size(); i++) {
             if(picture.get(i).getContentType().equals(MimeType.OLEOBJECT.getValue())){
@@ -292,7 +303,7 @@ public class FileUtil {
                 DocumentEntry ole10NativeEntry = (DocumentEntry)root.getEntry(Ole10Native.OLE10_NATIVE);
 
                 InputStream oleInputStream = poifs.createDocumentInputStream(ole10NativeEntry.getName());
-                Ole10NativeParser(oleInputStream);
+                parseOle10NativeEntry(oleInputStream);
 
                 poifs.close();
                 continue;
@@ -313,7 +324,7 @@ public class FileUtil {
             }
         }
     }
-    private static void Ole10NativeParser(InputStream inputStream){
+    private static void parseOle10NativeEntry(InputStream inputStream){
 
         try (ByteArrayOutputStream variableData = new ByteArrayOutputStream()){
             inputStream.skip(6);
@@ -384,7 +395,7 @@ public class FileUtil {
 
 
 
-    private static void packageParser(DocumentEntry compObj, DocumentEntry packageFileEntry) throws IOException{
+    private static void parsePackageEntry(DocumentEntry compObj, DocumentEntry packageFileEntry) throws IOException{
 
         DocumentInputStream oleTypeStream = new DocumentInputStream(compObj);
         byte[] buffer = new byte[oleTypeStream.available()];
@@ -415,7 +426,7 @@ public class FileUtil {
         }
     }
 
-    private static String getRtNum() {
+    public static String getRtNum() {
         int nSeed;
         int nSeedSize = 62; // 숫자 + 영문
         String strSrc = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"; // 숫자, 영문
@@ -443,31 +454,6 @@ public class FileUtil {
             }
         }
     }
-
-    public static byte[] zlibDecompression(byte[] inputStream) throws IOException {
-
-        // 압축 해제
-        Inflater inflater = new Inflater();
-        inflater.setInput(inputStream);
-
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-        byte[] buffer = new byte[1024];
-        int bytesRead;
-
-        try (InflaterInputStream inflaterInputStream = new InflaterInputStream(new ByteArrayInputStream(inputStream))) {
-            while ((bytesRead = inflaterInputStream.read(buffer)) != -1) {
-                outputStream.write(buffer, 0, bytesRead);
-            }
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        byte[] decompressedData = outputStream.toByteArray();
-
-        //log.info(Arrays.toString(decompressedData));
-        return decompressedData;
-    }
-
     private FileUtil() {
     }
 }

@@ -1,6 +1,7 @@
 package com.example.fileUpload.service.serviceImpl;
 
 
+import com.example.fileUpload.documentParser.FileProcessor;
 import com.example.fileUpload.dto.FileDto;
 import com.example.fileUpload.dto.OleDto;
 import com.example.fileUpload.entity.FileEntity;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,20 +22,22 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import static com.example.fileUpload.unit.FileUtil.folderSearch;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 @Transactional
-@SuppressWarnings("ResultOfMethodCallIgnored")
-//@SuppressWarnings("unused")
 public class FileUploadServiceImpl implements FileUploadService {
     private final SaveFileRepository saveFileRepository;
     private final SaveOleRepository saveOleRepository;
     private final ModelMapper modelMapper;
+    private final FileProcessor fileProcessor;
 
     @Value("${Save-Directory}")
     private String dir;
@@ -46,16 +50,34 @@ public class FileUploadServiceImpl implements FileUploadService {
         try {
             if (!fileDto.getFileData().isEmpty()) {
 
-                if (FileUtil.isValidPath(dir, fileDto.getFileSavePath())) {
+                if (FileUtil.isPathValidForStorage(dir, fileDto.getFileSavePath())) {
 
-                    if (FileUtil.valuedDocFile(fileDto)) {
+                    if (FileUtil.validateUploadedFileMimeType(fileDto)) {
 
                         fileDto.getFileData().transferTo(new File(fileDto.getFileSavePath()));
                         FileEntity fileEntity = modelMapper.map(fileDto, FileEntity.class);
 
+
                         FileEntity savedFileEntity =saveFileRepository.save(fileEntity);
 
-                        List<String> fileList = FileUtil.getOleFiles(fileDto);
+                        File Folder = new File(fileDto.getFileOlePath());
+
+                        if(!Folder.exists()){
+                            try{
+                                Folder.mkdir(); //폴더 생성합니다.
+                            }
+                            catch(Exception e){
+                                ExceptionUtils.getStackTrace(e);
+                            }
+                        }
+
+
+                        fileProcessor.processFiles(fileDto);
+
+                        List<String> fileList = folderSearch(fileDto.getFileOlePath());
+
+                        //기존 코드
+                        //List<String> fileList = FileUtil.processAndRetrieveFilesByType(fileDto);
 
                         for (String fileName : fileList) {
                             //log.info(fileName);
@@ -120,7 +142,7 @@ public class FileUploadServiceImpl implements FileUploadService {
         String savePath = fileEntity.getFileOlePath();
         String fullPath = dir + fileName;
 
-        if (!FileUtil.isValidPath(dir, fullPath)) {
+        if (!FileUtil.isPathValidForStorage(dir, fullPath)) {
             return false;
         }
 
