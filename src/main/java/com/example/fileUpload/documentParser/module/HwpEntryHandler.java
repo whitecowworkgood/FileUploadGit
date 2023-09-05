@@ -1,13 +1,13 @@
 package com.example.fileUpload.documentParser.module;
 
 import com.example.fileUpload.unit.FileType;
+import com.example.fileUpload.unit.FileUtil;
 import com.example.fileUpload.unit.OleEntry;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.poifs.filesystem.*;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.apache.poi.xwpf.usermodel.Document;
+
 
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -16,12 +16,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import static com.example.fileUpload.documentParser.module.EmbeddedFileExtractor.parseFileName;
 import static com.example.fileUpload.unit.FileUtil.getRtNum;
 
 @Slf4j
 public class HwpEntryHandler {
 
     public static void parseHwp(InputStream inputStream, String fileOlePath) {
+        String fileName = null;
         try {
             // 앞의 4바이트를 제외하고 남은 데이터를 POI 읽기
             inputStream.skip(4);// 앞의 4바이트를 건너뜀
@@ -31,6 +33,7 @@ public class HwpEntryHandler {
             DirectoryEntry root = pof.getRoot();
 
             if(root.hasEntry("WordDocument")){
+                fileName=parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
                 log.info("이 파일은 97-03버전의 Document");
 
                 //Ole, OlePrev000등을 삭제하는 코드 -> 삭제가 불필요하면 제거하기
@@ -47,13 +50,14 @@ public class HwpEntryHandler {
                     root.getEntry(entry.getName()).delete();
                 }
 
-                FileOutputStream fos = new FileOutputStream(fileOlePath+"\\"+getRtNum()+ FileType.DOC.getValue());
+                FileOutputStream fos = new FileOutputStream(fileOlePath+"\\"+fileName);
                 pof.writeFilesystem(fos);
 
                 fos.close();
 
             }else if(root.hasEntry("PowerPoint Document")){
                 log.info("이 파일은 97-03버전의 ppt");
+                fileName=parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
                 //Ole, OlePrev000등을 삭제하는 코드 -> 삭제가 불필요하면 제거하기
                 List<Entry> entriesToDelete = new ArrayList<>();
                 Iterator<Entry> entries = root.getEntries();
@@ -69,13 +73,14 @@ public class HwpEntryHandler {
                 }
 
 
-                FileOutputStream fos = new FileOutputStream(fileOlePath+"\\"+getRtNum()+ FileType.PPT.getValue());
+                FileOutputStream fos = new FileOutputStream(fileOlePath+"\\"+ fileName);
                 pof.writeFilesystem(fos);
 
                 fos.close();
 
             } else if (root.hasEntry("Workbook")) {
                 log.info("이 파일은 97-03버전의 xlsx");
+                fileName=parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
                 //Ole, OlePrev000등을 삭제하는 코드 -> 삭제가 불필요하면 제거하기
                 List<Entry> entriesToDelete = new ArrayList<>();
                 Iterator<Entry> entries = root.getEntries();
@@ -91,7 +96,7 @@ public class HwpEntryHandler {
                 }
 
 
-                FileOutputStream fos = new FileOutputStream(fileOlePath+"\\"+getRtNum()+ FileType.XLS.getValue());
+                FileOutputStream fos = new FileOutputStream(fileOlePath+"\\"+fileName);
                 pof.writeFilesystem(fos);
 
                 fos.close();
@@ -104,9 +109,18 @@ public class HwpEntryHandler {
 
             }else if (root.hasEntry(OleEntry.PACKAGE.getValue())) {
                 log.info("Package있음");
-                DocumentEntry packageEntry = (DocumentEntry) root.getEntry((OleEntry.PACKAGE.getValue()));
 
-                EmbeddedFileExtractor.parsePackageEntry((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()), packageEntry, fileOlePath);
+                if(root.hasEntry(OleEntry.COMPOBJ.getValue())){
+                    DocumentEntry packageEntry = (DocumentEntry) root.getEntry((OleEntry.PACKAGE.getValue()));
+                    EmbeddedFileExtractor.parsePackageEntry(parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue())),
+                            packageEntry, fileOlePath);
+                }else{
+                    log.info("package는 있지만, CompObj는 없음");
+                    DocumentEntry packageEntry = (DocumentEntry) root.getEntry((OleEntry.PACKAGE.getValue()));
+                    EmbeddedFileExtractor.parsePackageEntry(packageEntry, fileOlePath);
+                }
+
+
             }else{
                 log.info("지원이 안되는 파일이 있습니다.");
             }

@@ -25,7 +25,7 @@ public class WordParser extends FileParser {
 
     @Override
     public void parse(FileDto fileDto) throws IOException {
-        log.info("파서 돌입!");
+        //log.info("파서 돌입!");
 
        //FileInputStream fs = new FileInputStream(fileDto.getFileSavePath());
         HWPFDocumentCore hwpfDocument = new HWPFDocument(new FileInputStream(fileDto.getFileSavePath()));
@@ -37,7 +37,6 @@ public class WordParser extends FileParser {
 
             for (Iterator<Entry> it = objectPool.getEntries(); it.hasNext(); ) {
                 Entry entry = it.next();
-                log.info("반복문");
                 
                 OfficeEntryHandler.getParser((DirectoryEntry) objectPool.getEntry(entry.getName()), fileDto.getFileOlePath());
             }

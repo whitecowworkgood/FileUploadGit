@@ -5,8 +5,6 @@ import com.example.fileUpload.dto.FileDto;
 
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.util.List;
 
 //
 public class XHwpParser extends FileParser {

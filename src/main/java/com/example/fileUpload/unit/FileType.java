@@ -11,7 +11,8 @@ public enum FileType {
     DOC(".doc"),
     PPT(".ppt"),
     XLS(".xls"),
-/*    BIN("bin"),*/
+    BIN("bin"),
+    HWP(".hwp"),
     POWERPOINT("PowerPoint"),
     EXCEL("Excel"),
     WORD("Word");
