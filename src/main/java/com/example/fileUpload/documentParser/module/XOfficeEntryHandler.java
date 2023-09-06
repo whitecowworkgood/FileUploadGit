@@ -61,7 +61,7 @@ public class XOfficeEntryHandler {
                         ExceptionUtils.getStackTrace(e);
                         log.error("파일 저장 실패");
                     }
-                }else if (root.hasEntry("WordDocument")) {
+                }else if (root.hasEntry(OleEntry.WORD.getValue())) {
                     //log.info("안에 한글파일이 있잖아!!");
                     String fileName = parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
                     try (FileOutputStream outputStream = new FileOutputStream(fileOlePath +"\\"+ fileName)) {
@@ -70,7 +70,7 @@ public class XOfficeEntryHandler {
                         ExceptionUtils.getStackTrace(e);
                         log.error("파일 저장 실패");
                     }
-                }else if (root.hasEntry("PowerPoint Document")) {
+                }else if (root.hasEntry(OleEntry.PPT.getValue())) {
                     //log.info("안에 한글파일이 있잖아!!");
                     String fileName = parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
 
@@ -80,7 +80,7 @@ public class XOfficeEntryHandler {
                         ExceptionUtils.getStackTrace(e);
                         log.error("파일 저장 실패");
                     }
-                } else if (root.hasEntry("Workbook")) {
+                } else if (root.hasEntry(OleEntry.XLS.getValue())) {
                     //log.info("안에 한글파일이 있잖아!!");
                     String fileName = parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
 

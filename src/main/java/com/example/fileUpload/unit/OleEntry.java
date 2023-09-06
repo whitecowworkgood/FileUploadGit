@@ -4,7 +4,12 @@ public enum OleEntry {
     OBJECTPOOL("ObjectPool"),
     PACKAGE("Package"),
     COMPOBJ("\u0001CompObj"),
-    HWPINFO("\u0005HwpSummaryInformation");
+    HWPINFO("\u0005HwpSummaryInformation"),
+
+    WORD("WordDocument"),
+    PPT("PowerPoint Document"),
+    XLS("Workbook")
+    ;
 
 
     private final String value;

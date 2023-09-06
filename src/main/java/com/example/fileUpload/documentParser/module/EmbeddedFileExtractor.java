@@ -2,13 +2,17 @@ package com.example.fileUpload.documentParser.module;
 
 import com.example.fileUpload.unit.FileType;
 import com.example.fileUpload.unit.FileUtil;
+import com.example.fileUpload.unit.OleEntry;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.poi.poifs.filesystem.DirectoryEntry;
 import org.apache.poi.poifs.filesystem.DocumentEntry;
 import org.apache.poi.poifs.filesystem.DocumentInputStream;
+import org.apache.poi.poifs.filesystem.Entry;
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.Iterator;
 
 
 @Slf4j
@@ -185,8 +189,6 @@ public class EmbeddedFileExtractor {
         oleStream.read(oleData);
         oleStream.close();
 
-
-
         try (FileOutputStream outputStream = new FileOutputStream(fileOlePath +"\\"+FileUtil.getRtNum()+FileType.DOCX.getValue())) {
             outputStream.write(oleData);
         } catch (IOException e) {
@@ -194,4 +196,45 @@ public class EmbeddedFileExtractor {
             log.error("파일 저장 실패");
         }
     }
+
+
+    public static String copyDirectory(DirectoryEntry sourceDir, DirectoryEntry destinationDir, String directoryName) throws IOException {
+        // 기존 코드
+        DirectoryEntry copyDir;
+
+        String fileName = null;
+
+        if (!sourceDir.getName().equals(directoryName)) {
+            if (destinationDir.hasEntry(sourceDir.getName())) {
+                copyDir = (DirectoryEntry) destinationDir.getEntry(sourceDir.getName());
+            } else {
+                copyDir = destinationDir.createDirectory(sourceDir.getName());
+            }
+        }else{
+            copyDir=destinationDir;
+        }
+
+        // 하위 엔트리를 탐색하면서 복사
+        Iterator<Entry> entries = sourceDir.getEntries();
+        while (entries.hasNext()) {
+            Entry entry = entries.next();
+            if (entry.isDirectoryEntry()) {
+                // 디렉터리 엔트리인 경우, 재귀적으로 복사
+                DirectoryEntry sourceSubDir = (DirectoryEntry) entry;
+                copyDirectory(sourceSubDir, copyDir, "");
+            } else if (entry.isDocumentEntry()) {
+
+                if(entry.getName().equals(OleEntry.COMPOBJ.getValue())){
+                    fileName=parseFileName((DocumentEntry) entry);
+                }
+                // 문서 엔트리인 경우, 스트림 데이터를 읽어서 복사본에 생성 또는 업데이트
+                InputStream sourceDocEntry = new DocumentInputStream((DocumentEntry) entry);
+                DocumentEntry copyDocEntry = copyDir.createDocument(entry.getName(), sourceDocEntry);
+                sourceDocEntry.close();
+
+            }
+        }
+        return fileName;
+    }
+
 }

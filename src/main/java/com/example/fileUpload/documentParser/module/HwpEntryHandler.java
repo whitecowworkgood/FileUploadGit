@@ -32,7 +32,7 @@ public class HwpEntryHandler {
 
             DirectoryEntry root = pof.getRoot();
 
-            if(root.hasEntry("WordDocument")){
+            if(root.hasEntry(OleEntry.WORD.getValue())){
                 fileName=parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
                 log.info("이 파일은 97-03버전의 Document");
 
@@ -55,7 +55,7 @@ public class HwpEntryHandler {
 
                 fos.close();
 
-            }else if(root.hasEntry("PowerPoint Document")){
+            }else if(root.hasEntry(OleEntry.PPT.getValue())){
                 log.info("이 파일은 97-03버전의 ppt");
                 fileName=parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
                 //Ole, OlePrev000등을 삭제하는 코드 -> 삭제가 불필요하면 제거하기
@@ -78,7 +78,7 @@ public class HwpEntryHandler {
 
                 fos.close();
 
-            } else if (root.hasEntry("Workbook")) {
+            } else if (root.hasEntry(OleEntry.XLS.getValue())) {
                 log.info("이 파일은 97-03버전의 xlsx");
                 fileName=parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
                 //Ole, OlePrev000등을 삭제하는 코드 -> 삭제가 불필요하면 제거하기
