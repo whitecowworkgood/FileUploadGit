@@ -4,11 +4,13 @@ import com.example.fileUpload.unit.FileType;
 import com.example.fileUpload.unit.FileUtil;
 import com.example.fileUpload.unit.OleEntry;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.poifs.filesystem.DirectoryEntry;
 import org.apache.poi.poifs.filesystem.DocumentEntry;
 import org.apache.poi.poifs.filesystem.DocumentInputStream;
 import org.apache.poi.poifs.filesystem.Entry;
+import org.springframework.boot.autoconfigure.couchbase.CouchbaseProperties;
 
 import java.io.*;
 import java.nio.charset.Charset;
@@ -17,11 +19,11 @@ import java.util.Iterator;
 
 @Slf4j
 public class EmbeddedFileExtractor {
-
+    static StringBuilder stringBuilder = new StringBuilder();
     public static void parseOle10NativeEntry(InputStream inputStream, String fileOlePath) {
 
         try (ByteArrayOutputStream variableData = new ByteArrayOutputStream()){
-            inputStream.skip(6);
+            inputStream.skipNBytes(6);
 
             int byteRead;
             while ((byteRead = inputStream.read()) != -1) {
@@ -59,7 +61,7 @@ public class EmbeddedFileExtractor {
                     (tempPathSizeBytes[1] & 0xFF) << 8 |
                     (tempPathSizeBytes[0] & 0xFF);
 
-            inputStream.skip(dataSize);
+            inputStream.skipNBytes(dataSize);
 
             byte[] embeddedDataSize = new byte[4];
             inputStream.read(embeddedDataSize);
@@ -73,18 +75,21 @@ public class EmbeddedFileExtractor {
             byte[] embeddedData = new byte[realSize];
             inputStream.read(embeddedData);
 
-            //File outputFile = new File(savePath +"\\"+ fileName);
-            try (FileOutputStream fileOutputStream = new FileOutputStream(fileOlePath +"\\"+ fileName)) {
+            stringBuilder.append(fileOlePath).append(File.separator).append(fileName);
+            try (FileOutputStream fileOutputStream = new FileOutputStream(stringBuilder.toString())) {
                 fileOutputStream.write(embeddedData);
-                //System.out.println("File saved: " + outputFile.getAbsolutePath());
             } catch (IOException e) {
                 ExceptionUtils.getStackTrace(e);
             }
+            stringBuilder.setLength(0);
 
         } catch (IOException e) {
             ExceptionUtils.getStackTrace(e);
             log.error("IO 오류 발생");
+        }finally {
+            IOUtils.closeQuietly(inputStream);
         }
+
     }
     public static String parseFileName(DocumentEntry compObj){
         String fileName=null;
@@ -93,10 +98,10 @@ public class EmbeddedFileExtractor {
 
         try(DocumentInputStream compObjStream = new DocumentInputStream(compObj)){
 
-            compObjStream.skip(28);
+            compObjStream.skipNBytes(28);
 
             byte[] fileNameSizeBytes = new byte[4];
-            compObjStream.read(fileNameSizeBytes);
+            compObjStream.readFully(fileNameSizeBytes);
 
             int fileNameSize = (fileNameSizeBytes[3] & 0xFF) << 24 |
                     (fileNameSizeBytes[2] & 0xFF) << 16 |
@@ -104,7 +109,7 @@ public class EmbeddedFileExtractor {
                     (fileNameSizeBytes[0] & 0xFF);
 
             byte[] fileNameData = new byte[fileNameSize];
-            compObjStream.read(fileNameData);
+            compObjStream.readFully(fileNameData);
 
             fileName = FileUtil.removeNullCharacters(new String(fileNameData, Charset.forName("euc-kr")));
 
@@ -112,20 +117,18 @@ public class EmbeddedFileExtractor {
             //---------상단으로 파일명 확인------------
 
             byte[] skipSizeBytes = new byte[4];
-            compObjStream.read(skipSizeBytes);
+            compObjStream.readFully(skipSizeBytes);
 
             int skipSize = (skipSizeBytes[3] & 0xFF) << 24 |
                     (skipSizeBytes[2] & 0xFF) << 16 |
                     (skipSizeBytes[1] & 0xFF) << 8 |
                     (skipSizeBytes[0] & 0xFF);
 
-            //fileTypeStringServ = FileUtil.removeNullCharacters(new String(skipSizeBytes, Charset.forName("euc-kr")));
-
-
-            compObjStream.skip(skipSize);
+            compObjStream.skipNBytes(skipSize);
 
             byte[] fileTypeBytes = new byte[4];
-            compObjStream.read(fileTypeBytes);
+            //compObjStream.read(fileTypeBytes);
+            compObjStream.readFully(fileTypeBytes);
 
             int fileTypeSize = (fileTypeBytes[3] & 0xFF) << 24 |
                     (fileTypeBytes[2] & 0xFF) << 16 |
@@ -134,7 +137,7 @@ public class EmbeddedFileExtractor {
 
 
             byte[] fileTypeData = new byte[fileTypeSize];
-            compObjStream.read(fileTypeData);
+            compObjStream.readFully(fileTypeData);
 
 
             fileTypeString = new String(fileTypeData, Charset.forName("euc-kr"));
@@ -164,37 +167,50 @@ public class EmbeddedFileExtractor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        return fileName+fileType;
+        String returnValue = stringBuilder.append(fileName).append(fileType).toString();
+        stringBuilder.setLength(0);
+        return returnValue;
     }
     public static void parsePackageEntry(String fileName, DocumentEntry packageFileEntry, String fileOlePath) throws IOException {
 
-        DocumentInputStream oleStream = new DocumentInputStream(packageFileEntry);
-        byte[] oleData = new byte[oleStream.available()];
-        oleStream.read(oleData);
-        oleStream.close();
+        try(DocumentInputStream oleStream = new DocumentInputStream(packageFileEntry)){
+            byte[] oleData = new byte[oleStream.available()];
+            oleStream.readFully(oleData);
 
-        log.info(fileName);
+            stringBuilder.append(fileOlePath).append(File.separator).append(fileName);
 
-        try (FileOutputStream outputStream = new FileOutputStream(fileOlePath +"\\"+fileName)) {
-            outputStream.write(oleData);
-        } catch (IOException e) {
+            try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
+                outputStream.write(oleData);
+            } catch (IOException e) {
+                ExceptionUtils.getStackTrace(e);
+                log.error("파일 저장 실패");
+            }
+            stringBuilder.setLength(0);
+        }catch(IOException e) {
             ExceptionUtils.getStackTrace(e);
-            log.error("파일 저장 실패");
+            throw new RuntimeException(e);
         }
+
     }
     public static void parsePackageEntry(DocumentEntry packageFileEntry, String fileOlePath) throws IOException {
 
-        DocumentInputStream oleStream = new DocumentInputStream(packageFileEntry);
-        byte[] oleData = new byte[oleStream.available()];
-        oleStream.read(oleData);
-        oleStream.close();
+        try(DocumentInputStream oleStream = new DocumentInputStream(packageFileEntry)){
+            byte[] oleData = new byte[oleStream.available()];
+            oleStream.readFully(oleData);
 
-        try (FileOutputStream outputStream = new FileOutputStream(fileOlePath +"\\"+FileUtil.getRtNum()+FileType.DOCX.getValue())) {
-            outputStream.write(oleData);
-        } catch (IOException e) {
+            stringBuilder.append(fileOlePath).append(File.separator).append(FileUtil.getRtNum()).append(FileType.DOCX.getValue());
+            try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
+                outputStream.write(oleData);
+            } catch (IOException e) {
+                ExceptionUtils.getStackTrace(e);
+                log.error("파일 저장 실패");
+            }
+            stringBuilder.setLength(0);
+        }catch(IOException e) {
             ExceptionUtils.getStackTrace(e);
-            log.error("파일 저장 실패");
+            throw new RuntimeException(e);
         }
+
     }
 
 
@@ -228,10 +244,12 @@ public class EmbeddedFileExtractor {
                     fileName=parseFileName((DocumentEntry) entry);
                 }
                 // 문서 엔트리인 경우, 스트림 데이터를 읽어서 복사본에 생성 또는 업데이트
-                InputStream sourceDocEntry = new DocumentInputStream((DocumentEntry) entry);
-                DocumentEntry copyDocEntry = copyDir.createDocument(entry.getName(), sourceDocEntry);
-                sourceDocEntry.close();
-
+                try(InputStream sourceDocEntry = new DocumentInputStream((DocumentEntry) entry)){
+                    DocumentEntry copyDocEntry = copyDir.createDocument(entry.getName(), sourceDocEntry);
+                }catch (IOException e) {
+                    ExceptionUtils.getStackTrace(e);
+                    throw new RuntimeException(e);
+                }
             }
         }
         return fileName;

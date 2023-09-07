@@ -10,38 +10,36 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class FileParserFactory {
-    public FileParser createParser(String mimeType){
+    public FileParser createParser(String mimeType, String fileName){
+        log.info(mimeType);
         switch (mimeType){
             case "application/vnd.ms-powerpoint"->{
-               // log.info("ppt");
                 return new PowerPointParser();
             }
             case "application/vnd.ms-excel"->{
-                //log.info("xls");
                 return new ExcelParser();
             }
             case "application/msword"->{
-               // log.info("doc");
                 return new WordParser();
             }
             case "application/vnd.openxmlformats-officedocument.wordprocessingml.document"->{
-                //log.info("docx");
                 return new XWordParser();
             }
             case "application/vnd.openxmlformats-officedocument.presentationml.presentation"->{
-               // log.info("pptx");
                 return new XPowerPointParser();
             }
             case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" ->{
-                //log.info("xlsx");
                 return new XExcelParser();
             }
             case "application/octet-stream" -> {
-                //log.info("한컴");
-                return new HwpParser();
+                if (fileName.equals(".hwp")) {
+                    return new HwpParser();
+                    // return new XHwpParser();
+                }
+                //return new HwpParser();
+                return new XHwpParser();
             }
             default -> {
-                //log.info("에러에러");
                 throw new IllegalArgumentException("Unsupported MIME type: " + mimeType);
             }
         }
