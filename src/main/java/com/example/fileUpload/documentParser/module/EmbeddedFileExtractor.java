@@ -92,7 +92,7 @@ public class EmbeddedFileExtractor {
 
     }
     public static String parseFileName(DocumentEntry compObj){
-        String fileName=null;
+        String fileFormat=null;
         String fileTypeString=null;
         String fileType=null;
 
@@ -111,7 +111,7 @@ public class EmbeddedFileExtractor {
             byte[] fileNameData = new byte[fileNameSize];
             compObjStream.readFully(fileNameData);
 
-            fileName = FileUtil.removeNullCharacters(new String(fileNameData, Charset.forName("euc-kr")));
+            fileFormat = FileUtil.removeNullCharacters(new String(fileNameData, Charset.forName("euc-kr")));
 
 
             //---------상단으로 파일명 확인------------
@@ -150,11 +150,11 @@ public class EmbeddedFileExtractor {
                 fileType = ".docm";
             } else if (fileTypeString.startsWith("PowerPoint.ShowMacroEnabled")) {
                 fileType=".pptm";
-            } else if (fileTypeString.startsWith("Excel.Sheet.12") || fileName.equals("Microsoft Excel Worksheet")) {
+            } else if (fileTypeString.startsWith("Excel.Sheet.12") || fileFormat.equals("Microsoft Excel Worksheet")) {
                 fileType=".xlsx";
-            } else if (fileTypeString.startsWith("Word.Document.12") || fileName.equals("Microsoft Word Document")) {
+            } else if (fileTypeString.startsWith("Word.Document.12") || fileFormat.equals("Microsoft Word Document")) {
                 fileType = ".docx";
-            } else if (fileTypeString.startsWith("PowerPoint.Show.12") || fileName.equals("Microsoft PowerPoint Presentation")) {
+            } else if (fileTypeString.startsWith("PowerPoint.Show.12") || fileFormat.equals("Microsoft PowerPoint Presentation")) {
                 fileType=".pptx";
             } else if (fileTypeString.startsWith("Excel.Sheet.8")) {
                 fileType=".xls";
@@ -167,7 +167,7 @@ public class EmbeddedFileExtractor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        String returnValue = stringBuilder.append(fileName).append(fileType).toString();
+        String returnValue = stringBuilder.append(FileUtil.getRtNum()).append(fileType).toString();
         stringBuilder.setLength(0);
         return returnValue;
     }
