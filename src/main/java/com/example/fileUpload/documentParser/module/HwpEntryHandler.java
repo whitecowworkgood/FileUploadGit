@@ -1,5 +1,6 @@
 package com.example.fileUpload.documentParser.module;
 
+import com.example.fileUpload.unit.ExternalFileMap;
 import com.example.fileUpload.unit.FileType;
 import com.example.fileUpload.unit.FileUtil;
 import com.example.fileUpload.unit.OleEntry;
@@ -17,9 +18,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import static com.example.fileUpload.documentParser.module.EmbeddedFileExtractor.parseFileName;
-import static com.example.fileUpload.unit.FileUtil.getRtNum;
 
 @Slf4j
 public class HwpEntryHandler {
@@ -51,7 +52,11 @@ public class HwpEntryHandler {
                     root.getEntry(entry.getName()).delete();
                 }
 
-                stringBuilder.append(fileOlePath).append(File.separator).append(fileName);
+
+                String uuid = UUID.randomUUID().toString();
+                ExternalFileMap.addFileNameMapping(fileName,uuid);
+
+                stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
                 FileOutputStream fos = new FileOutputStream(stringBuilder.toString());
 
                 stringBuilder.setLength(0);
@@ -76,7 +81,10 @@ public class HwpEntryHandler {
                     root.getEntry(entry.getName()).delete();
                 }
 
-                stringBuilder.append(fileOlePath).append(File.separator).append(fileName);
+                String uuid = UUID.randomUUID().toString();
+                ExternalFileMap.addFileNameMapping(fileName,uuid);
+
+                stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
                 FileOutputStream fos = new FileOutputStream(stringBuilder.toString());
 
                 stringBuilder.setLength(0);
@@ -102,7 +110,10 @@ public class HwpEntryHandler {
                     root.getEntry(entry.getName()).delete();
                 }
 
-                stringBuilder.append(fileOlePath).append(File.separator).append(fileName);
+                String uuid = UUID.randomUUID().toString();
+                ExternalFileMap.addFileNameMapping(fileName,uuid);
+
+                stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
                 FileOutputStream fos = new FileOutputStream(stringBuilder.toString());
 
                 stringBuilder.setLength(0);

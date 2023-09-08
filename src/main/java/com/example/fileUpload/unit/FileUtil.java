@@ -3,6 +3,8 @@ package com.example.fileUpload.unit;
 import com.example.fileUpload.dto.FileDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.util.*;
@@ -57,6 +59,22 @@ public class FileUtil {
         return fileList;
     }
 
+    public static String getFileExtension(MultipartFile file) {
+        String originalFileName = file.getOriginalFilename();
+        if (originalFileName != null && originalFileName.contains(".")) {
+            return "."+StringUtils.getFilenameExtension(originalFileName);
+        } else {
+            return ""; // 확장자가 없을 경우 빈 문자열 반환
+        }
+    }
+    public static String getFileExtension(String originalFileName) {
+        if (originalFileName != null && originalFileName.contains(".")) {
+            return "." + StringUtils.getFilenameExtension(originalFileName);
+        } else {
+            return ""; // 확장자가 없을 경우 빈 문자열 반환
+        }
+    }
+
     public static String removeNullCharacters(String input) {
         StringBuilder output = new StringBuilder();
 
@@ -69,18 +87,6 @@ public class FileUtil {
 
         return output.toString();
     }
-    public static String getRtNum() {
-        int nSeed;
-        int nSeedSize = 62; // 숫자 + 영문
-        String strSrc = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"; // 숫자, 영문
-        StringBuilder strKey = new StringBuilder();
-        for(int i=0; i<12; i++){
-            nSeed = (int)(Math.random() * nSeedSize) + 1;
-            strKey.append(strSrc.charAt(nSeed - 1));
-        }
-        return strKey.toString();
-    }
-
     public static void deleteFolder(File folder) {
         if (folder.isDirectory()) {
             File[] files = folder.listFiles();

@@ -12,7 +12,8 @@ import lombok.Setter;
 public class OleDto {
     private Long id;
     private Long superId;
-    private String fileName;
+    private String UUIDFileName;
+    private String originalFileName;
 
     public OleDto() {
     }

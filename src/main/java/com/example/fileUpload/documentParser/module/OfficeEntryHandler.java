@@ -12,6 +12,7 @@ import org.springframework.boot.autoconfigure.couchbase.CouchbaseProperties;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.UUID;
 
 import static com.example.fileUpload.documentParser.module.EmbeddedFileExtractor.parseFileName;
 
@@ -49,7 +50,7 @@ public class OfficeEntryHandler {
 
                 if(fileName == null){
 
-                    stringBuilder.append(FileUtil.getRtNum()).append(FileType.HWP.getValue());
+                    stringBuilder.append(UUID.randomUUID()).append(FileType.HWP.getValue());
                     fileName = stringBuilder.toString();
                     stringBuilder.setLength(0);
                 }
@@ -79,7 +80,7 @@ public class OfficeEntryHandler {
 
                 if(fileName == null){
                     //fileName = FileUtil.getRtNum()+FileType.HWP.getValue();
-                    stringBuilder.append(FileUtil.getRtNum()).append(FileType.HWP.getValue());
+                    stringBuilder.append(UUID.randomUUID()).append(FileType.HWP.getValue());
                     fileName = stringBuilder.toString();
                     stringBuilder.setLength(0);
                 }
@@ -106,7 +107,7 @@ public class OfficeEntryHandler {
                 fileName = EmbeddedFileExtractor.copyDirectory(directoryEntry, dst, directoryEntry.getName());
 
                 if(fileName == null){
-                    stringBuilder.append(FileUtil.getRtNum()).append(FileType.HWP.getValue());
+                    stringBuilder.append(UUID.randomUUID()).append(FileType.HWP.getValue());
                     fileName = stringBuilder.toString();
                     stringBuilder.setLength(0);
                     //fileName = FileUtil.getRtNum()+FileType.HWP.getValue();
@@ -134,7 +135,7 @@ public class OfficeEntryHandler {
                 fileName = EmbeddedFileExtractor.copyDirectory(directoryEntry, dst, directoryEntry.getName());
 
                 if(fileName == null){
-                    stringBuilder.append(FileUtil.getRtNum()).append(FileType.HWP.getValue());
+                    stringBuilder.append(UUID.randomUUID()).append(FileType.HWP.getValue());
                     //fileName = FileUtil.getRtNum()+FileType.HWP.getValue();
                     fileName = stringBuilder.toString();
 

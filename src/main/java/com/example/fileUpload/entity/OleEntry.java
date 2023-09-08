@@ -21,8 +21,10 @@ public class OleEntry {
     private Long superId;
 
     @Column(nullable = false, length = 1020)
-    private String fileName;
+    private String UUIDFileName;
 
+    @Column(nullable = false, length = 1020)
+    private String originalFileName;
 
     public OleEntry() {
 

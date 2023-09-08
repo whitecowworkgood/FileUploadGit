@@ -10,7 +10,8 @@ import org.springframework.web.multipart.MultipartFile;
 @Builder
 public class FileDto {
     private Long id;
-    private String fileName;
+    private String UUIDFileName;
+    private String originFileName;
     private String fileType;
     private Long fileSize;
     private String fileSavePath;

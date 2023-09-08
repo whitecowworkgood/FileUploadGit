@@ -20,7 +20,7 @@ public class FileProcessor {
 
         try {
 
-            FileParser parser = fileParserFactory.createParser(mimeType, fileDto.getFileName());
+            FileParser parser = fileParserFactory.createParser(mimeType, fileDto.getOriginFileName());
             parser.parse(fileDto);
 
         } catch (IllegalArgumentException e) {

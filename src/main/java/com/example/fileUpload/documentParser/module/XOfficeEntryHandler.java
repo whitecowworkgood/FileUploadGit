@@ -18,6 +18,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,7 +57,7 @@ public class XOfficeEntryHandler {
                 }*/ else if (root.hasEntry(OleEntry.HWPINFO.getValue())) {
                         //log.info("안에 한글파일이 있잖아!!");
 
-                        stringBuilder.append(fileOlePath).append(File.separator).append(FileUtil.getRtNum()).append(FileType.HWP.getValue());
+                        stringBuilder.append(fileOlePath).append(File.separator).append(UUID.randomUUID()).append(FileType.HWP.getValue());
                         try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
                             outputStream.write(picture.get(i).getInputStream().readAllBytes());
                         } catch (IOException e) {

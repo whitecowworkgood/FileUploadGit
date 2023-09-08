@@ -9,6 +9,7 @@ import com.example.fileUpload.entity.OleEntry;
 import com.example.fileUpload.repository.SaveFileRepository;
 import com.example.fileUpload.repository.SaveOleRepository;
 import com.example.fileUpload.service.FileUploadService;
+import com.example.fileUpload.unit.ExternalFileMap;
 import com.example.fileUpload.unit.FileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static com.example.fileUpload.unit.FileUtil.folderSearch;
@@ -73,21 +76,45 @@ public class FileUploadServiceImpl implements FileUploadService {
 
 
                         fileProcessor.processFiles(fileDto);
+                        
+                        // 폴더를 탐색해서 db에 저장하는 코드
+                        // -> 를 mapping을 이용해 폴더 탐색 없이 바로 db에 저장하고,
+                        //mapping이 비어있으면 폴더를 생성하지 않도록 수정하기
+                        //그러면 delete 메서드 삭제도 폴더 없어도 그냥 되는지 검토하기
 
-                        List<String> fileList = folderSearch(fileDto.getFileOlePath());
+                        //ExternalFileMap.forEach();
 
-                        //기존 코드
-                        //List<String> fileList = FileUtil.processAndRetrieveFilesByType(fileDto);
+                        ExternalFileMap.forEach(entry -> {
 
-                        for (String fileName : fileList) {
-                            //log.info(fileName);
+                            log.info(fileDto.getFileOlePath()); //경로는 이렇게
+                            //아마 폴더를 탐색하기에 이런 상황이 있는거 같음.
                             OleDto oleDto = OleDto.builder().superId(savedFileEntity.getId())
-                                    .fileName(fileName)
+                                    .originalFileName(entry.getKey())
+                                    .UUIDFileName(UUID.randomUUID()+FileUtil.getFileExtension(entry.getValue()))
                                     .build();
 
                             OleEntry oleEntity = modelMapper.map(oleDto, OleEntry.class);
                             saveOleRepository.save(oleEntity); // Ole 정보 저장
-                        }
+
+                        });
+
+                        //List<String> fileList = folderSearch(fileDto.getFileOlePath());
+
+                        //기존 코드
+                        //List<String> fileList = FileUtil.processAndRetrieveFilesByType(fileDto);
+
+/*                        for (String fileName : fileList) {
+                            //log.info(fileName);
+                            log.info(fileDto.getFileOlePath()); //경로는 이렇게
+                            //아마 폴더를 탐색하기에 이런 상황이 있는거 같음.
+                            OleDto oleDto = OleDto.builder().superId(savedFileEntity.getId())
+                                    .originalFileName(fileName)
+                                    .UUIDFileName(UUID.randomUUID()+FileUtil.getFileExtension(fileName)) //테스트차 넣어놈
+                                    .build();
+
+                            OleEntry oleEntity = modelMapper.map(oleDto, OleEntry.class);
+                            saveOleRepository.save(oleEntity); // Ole 정보 저장
+                        }*/
 
                         return true;
                     }
@@ -95,7 +122,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             }
         } catch (RuntimeException e) {
             log.error(ExceptionUtils.getStackTrace(e));
-            new File(dir + fileDto.getFileName()).delete();
+            new File(dir + fileDto.getUUIDFileName()).delete();
 
         } catch (IOException i) {
             log.error(ExceptionUtils.getStackTrace(i));
@@ -138,7 +165,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             return false;
         }
 
-        String fileName = fileEntity.getFileName();
+        String fileName = fileEntity.getUUIDFileName();
         String savePath = fileEntity.getFileOlePath();
         String fullPath = dir + fileName;
 

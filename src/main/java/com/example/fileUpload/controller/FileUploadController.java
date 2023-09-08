@@ -6,6 +6,7 @@ import com.example.fileUpload.dto.PostDeleteMessage;
 import com.example.fileUpload.dto.FileDto;
 import com.example.fileUpload.dto.GetMessage;
 import com.example.fileUpload.service.FileUploadService;
+import com.example.fileUpload.unit.FileUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequiredArgsConstructor
@@ -110,13 +112,16 @@ public class FileUploadController {
     @Operation(summary = "파일 업로드", description = "파일을 저장 합니다.")
     @PostMapping("/upload")
     public ResponseEntity<PostDeleteMessage> uploadFile(@RequestParam("file") MultipartFile file){
-        //StringBuilder stringBuilder = new StringBuilder().;
+
+        String uuidName = UUID.randomUUID().toString();
+
         FileDto fileDto = FileDto.builder()
-                .fileName(file.getOriginalFilename())
+                .UUIDFileName(uuidName+FileUtil.getFileExtension(file))
+                .originFileName(file.getOriginalFilename())
                 .fileSize(file.getSize())
                 .fileType(file.getContentType())
-                .fileSavePath(dir + file.getOriginalFilename())
-                .fileOlePath(dir+"ole"+File.separator+file.getOriginalFilename()+ File.separator)
+                .fileSavePath(dir + uuidName+FileUtil.getFileExtension(file))
+                .fileOlePath(dir+"ole"+File.separator+ uuidName + File.separator)
                 .fileData(file)
                 .build();
 

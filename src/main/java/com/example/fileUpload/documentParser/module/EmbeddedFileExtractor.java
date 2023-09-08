@@ -1,5 +1,6 @@
 package com.example.fileUpload.documentParser.module;
 
+import com.example.fileUpload.unit.ExternalFileMap;
 import com.example.fileUpload.unit.FileType;
 import com.example.fileUpload.unit.FileUtil;
 import com.example.fileUpload.unit.OleEntry;
@@ -10,11 +11,11 @@ import org.apache.poi.poifs.filesystem.DirectoryEntry;
 import org.apache.poi.poifs.filesystem.DocumentEntry;
 import org.apache.poi.poifs.filesystem.DocumentInputStream;
 import org.apache.poi.poifs.filesystem.Entry;
-import org.springframework.boot.autoconfigure.couchbase.CouchbaseProperties;
 
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Iterator;
+import java.util.UUID;
 
 
 @Slf4j
@@ -75,7 +76,11 @@ public class EmbeddedFileExtractor {
             byte[] embeddedData = new byte[realSize];
             inputStream.read(embeddedData);
 
-            stringBuilder.append(fileOlePath).append(File.separator).append(fileName);
+
+            String uuid = UUID.randomUUID().toString();
+            ExternalFileMap.addFileNameMapping(fileName,uuid);
+
+            stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
             try (FileOutputStream fileOutputStream = new FileOutputStream(stringBuilder.toString())) {
                 fileOutputStream.write(embeddedData);
             } catch (IOException e) {
@@ -167,7 +172,10 @@ public class EmbeddedFileExtractor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        String returnValue = stringBuilder.append(FileUtil.getRtNum()).append(fileType).toString();
+        String uuid = UUID.randomUUID().toString();
+        ExternalFileMap.addFileNameMapping(fileFormat+fileType,uuid);
+
+        String returnValue = stringBuilder.append(uuid).append(fileType).toString();
         stringBuilder.setLength(0);
         return returnValue;
     }
@@ -177,7 +185,10 @@ public class EmbeddedFileExtractor {
             byte[] oleData = new byte[oleStream.available()];
             oleStream.readFully(oleData);
 
-            stringBuilder.append(fileOlePath).append(File.separator).append(fileName);
+            String uuid = UUID.randomUUID().toString();
+            ExternalFileMap.addFileNameMapping(fileName,uuid);
+
+            stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
 
             try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
                 outputStream.write(oleData);
@@ -197,8 +208,12 @@ public class EmbeddedFileExtractor {
         try(DocumentInputStream oleStream = new DocumentInputStream(packageFileEntry)){
             byte[] oleData = new byte[oleStream.available()];
             oleStream.readFully(oleData);
+            String fileName = "ole_.doc"; //임시로 넣어놓은 코드
 
-            stringBuilder.append(fileOlePath).append(File.separator).append(FileUtil.getRtNum()).append(FileType.DOCX.getValue());
+            String uuid = UUID.randomUUID().toString();
+            ExternalFileMap.addFileNameMapping(fileName,uuid);
+
+            stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileType.DOCX.getValue());
             try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
                 outputStream.write(oleData);
             } catch (IOException e) {

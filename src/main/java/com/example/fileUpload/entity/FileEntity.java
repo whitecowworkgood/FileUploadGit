@@ -16,7 +16,10 @@ public class FileEntity {
     private Long id;
 
     @Column(nullable = false, length = 1020)
-    private String fileName;
+    private String UUIDFileName;
+
+    @Column(nullable = false, length = 1020)
+    private String originFileName;
 
     @Column(nullable = false, length = 1020)
     private String fileSavePath;
