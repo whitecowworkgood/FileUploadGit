@@ -78,7 +78,7 @@ public class EmbeddedFileExtractor {
 
 
             String uuid = UUID.randomUUID().toString();
-            ExternalFileMap.addFileNameMapping(fileName,uuid);
+            ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
             stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
             try (FileOutputStream fileOutputStream = new FileOutputStream(stringBuilder.toString())) {
@@ -172,10 +172,10 @@ public class EmbeddedFileExtractor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        String uuid = UUID.randomUUID().toString();
-        ExternalFileMap.addFileNameMapping(fileFormat+fileType,uuid);
+        //String uuid = UUID.randomUUID().toString();
+        //ExternalFileMap.addFileNameMapping(fileFormat+fileType,uuid+fileType);
 
-        String returnValue = stringBuilder.append(uuid).append(fileType).toString();
+        String returnValue = stringBuilder.append(fileFormat).append(fileType).toString();
         stringBuilder.setLength(0);
         return returnValue;
     }
@@ -186,7 +186,7 @@ public class EmbeddedFileExtractor {
             oleStream.readFully(oleData);
 
             String uuid = UUID.randomUUID().toString();
-            ExternalFileMap.addFileNameMapping(fileName,uuid);
+            ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
             stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
 
@@ -211,7 +211,7 @@ public class EmbeddedFileExtractor {
             String fileName = "ole_.doc"; //임시로 넣어놓은 코드
 
             String uuid = UUID.randomUUID().toString();
-            ExternalFileMap.addFileNameMapping(fileName,uuid);
+            ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
             stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileType.DOCX.getValue());
             try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {

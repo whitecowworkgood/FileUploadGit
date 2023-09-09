@@ -54,7 +54,7 @@ public class HwpEntryHandler {
 
 
                 String uuid = UUID.randomUUID().toString();
-                ExternalFileMap.addFileNameMapping(fileName,uuid);
+                ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
                 stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
                 FileOutputStream fos = new FileOutputStream(stringBuilder.toString());
@@ -82,7 +82,7 @@ public class HwpEntryHandler {
                 }
 
                 String uuid = UUID.randomUUID().toString();
-                ExternalFileMap.addFileNameMapping(fileName,uuid);
+                ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
                 stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
                 FileOutputStream fos = new FileOutputStream(stringBuilder.toString());
@@ -111,7 +111,7 @@ public class HwpEntryHandler {
                 }
 
                 String uuid = UUID.randomUUID().toString();
-                ExternalFileMap.addFileNameMapping(fileName,uuid);
+                ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
                 stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
                 FileOutputStream fos = new FileOutputStream(stringBuilder.toString());

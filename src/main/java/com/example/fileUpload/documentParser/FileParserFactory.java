@@ -32,12 +32,12 @@ public class FileParserFactory {
                 return new XExcelParser();
             }
             case "application/octet-stream" -> {
-                if (fileName.equals(".hwp")) {
-                    return new HwpParser();
+                if (fileName.equals(".hwpx")) {
+                    return new XHwpParser();
                     // return new XHwpParser();
                 }
                 //return new HwpParser();
-                return new XHwpParser();
+                return new HwpParser();
             }
             default -> {
                 throw new IllegalArgumentException("Unsupported MIME type: " + mimeType);

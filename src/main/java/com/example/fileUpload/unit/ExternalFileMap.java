@@ -22,5 +22,8 @@ public class ExternalFileMap {
     public static void forEach(Consumer<? super Map.Entry<String, String>> action) {
         fileNameMap.entrySet().forEach(action);
     }
+    public static void resetMap(){
+        fileNameMap.clear();
+    }
 
 }

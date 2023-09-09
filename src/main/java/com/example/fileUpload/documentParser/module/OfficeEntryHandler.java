@@ -1,5 +1,6 @@
 package com.example.fileUpload.documentParser.module;
 
+import com.example.fileUpload.unit.ExternalFileMap;
 import com.example.fileUpload.unit.FileType;
 import com.example.fileUpload.unit.FileUtil;
 import com.example.fileUpload.unit.OleEntry;
@@ -49,13 +50,17 @@ public class OfficeEntryHandler {
                 fileName = EmbeddedFileExtractor.copyDirectory(directoryEntry, dst, directoryEntry.getName());
 
                 if(fileName == null){
-
-                    stringBuilder.append(UUID.randomUUID()).append(FileType.HWP.getValue());
+                    stringBuilder.append("HWP_Document").append(FileType.HWP.getValue());
                     fileName = stringBuilder.toString();
                     stringBuilder.setLength(0);
                 }
 
-                stringBuilder.append(fileOlePath).append(fileName);
+                String randomName = UUID.randomUUID().toString();
+                ExternalFileMap.addFileNameMapping(fileName, randomName+FileType.HWP.getValue());
+
+                stringBuilder.append(fileOlePath).append(randomName).append(FileType.HWP.getValue());
+
+
                 // 복사본 저장
                 try(FileOutputStream fos = new FileOutputStream(stringBuilder.toString())){
                     stringBuilder.setLength(0);
@@ -79,13 +84,16 @@ public class OfficeEntryHandler {
                 fileName = EmbeddedFileExtractor.copyDirectory(directoryEntry, dst, directoryEntry.getName());
 
                 if(fileName == null){
-                    //fileName = FileUtil.getRtNum()+FileType.HWP.getValue();
-                    stringBuilder.append(UUID.randomUUID()).append(FileType.HWP.getValue());
+                    stringBuilder.append("HWP_Document").append(FileType.HWP.getValue());
                     fileName = stringBuilder.toString();
                     stringBuilder.setLength(0);
                 }
 
-                stringBuilder.append(fileOlePath).append(fileName);
+                String randomName = UUID.randomUUID().toString();
+                ExternalFileMap.addFileNameMapping(fileName, randomName+FileType.DOC.getValue());
+
+                stringBuilder.append(fileOlePath).append(randomName).append(FileType.DOC.getValue());
+
                 // 복사본 저장
                 try(FileOutputStream fos = new FileOutputStream(stringBuilder.toString())){
                     stringBuilder.setLength(0);
@@ -103,17 +111,19 @@ public class OfficeEntryHandler {
 
             try(POIFSFileSystem poifs = new POIFSFileSystem()){
                 DirectoryEntry dst = poifs.getRoot();
-
                 fileName = EmbeddedFileExtractor.copyDirectory(directoryEntry, dst, directoryEntry.getName());
 
                 if(fileName == null){
-                    stringBuilder.append(UUID.randomUUID()).append(FileType.HWP.getValue());
+                    stringBuilder.append("HWP_Document").append(FileType.HWP.getValue());
                     fileName = stringBuilder.toString();
                     stringBuilder.setLength(0);
-                    //fileName = FileUtil.getRtNum()+FileType.HWP.getValue();
                 }
 
-                stringBuilder.append(fileOlePath).append(fileName);
+                String randomName = UUID.randomUUID().toString();
+                ExternalFileMap.addFileNameMapping(fileName, randomName+FileType.PPT.getValue());
+
+                stringBuilder.append(fileOlePath).append(randomName).append(FileType.PPT.getValue());
+
                 // 복사본 저장
                 try(FileOutputStream fos = new FileOutputStream(stringBuilder.toString())){
                     stringBuilder.setLength(0);
@@ -135,14 +145,16 @@ public class OfficeEntryHandler {
                 fileName = EmbeddedFileExtractor.copyDirectory(directoryEntry, dst, directoryEntry.getName());
 
                 if(fileName == null){
-                    stringBuilder.append(UUID.randomUUID()).append(FileType.HWP.getValue());
-                    //fileName = FileUtil.getRtNum()+FileType.HWP.getValue();
+                    stringBuilder.append("HWP_Document").append(FileType.HWP.getValue());
                     fileName = stringBuilder.toString();
-
                     stringBuilder.setLength(0);
                 }
 
-                stringBuilder.append(fileOlePath).append(fileName);
+                String randomName = UUID.randomUUID().toString();
+                ExternalFileMap.addFileNameMapping(fileName, randomName+FileType.XLS.getValue());
+
+                stringBuilder.append(fileOlePath).append(randomName).append(FileType.XLS.getValue());
+
                 // 복사본 저장
                 try(FileOutputStream fos = new FileOutputStream(stringBuilder.toString())){
                     stringBuilder.setLength(0);

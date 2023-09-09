@@ -1,9 +1,6 @@
 package com.example.fileUpload.documentParser.module;
 
-import com.example.fileUpload.unit.FileType;
-import com.example.fileUpload.unit.FileUtil;
-import com.example.fileUpload.unit.MimeType;
-import com.example.fileUpload.unit.OleEntry;
+import com.example.fileUpload.unit.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -57,7 +54,15 @@ public class XOfficeEntryHandler {
                 }*/ else if (root.hasEntry(OleEntry.HWPINFO.getValue())) {
                         //log.info("안에 한글파일이 있잖아!!");
 
-                        stringBuilder.append(fileOlePath).append(File.separator).append(UUID.randomUUID()).append(FileType.HWP.getValue());
+                        stringBuilder.append("HWP_Document").append(FileType.HWP.getValue());
+                        String fileName = stringBuilder.toString();
+
+                        String uuid = UUID.randomUUID()+FileUtil.getFileExtension(fileName);
+                        stringBuilder.setLength(0);
+
+                        ExternalFileMap.addFileNameMapping(fileName, uuid);
+
+                        stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
                         try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
                             outputStream.write(picture.get(i).getInputStream().readAllBytes());
                         } catch (IOException e) {
@@ -68,8 +73,11 @@ public class XOfficeEntryHandler {
                     }else if (root.hasEntry(OleEntry.WORD.getValue())) {
                         //log.info("안에 한글파일이 있잖아!!");
                         String fileName = parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
+                        String uuid = UUID.randomUUID()+FileUtil.getFileExtension(fileName);
 
-                        stringBuilder.append(fileOlePath).append(File.separator).append(fileName);
+                        ExternalFileMap.addFileNameMapping(fileName, uuid);
+
+                        stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
                         try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
                             outputStream.write(picture.get(i).getInputStream().readAllBytes());
                         } catch (IOException e) {
@@ -80,8 +88,11 @@ public class XOfficeEntryHandler {
                     }else if (root.hasEntry(OleEntry.PPT.getValue())) {
                         //log.info("안에 한글파일이 있잖아!!");
                         String fileName = parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
+                        String uuid = UUID.randomUUID()+FileUtil.getFileExtension(fileName);
 
-                        stringBuilder.append(fileOlePath).append(File.separator).append(fileName);
+                        ExternalFileMap.addFileNameMapping(fileName, uuid);
+
+                        stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
                         try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
                             outputStream.write(picture.get(i).getInputStream().readAllBytes());
                         } catch (IOException e) {
@@ -92,8 +103,11 @@ public class XOfficeEntryHandler {
                     } else if (root.hasEntry(OleEntry.XLS.getValue())) {
                         //log.info("안에 한글파일이 있잖아!!");
                         String fileName = parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
+                        String uuid = UUID.randomUUID()+FileUtil.getFileExtension(fileName);
 
-                        stringBuilder.append(fileOlePath).append(File.separator).append(fileName);
+                        ExternalFileMap.addFileNameMapping(fileName, uuid);
+
+                        stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
                         try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
                             outputStream.write(picture.get(i).getInputStream().readAllBytes());
                         } catch (IOException e) {
@@ -113,7 +127,12 @@ public class XOfficeEntryHandler {
             if(matcher.find()){
                 String fileNameAndExtension = matcher.group(0);
 
-                stringBuilder.append(fileOlePath).append(File.separator).append(fileNameAndExtension);
+                String uuid = UUID.randomUUID()+FileUtil.getFileExtension(fileNameAndExtension);
+
+                ExternalFileMap.addFileNameMapping(fileNameAndExtension, uuid);
+
+                stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
+
                 try (FileOutputStream fileOutputStream = new FileOutputStream(stringBuilder.toString())) {
                     fileOutputStream.write(picture.get(i).getInputStream().readAllBytes());
                 } catch (IOException e) {

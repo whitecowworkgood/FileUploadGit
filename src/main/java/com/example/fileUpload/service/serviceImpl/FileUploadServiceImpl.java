@@ -90,13 +90,14 @@ public class FileUploadServiceImpl implements FileUploadService {
                             //아마 폴더를 탐색하기에 이런 상황이 있는거 같음.
                             OleDto oleDto = OleDto.builder().superId(savedFileEntity.getId())
                                     .originalFileName(entry.getKey())
-                                    .UUIDFileName(UUID.randomUUID()+FileUtil.getFileExtension(entry.getValue()))
+                                    .UUIDFileName(entry.getValue())
                                     .build();
 
                             OleEntry oleEntity = modelMapper.map(oleDto, OleEntry.class);
                             saveOleRepository.save(oleEntity); // Ole 정보 저장
 
                         });
+                        ExternalFileMap.resetMap();
 
                         //List<String> fileList = folderSearch(fileDto.getFileOlePath());
 
