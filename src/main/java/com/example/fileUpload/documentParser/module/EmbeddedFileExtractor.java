@@ -17,6 +17,8 @@ import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.UUID;
 
+import static com.example.fileUpload.unit.ExternalFileMap.addUniqueFileNameMapping;
+
 
 @Slf4j
 public class EmbeddedFileExtractor {
@@ -77,10 +79,11 @@ public class EmbeddedFileExtractor {
             inputStream.read(embeddedData);
 
 
-            String uuid = UUID.randomUUID().toString();
-            ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
+            String uuid = addUniqueFileNameMapping(fileName);
 
-            stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
+            //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
+
+            stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
             try (FileOutputStream fileOutputStream = new FileOutputStream(stringBuilder.toString())) {
                 fileOutputStream.write(embeddedData);
             } catch (IOException e) {
@@ -185,10 +188,11 @@ public class EmbeddedFileExtractor {
             byte[] oleData = new byte[oleStream.available()];
             oleStream.readFully(oleData);
 
-            String uuid = UUID.randomUUID().toString();
-            ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
+            String uuid = addUniqueFileNameMapping(fileName);
 
-            stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
+            //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
+
+            stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
 
             try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
                 outputStream.write(oleData);
@@ -210,10 +214,16 @@ public class EmbeddedFileExtractor {
             oleStream.readFully(oleData);
             String fileName = "ole_.doc"; //임시로 넣어놓은 코드
 
-            String uuid = UUID.randomUUID().toString();
-            ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
+           // String uuid = UUID.randomUUID().toString();
+           //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
-            stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileType.DOCX.getValue());
+            String uuid = addUniqueFileNameMapping(fileName);
+
+            //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
+
+            stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
+
+            //stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileType.DOCX.getValue());
             try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
                 outputStream.write(oleData);
             } catch (IOException e) {

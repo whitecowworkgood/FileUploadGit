@@ -20,6 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.example.fileUpload.documentParser.module.EmbeddedFileExtractor.parseFileName;
+import static com.example.fileUpload.unit.ExternalFileMap.addUniqueFileNameMapping;
 
 @Slf4j
 public class XOfficeEntryHandler {
@@ -57,10 +58,9 @@ public class XOfficeEntryHandler {
                         stringBuilder.append("HWP_Document").append(FileType.HWP.getValue());
                         String fileName = stringBuilder.toString();
 
-                        String uuid = UUID.randomUUID()+FileUtil.getFileExtension(fileName);
-                        stringBuilder.setLength(0);
+                        String uuid = addUniqueFileNameMapping(fileName);
 
-                        ExternalFileMap.addFileNameMapping(fileName, uuid);
+                        //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
                         stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
                         try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
@@ -73,9 +73,9 @@ public class XOfficeEntryHandler {
                     }else if (root.hasEntry(OleEntry.WORD.getValue())) {
                         //log.info("안에 한글파일이 있잖아!!");
                         String fileName = parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
-                        String uuid = UUID.randomUUID()+FileUtil.getFileExtension(fileName);
+                        String uuid = addUniqueFileNameMapping(fileName);
 
-                        ExternalFileMap.addFileNameMapping(fileName, uuid);
+                        //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
                         stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
                         try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
@@ -88,9 +88,9 @@ public class XOfficeEntryHandler {
                     }else if (root.hasEntry(OleEntry.PPT.getValue())) {
                         //log.info("안에 한글파일이 있잖아!!");
                         String fileName = parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
-                        String uuid = UUID.randomUUID()+FileUtil.getFileExtension(fileName);
+                        String uuid = addUniqueFileNameMapping(fileName);
 
-                        ExternalFileMap.addFileNameMapping(fileName, uuid);
+                        //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
                         stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
                         try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
@@ -103,9 +103,9 @@ public class XOfficeEntryHandler {
                     } else if (root.hasEntry(OleEntry.XLS.getValue())) {
                         //log.info("안에 한글파일이 있잖아!!");
                         String fileName = parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
-                        String uuid = UUID.randomUUID()+FileUtil.getFileExtension(fileName);
+                        String uuid = addUniqueFileNameMapping(fileName);
 
-                        ExternalFileMap.addFileNameMapping(fileName, uuid);
+                        //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
                         stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
                         try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
@@ -125,11 +125,11 @@ public class XOfficeEntryHandler {
             Matcher matcher = DiractoryPattern.matcher(picture.get(i).getPartName().getName());
 
             if(matcher.find()){
-                String fileNameAndExtension = matcher.group(0);
+                String fileName = matcher.group(0);
 
-                String uuid = UUID.randomUUID()+FileUtil.getFileExtension(fileNameAndExtension);
+                String uuid = UUID.randomUUID()+FileUtil.getFileExtension(fileName);
 
-                ExternalFileMap.addFileNameMapping(fileNameAndExtension, uuid);
+                ExternalFileMap.addFileNameMapping(fileName,uuid);
 
                 stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
 

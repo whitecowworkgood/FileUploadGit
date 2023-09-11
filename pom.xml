@@ -58,6 +58,12 @@
             <version>2.0.3</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis</artifactId>
+            <version>3.5.6</version> <!-- 사용하려는 MyBatis 버전에 따라 버전을 지정하세요. -->
+        </dependency>
+
 <!--
         <dependency>
             <groupId>org.apache.poi</groupId>
@@ -109,6 +115,11 @@
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-scratchpad</artifactId>
             <version>5.2.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.mybatis</groupId>
+            <artifactId>mybatis-spring</artifactId>
+            <version>3.0.2</version>
         </dependency>
     </dependencies>
 

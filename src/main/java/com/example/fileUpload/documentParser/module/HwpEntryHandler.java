@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.UUID;
 
 import static com.example.fileUpload.documentParser.module.EmbeddedFileExtractor.parseFileName;
+import static com.example.fileUpload.unit.ExternalFileMap.addUniqueFileNameMapping;
 
 @Slf4j
 public class HwpEntryHandler {
@@ -53,8 +54,14 @@ public class HwpEntryHandler {
                 }
 
 
-                String uuid = UUID.randomUUID().toString();
+                /*String uuid = UUID.randomUUID().toString();
                 ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
+
+                stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));*/
+
+                String uuid = addUniqueFileNameMapping(fileName);
+
+                //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
                 stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
                 FileOutputStream fos = new FileOutputStream(stringBuilder.toString());
@@ -81,8 +88,14 @@ public class HwpEntryHandler {
                     root.getEntry(entry.getName()).delete();
                 }
 
-                String uuid = UUID.randomUUID().toString();
+               /* String uuid = UUID.randomUUID().toString();
                 ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
+
+                stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName))*/;
+
+                String uuid = addUniqueFileNameMapping(fileName);
+
+                //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
                 stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
                 FileOutputStream fos = new FileOutputStream(stringBuilder.toString());
@@ -110,8 +123,14 @@ public class HwpEntryHandler {
                     root.getEntry(entry.getName()).delete();
                 }
 
-                String uuid = UUID.randomUUID().toString();
+                /*String uuid = UUID.randomUUID().toString();
                 ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
+
+                stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));*/
+
+                String uuid = addUniqueFileNameMapping(fileName);
+
+                //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
                 stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
                 FileOutputStream fos = new FileOutputStream(stringBuilder.toString());

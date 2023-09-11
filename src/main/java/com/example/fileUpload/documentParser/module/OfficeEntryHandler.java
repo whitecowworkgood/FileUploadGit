@@ -16,6 +16,7 @@ import java.io.IOException;
 import java.util.UUID;
 
 import static com.example.fileUpload.documentParser.module.EmbeddedFileExtractor.parseFileName;
+import static com.example.fileUpload.unit.ExternalFileMap.addUniqueFileNameMapping;
 
 @Slf4j
 public class OfficeEntryHandler {
@@ -55,10 +56,16 @@ public class OfficeEntryHandler {
                     stringBuilder.setLength(0);
                 }
 
-                String randomName = UUID.randomUUID().toString();
-                ExternalFileMap.addFileNameMapping(fileName, randomName+FileType.HWP.getValue());
+                /*String randomName = UUID.randomUUID().toString();
+                ExternalFileMap.addFileNameMapping(fileName, randomName+FileType.HWP.getValue());*/
 
-                stringBuilder.append(fileOlePath).append(randomName).append(FileType.HWP.getValue());
+                String uuid = addUniqueFileNameMapping(fileName);
+
+                //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
+
+                stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
+
+                //stringBuilder.append(fileOlePath).append(randomName).append(FileType.HWP.getValue());
 
 
                 // 복사본 저장
@@ -89,10 +96,16 @@ public class OfficeEntryHandler {
                     stringBuilder.setLength(0);
                 }
 
-                String randomName = UUID.randomUUID().toString();
+                /*String randomName = UUID.randomUUID().toString();
                 ExternalFileMap.addFileNameMapping(fileName, randomName+FileType.DOC.getValue());
 
-                stringBuilder.append(fileOlePath).append(randomName).append(FileType.DOC.getValue());
+                stringBuilder.append(fileOlePath).append(randomName).append(FileType.DOC.getValue());*/
+
+                String uuid = addUniqueFileNameMapping(fileName);
+
+                //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
+
+                stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
 
                 // 복사본 저장
                 try(FileOutputStream fos = new FileOutputStream(stringBuilder.toString())){
@@ -119,10 +132,16 @@ public class OfficeEntryHandler {
                     stringBuilder.setLength(0);
                 }
 
-                String randomName = UUID.randomUUID().toString();
+                /*String randomName = UUID.randomUUID().toString();
                 ExternalFileMap.addFileNameMapping(fileName, randomName+FileType.PPT.getValue());
 
-                stringBuilder.append(fileOlePath).append(randomName).append(FileType.PPT.getValue());
+                stringBuilder.append(fileOlePath).append(randomName).append(FileType.PPT.getValue());*/
+
+                String uuid = addUniqueFileNameMapping(fileName);
+
+                //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
+
+                stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
 
                 // 복사본 저장
                 try(FileOutputStream fos = new FileOutputStream(stringBuilder.toString())){
@@ -150,10 +169,16 @@ public class OfficeEntryHandler {
                     stringBuilder.setLength(0);
                 }
 
-                String randomName = UUID.randomUUID().toString();
+                /*String randomName = UUID.randomUUID().toString();
                 ExternalFileMap.addFileNameMapping(fileName, randomName+FileType.XLS.getValue());
 
-                stringBuilder.append(fileOlePath).append(randomName).append(FileType.XLS.getValue());
+                stringBuilder.append(fileOlePath).append(randomName).append(FileType.XLS.getValue());*/
+
+                String uuid = addUniqueFileNameMapping(fileName);
+
+                //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
+
+                stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
 
                 // 복사본 저장
                 try(FileOutputStream fos = new FileOutputStream(stringBuilder.toString())){

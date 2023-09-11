@@ -37,7 +37,8 @@ import static com.example.fileUpload.unit.FileUtil.folderSearch;
 @Transactional
 public class FileUploadServiceImpl implements FileUploadService {
     private final SaveFileRepository saveFileRepository;
-    private final SaveOleRepository saveOleRepository;
+    private final SaveOleRepository saveOleRepository; //jpa
+    //private final OleDao oleDao; //mybatis
     private final ModelMapper modelMapper;
     private final FileProcessor fileProcessor;
 
@@ -123,7 +124,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             }
         } catch (RuntimeException e) {
             log.error(ExceptionUtils.getStackTrace(e));
-            new File(dir + fileDto.getUUIDFileName()).delete();
+            new File(dir+File.separator + fileDto.getUUIDFileName()).delete();
 
         } catch (IOException i) {
             log.error(ExceptionUtils.getStackTrace(i));
@@ -135,6 +136,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     public List<FileDto> printFileAll() {
 
         List<FileEntity> fileEntities = saveFileRepository.findAll();
+        //List<OleDto> fileEntities = oleDao.printAll();
 
         return fileEntities.stream()
                 .map(fileEntity -> modelMapper.map(fileEntity, FileDto.class))
@@ -152,6 +154,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     @Override
     public List<OleDto> printOleAll(Long id) {
         List<OleEntry> oleEntries = saveOleRepository.findBySuperId(id);
+        //List<OleDto> oleEntries = oleDao.selectById(id);
 
         return oleEntries.stream()
                 .map(oleEntry -> modelMapper.map(oleEntry, OleDto.class))
@@ -168,7 +171,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
         String fileName = fileEntity.getUUIDFileName();
         String savePath = fileEntity.getFileOlePath();
-        String fullPath = dir + fileName;
+        String fullPath = dir+File.separator + fileName;
 
         if (!FileUtil.isPathValidForStorage(dir, fullPath)) {
             return false;

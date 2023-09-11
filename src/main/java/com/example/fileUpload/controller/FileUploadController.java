@@ -120,8 +120,8 @@ public class FileUploadController {
                 .originFileName(file.getOriginalFilename())
                 .fileSize(file.getSize())
                 .fileType(file.getContentType())
-                .fileSavePath(dir + uuidName+FileUtil.getFileExtension(file))
-                .fileOlePath(dir+"ole"+File.separator+ uuidName + File.separator)
+                .fileSavePath(dir+File.separator+uuidName+FileUtil.getFileExtension(file))
+                .fileOlePath(dir+File.separator+"ole"+File.separator+ uuidName + File.separator)
                 .fileData(file)
                 .build();
 
