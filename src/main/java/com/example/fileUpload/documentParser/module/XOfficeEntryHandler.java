@@ -1,8 +1,7 @@
 package com.example.fileUpload.documentParser.module;
 
-import com.example.fileUpload.unit.*;
+import com.example.fileUpload.util.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.poifs.filesystem.DirectoryEntry;
@@ -20,7 +19,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import static com.example.fileUpload.documentParser.module.EmbeddedFileExtractor.parseFileName;
-import static com.example.fileUpload.unit.ExternalFileMap.addUniqueFileNameMapping;
+import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
 
 @Slf4j
 public class XOfficeEntryHandler {
@@ -51,31 +50,28 @@ public class XOfficeEntryHandler {
                         ExceptionUtils.getStackTrace(e);
                         log.error("파일 저장 실패");
                     }
-                //docx파일과 같이 03이후 오피스에 한컴을 넣을 경우
+
                 }*/ else if (root.hasEntry(OleEntry.HWPINFO.getValue())) {
-                        //log.info("안에 한글파일이 있잖아!!");
 
                         stringBuilder.append("HWP_Document").append(FileType.HWP.getValue());
                         String fileName = stringBuilder.toString();
+                        stringBuilder.setLength(0);
 
                         String uuid = addUniqueFileNameMapping(fileName);
-
-                        //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
                         stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
                         try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
+                            log.info("try안에 들어옴");
                             outputStream.write(picture.get(i).getInputStream().readAllBytes());
                         } catch (IOException e) {
                             ExceptionUtils.getStackTrace(e);
-                            log.error("파일 저장 실패");
+                            log.error("한컴 파일 저장 실패");
                         }
                         stringBuilder.setLength(0);
                     }else if (root.hasEntry(OleEntry.WORD.getValue())) {
-                        //log.info("안에 한글파일이 있잖아!!");
+
                         String fileName = parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
                         String uuid = addUniqueFileNameMapping(fileName);
-
-                        //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
                         stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
                         try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
@@ -86,11 +82,9 @@ public class XOfficeEntryHandler {
                         }
                         stringBuilder.setLength(0);
                     }else if (root.hasEntry(OleEntry.PPT.getValue())) {
-                        //log.info("안에 한글파일이 있잖아!!");
+
                         String fileName = parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
                         String uuid = addUniqueFileNameMapping(fileName);
-
-                        //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
                         stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
                         try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
@@ -101,11 +95,9 @@ public class XOfficeEntryHandler {
                         }
                         stringBuilder.setLength(0);
                     } else if (root.hasEntry(OleEntry.XLS.getValue())) {
-                        //log.info("안에 한글파일이 있잖아!!");
+
                         String fileName = parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
                         String uuid = addUniqueFileNameMapping(fileName);
-
-                        //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
                         stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
                         try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {

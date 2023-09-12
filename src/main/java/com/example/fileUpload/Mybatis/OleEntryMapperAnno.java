@@ -1,32 +1,36 @@
-/*
 package com.example.fileUpload.Mybatis;
 
-import com.example.fileUpload.dto.OleDto;
-import org.apache.ibatis.annotations.Select;
+import com.example.fileUpload.model.OleDto;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
 public interface OleEntryMapperAnno {
 
     @Select("SELECT * FROM ole_entry WHERE super_id = #{id}")
-*/
-/*    @Results({
+    @Results({
             @Result(column ="id", property="id"),
             @Result(column ="uuidfile_name", property="UUIDFileName"),
             @Result(column ="original_file_name", property="originalFileName"),
             @Result(column ="super_id", property="superId")
-    })*//*
-
+    })
     List<OleDto> selectById(Long id);
 
     @Select("SELECT * FROM ole_entry")
-    */
-/*@Results({
+    /*@Results({
             @Result(column ="id", property="id"),
             @Result(column ="uuidfile_name", property="UUIDFileName"),
             @Result(column ="original_file_name", property="originalFileName"),
             @Result(column ="super_id", property="superId")
-    })*//*
+    })*/
+    List<OleDto> findAllEntry();
 
-    List<OleDto> findAll();
-}*/
+    @Insert("INSERT INTO ole_entry (uuidfile_name, original_file_name, super_id) " +
+            "VALUES (#{UUIDFileName}, #{originalFileName}, #{superId})")
+    boolean insertOleEntry(OleDto oleDto);
+
+
+
+    @Delete("DELETE FROM ole_entry where super_id=#{id}")
+    boolean deleteOleEntry(Long id);
+}

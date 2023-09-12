@@ -2,7 +2,7 @@ package com.example.fileUpload.documentParser.parsers;
 
 import com.example.fileUpload.documentParser.module.OfficeEntryHandler;
 import com.example.fileUpload.documentParser.parsers.abstracts.FileParser;
-import com.example.fileUpload.dto.FileDto;
+import com.example.fileUpload.model.FileDto;
 import lombok.NoArgsConstructor;
 import org.apache.poi.hslf.usermodel.HSLFObjectData;
 import org.apache.poi.hslf.usermodel.HSLFSlideShow;

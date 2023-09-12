@@ -2,7 +2,7 @@ package com.example.fileUpload.documentParser.parsers;
 
 import com.example.fileUpload.documentParser.module.HwpEntryHandler;
 import com.example.fileUpload.documentParser.parsers.abstracts.FileParser;
-import com.example.fileUpload.dto.FileDto;
+import com.example.fileUpload.model.FileDto;
 import kr.dogfoot.hwplib.object.bindata.BinData;
 import kr.dogfoot.hwplib.object.bindata.EmbeddedBinaryData;
 import kr.dogfoot.hwplib.reader.HWPReader;

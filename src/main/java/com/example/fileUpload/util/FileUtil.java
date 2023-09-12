@@ -1,6 +1,6 @@
-package com.example.fileUpload.unit;
+package com.example.fileUpload.util;
 
-import com.example.fileUpload.dto.FileDto;
+import com.example.fileUpload.model.FileDto;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.util.StringUtils;

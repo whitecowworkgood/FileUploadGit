@@ -1,7 +1,7 @@
 package com.example.fileUpload.documentParser.parsers;
 
 import com.example.fileUpload.documentParser.parsers.abstracts.FileParser;
-import com.example.fileUpload.dto.FileDto;
+import com.example.fileUpload.model.FileDto;
 import lombok.extern.slf4j.Slf4j;
 
 import java.io.FileInputStream;

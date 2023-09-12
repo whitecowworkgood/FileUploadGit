@@ -1,16 +1,14 @@
 package com.example.fileUpload.service.serviceImpl;
 
-
 import com.example.fileUpload.documentParser.FileProcessor;
-import com.example.fileUpload.dto.FileDto;
-import com.example.fileUpload.dto.OleDto;
-import com.example.fileUpload.entity.FileEntity;
-import com.example.fileUpload.entity.OleEntry;
-import com.example.fileUpload.repository.SaveFileRepository;
-import com.example.fileUpload.repository.SaveOleRepository;
+import com.example.fileUpload.model.FileDto;
+import com.example.fileUpload.model.OleDto;
+import com.example.fileUpload.model.FileVO;
+import com.example.fileUpload.repository.FileDao;
+import com.example.fileUpload.repository.OleDao;
 import com.example.fileUpload.service.FileUploadService;
-import com.example.fileUpload.unit.ExternalFileMap;
-import com.example.fileUpload.unit.FileUtil;
+import com.example.fileUpload.util.ExternalFileMap;
+import com.example.fileUpload.util.FileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -24,22 +22,16 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import static com.example.fileUpload.unit.FileUtil.folderSearch;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 @Transactional
 public class FileUploadServiceImpl implements FileUploadService {
-    private final SaveFileRepository saveFileRepository;
-    private final SaveOleRepository saveOleRepository; //jpa
-    //private final OleDao oleDao; //mybatis
-    private final ModelMapper modelMapper;
+
+    private final FileDao fileDao; //mybatis
+    private final OleDao oleDao; //mybatis
     private final FileProcessor fileProcessor;
 
     @Value("${Save-Directory}")
@@ -48,7 +40,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Override
     @Transactional
-    public boolean fileUpload(FileDto fileDto) {
+    public synchronized boolean fileUpload(FileDto fileDto) {
 
         try {
             if (!fileDto.getFileData().isEmpty()) {
@@ -58,13 +50,9 @@ public class FileUploadServiceImpl implements FileUploadService {
                     if (FileUtil.validateUploadedFileMimeType(fileDto)) {
 
                         fileDto.getFileData().transferTo(new File(fileDto.getFileSavePath()));
-                        FileEntity fileEntity = modelMapper.map(fileDto, FileEntity.class);
 
+                        boolean fileResult = fileDao.saveFile(fileDto);
 
-                        FileEntity savedFileEntity =saveFileRepository.save(fileEntity);
-
-                        //File Folder = new File(fileDto.getFileOlePath());
-                        //;
                         if(!Files.exists(Path.of(fileDto.getFileOlePath()))){
                             try{
                                 //Folder.mkdir(); //폴더 생성합니다.
@@ -77,48 +65,21 @@ public class FileUploadServiceImpl implements FileUploadService {
 
 
                         fileProcessor.processFiles(fileDto);
-                        
-                        // 폴더를 탐색해서 db에 저장하는 코드
-                        // -> 를 mapping을 이용해 폴더 탐색 없이 바로 db에 저장하고,
-                        //mapping이 비어있으면 폴더를 생성하지 않도록 수정하기
-                        //그러면 delete 메서드 삭제도 폴더 없어도 그냥 되는지 검토하기
-
-                        //ExternalFileMap.forEach();
-
                         ExternalFileMap.forEach(entry -> {
 
-                            log.info(fileDto.getFileOlePath()); //경로는 이렇게
-                            //아마 폴더를 탐색하기에 이런 상황이 있는거 같음.
-                            OleDto oleDto = OleDto.builder().superId(savedFileEntity.getId())
+                            OleDto oleDto = OleDto.builder().superId(fileDto.getId())
                                     .originalFileName(entry.getKey())
                                     .UUIDFileName(entry.getValue())
                                     .build();
 
-                            OleEntry oleEntity = modelMapper.map(oleDto, OleEntry.class);
-                            saveOleRepository.save(oleEntity); // Ole 정보 저장
+
+
+                            oleDao.insertOle(oleDto);
 
                         });
                         ExternalFileMap.resetMap();
-
-                        //List<String> fileList = folderSearch(fileDto.getFileOlePath());
-
-                        //기존 코드
-                        //List<String> fileList = FileUtil.processAndRetrieveFilesByType(fileDto);
-
-/*                        for (String fileName : fileList) {
-                            //log.info(fileName);
-                            log.info(fileDto.getFileOlePath()); //경로는 이렇게
-                            //아마 폴더를 탐색하기에 이런 상황이 있는거 같음.
-                            OleDto oleDto = OleDto.builder().superId(savedFileEntity.getId())
-                                    .originalFileName(fileName)
-                                    .UUIDFileName(UUID.randomUUID()+FileUtil.getFileExtension(fileName)) //테스트차 넣어놈
-                                    .build();
-
-                            OleEntry oleEntity = modelMapper.map(oleDto, OleEntry.class);
-                            saveOleRepository.save(oleEntity); // Ole 정보 저장
-                        }*/
-
-                        return true;
+                        return fileResult;
+                        //return true;
                     }
                 }
             }
@@ -133,44 +94,34 @@ public class FileUploadServiceImpl implements FileUploadService {
     }
 
     @Override
-    public List<FileDto> printFileAll() {
-
-        List<FileEntity> fileEntities = saveFileRepository.findAll();
-        //List<OleDto> fileEntities = oleDao.printAll();
-
-        return fileEntities.stream()
-                .map(fileEntity -> modelMapper.map(fileEntity, FileDto.class))
-                .collect(Collectors.toList());
+    public synchronized List<FileVO> printFileAll() {
+        return fileDao.printFileAll();
     }
 
     @Override
-    public FileDto printFileOne(Long id) {
-        Optional<FileEntity> optionalFileEntity = saveFileRepository.findById(id);
+    public synchronized FileVO printFileOne(Long id) {
 
-        return optionalFileEntity.map(fileEntity -> modelMapper.map(fileEntity, FileDto.class))
-                .orElse(null);
+        Optional<FileVO> optionalFileVO = Optional.ofNullable(fileDao.printFileOne(id));
+
+        return optionalFileVO.orElse(null);
     }
 
     @Override
-    public List<OleDto> printOleAll(Long id) {
-        List<OleEntry> oleEntries = saveOleRepository.findBySuperId(id);
-        //List<OleDto> oleEntries = oleDao.selectById(id);
+    public synchronized List<OleDto> printOleAll(Long id) {
 
-        return oleEntries.stream()
-                .map(oleEntry -> modelMapper.map(oleEntry, OleDto.class))
-                .collect(Collectors.toList());
+        return oleDao.selectById(id);
     }
 
     @Override
-    public boolean deleteOne(Long id) {
+    public synchronized boolean deleteOne(Long id) {
 
-        FileEntity fileEntity = saveFileRepository.findById(id).orElse(null);
-        if (fileEntity == null) {
+        FileVO fileVO = fileDao.printFileOne(id);
+        if (fileVO == null) {
             return false;
         }
 
-        String fileName = fileEntity.getUUIDFileName();
-        String savePath = fileEntity.getFileOlePath();
+        String fileName = fileVO.getUUIDFileName();
+        String savePath = fileVO.getFileOlePath();
         String fullPath = dir+File.separator + fileName;
 
         if (!FileUtil.isPathValidForStorage(dir, fullPath)) {
@@ -185,11 +136,13 @@ public class FileUploadServiceImpl implements FileUploadService {
         }
         File folder = new File(savePath);
 
-        saveFileRepository.deleteById(fileEntity.getId());
+        boolean fileResult = fileDao.deleteById(fileVO.getId());
 
         FileUtil.deleteFolder(folder);
         folder.delete();
-        saveOleRepository.deleteAllBySuperId(fileEntity.getId());
-        return true;
+
+        boolean oleResult = oleDao.deleteById(fileVO.getId());
+
+        return fileResult && oleResult;
     }
 }

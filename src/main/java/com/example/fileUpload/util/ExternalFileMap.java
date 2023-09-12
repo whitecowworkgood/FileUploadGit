@@ -1,7 +1,6 @@
-package com.example.fileUpload.unit;
+package com.example.fileUpload.util;
 
 import lombok.Getter;
-import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;

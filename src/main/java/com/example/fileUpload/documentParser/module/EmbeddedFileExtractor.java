@@ -1,9 +1,7 @@
 package com.example.fileUpload.documentParser.module;
 
-import com.example.fileUpload.unit.ExternalFileMap;
-import com.example.fileUpload.unit.FileType;
-import com.example.fileUpload.unit.FileUtil;
-import com.example.fileUpload.unit.OleEntry;
+import com.example.fileUpload.util.FileUtil;
+import com.example.fileUpload.util.OleEntry;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -15,9 +13,8 @@ import org.apache.poi.poifs.filesystem.Entry;
 import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Iterator;
-import java.util.UUID;
 
-import static com.example.fileUpload.unit.ExternalFileMap.addUniqueFileNameMapping;
+import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
 
 
 @Slf4j
@@ -36,7 +33,6 @@ public class EmbeddedFileExtractor {
                 variableData.write(byteRead);
             }
             String fileName = variableData.toString(Charset.forName("euc-kr"));
-            //log.info(fileName);
 
             while (true) {
                 byteRead = inputStream.read();
@@ -80,8 +76,6 @@ public class EmbeddedFileExtractor {
 
 
             String uuid = addUniqueFileNameMapping(fileName);
-
-            //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
             stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
             try (FileOutputStream fileOutputStream = new FileOutputStream(stringBuilder.toString())) {
@@ -135,7 +129,6 @@ public class EmbeddedFileExtractor {
             compObjStream.skipNBytes(skipSize);
 
             byte[] fileTypeBytes = new byte[4];
-            //compObjStream.read(fileTypeBytes);
             compObjStream.readFully(fileTypeBytes);
 
             int fileTypeSize = (fileTypeBytes[3] & 0xFF) << 24 |
@@ -151,7 +144,6 @@ public class EmbeddedFileExtractor {
             fileTypeString = new String(fileTypeData, Charset.forName("euc-kr"));
 
 
-            //log.info(fileTypeString);
             if(fileTypeString.startsWith("Excel.SheetMacroEnabled")){
                 fileType = ".csv";
             } else if (fileTypeString.startsWith("Word.DocumentMacroEnabled")) {
@@ -175,8 +167,6 @@ public class EmbeddedFileExtractor {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-        //String uuid = UUID.randomUUID().toString();
-        //ExternalFileMap.addFileNameMapping(fileFormat+fileType,uuid+fileType);
 
         String returnValue = stringBuilder.append(fileFormat).append(fileType).toString();
         stringBuilder.setLength(0);
@@ -189,8 +179,6 @@ public class EmbeddedFileExtractor {
             oleStream.readFully(oleData);
 
             String uuid = addUniqueFileNameMapping(fileName);
-
-            //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
             stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
 
@@ -214,16 +202,10 @@ public class EmbeddedFileExtractor {
             oleStream.readFully(oleData);
             String fileName = "ole_.doc"; //임시로 넣어놓은 코드
 
-           // String uuid = UUID.randomUUID().toString();
-           //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
-
             String uuid = addUniqueFileNameMapping(fileName);
-
-            //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
             stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
 
-            //stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileType.DOCX.getValue());
             try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
                 outputStream.write(oleData);
             } catch (IOException e) {

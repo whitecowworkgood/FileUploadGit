@@ -1,12 +1,13 @@
 package com.example.fileUpload.controller;
 
 
-import com.example.fileUpload.dto.OleDto;
-import com.example.fileUpload.dto.PostDeleteMessage;
-import com.example.fileUpload.dto.FileDto;
-import com.example.fileUpload.dto.GetMessage;
+import com.example.fileUpload.model.OleDto;
+import com.example.fileUpload.message.PostDeleteMessage;
+import com.example.fileUpload.model.FileDto;
+import com.example.fileUpload.message.GetMessage;
+import com.example.fileUpload.model.FileVO;
 import com.example.fileUpload.service.FileUploadService;
-import com.example.fileUpload.unit.FileUtil;
+import com.example.fileUpload.util.FileUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +25,7 @@ import java.util.UUID;
 @RestController
 @RequiredArgsConstructor
 @Slf4j
-@RequestMapping("/api")
+@RequestMapping("/api/upload")
 @Tag(name = "FileUpload", description = "파일 업로드 API 구성")
 public class FileUploadController {
 
@@ -51,38 +52,38 @@ public class FileUploadController {
      * 해당 영역은 API 영역
      */
     @Operation(summary = "전체 파일 조회", description = "저장된 파일 정보들을 조회 합니다.")
-    @GetMapping("/uploads")
+    @GetMapping("/files")
     public ResponseEntity<GetMessage> printFiles(){
 
-        List<FileDto> fileDtos = fileUploadService.printFileAll();
-
+        List<FileVO> fileVOS = fileUploadService.printFileAll();
         GetMessage getMessage = new GetMessage();
 
-        if(!fileDtos.isEmpty()){
+        if(!fileVOS.isEmpty()){
             getMessage.setMessage("List");
             //getMessage.setHttpStatus(200);
-            getMessage.setData(fileDtos);
+            getMessage.setData(fileVOS);
         }
         return ResponseEntity.status(HttpStatus.OK).body(getMessage);
     }
     @Operation(summary = "선택 파일 조회", description = "파일 id를 통해 파일 정보를 조회 합니다.")
-    @GetMapping("/upload/{id}")
+    @GetMapping("/file/{id}")
     @ResponseBody
     public ResponseEntity<GetMessage> printFile(@PathVariable("id") Long id){
 
-        FileDto fileDto = fileUploadService.printFileOne(id);
+        FileVO fileVO = fileUploadService.printFileOne(id);
+
         GetMessage getMessage = new GetMessage();
 
-        if(fileDto != null){
+        if(fileVO != null){
             getMessage.setMessage("File");
             //getMessage.setHttpStatus(200);
-            getMessage.setData(fileDto);
+            getMessage.setData(fileVO);
         }
         return ResponseEntity.status(HttpStatus.OK).body(getMessage);
     }
 
     @Operation(summary = "선택 파일 OLE 파일 조회", description = "파일 id를 통해 파일에 대한 OLE 정보를 출력 한다.")
-    @GetMapping("/upload/{id}/ole")
+    @GetMapping("/file/{id}/ole")
     @ResponseBody
     public ResponseEntity<GetMessage> printOle(@PathVariable("id") Long id) {
         List<OleDto> oleDtoList = fileUploadService.printOleAll(id);
@@ -96,7 +97,7 @@ public class FileUploadController {
     }
 
     @Operation(summary = "파일 삭제", description = "파일 id를 통해 파일 정보를 삭제 합니다.")
-    @DeleteMapping("/upload")
+    @DeleteMapping("")
     public ResponseEntity<PostDeleteMessage> DeleteFile(@RequestParam("id") Long id){
 
         boolean deleteResult = fileUploadService.deleteOne(id);
@@ -110,7 +111,7 @@ public class FileUploadController {
     }
 
     @Operation(summary = "파일 업로드", description = "파일을 저장 합니다.")
-    @PostMapping("/upload")
+    @PostMapping("")
     public ResponseEntity<PostDeleteMessage> uploadFile(@RequestParam("file") MultipartFile file){
 
         String uuidName = UUID.randomUUID().toString();

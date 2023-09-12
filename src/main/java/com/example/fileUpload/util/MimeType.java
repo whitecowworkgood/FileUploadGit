@@ -1,4 +1,4 @@
-package com.example.fileUpload.unit;
+package com.example.fileUpload.util;
 
 public enum MimeType {
     PDF("application/pdf"),

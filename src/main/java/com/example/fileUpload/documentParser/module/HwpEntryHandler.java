@@ -1,14 +1,11 @@
 package com.example.fileUpload.documentParser.module;
 
-import com.example.fileUpload.unit.ExternalFileMap;
-import com.example.fileUpload.unit.FileType;
-import com.example.fileUpload.unit.FileUtil;
-import com.example.fileUpload.unit.OleEntry;
+import com.example.fileUpload.util.FileUtil;
+import com.example.fileUpload.util.OleEntry;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.poifs.filesystem.*;
-import org.apache.poi.xwpf.usermodel.Document;
 
 
 import java.io.File;
@@ -18,10 +15,9 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import java.util.UUID;
 
 import static com.example.fileUpload.documentParser.module.EmbeddedFileExtractor.parseFileName;
-import static com.example.fileUpload.unit.ExternalFileMap.addUniqueFileNameMapping;
+import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
 
 @Slf4j
 public class HwpEntryHandler {
@@ -37,7 +33,6 @@ public class HwpEntryHandler {
 
             if(root.hasEntry(OleEntry.WORD.getValue())){
                 fileName=parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
-                //log.info("이 파일은 97-03버전의 Document");
 
                 //Ole, OlePrev000등을 삭제하는 코드 -> 삭제가 불필요하면 제거하기
                 List<Entry> entriesToDelete = new ArrayList<>();
@@ -53,15 +48,7 @@ public class HwpEntryHandler {
                     root.getEntry(entry.getName()).delete();
                 }
 
-
-                /*String uuid = UUID.randomUUID().toString();
-                ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
-
-                stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));*/
-
                 String uuid = addUniqueFileNameMapping(fileName);
-
-                //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
                 stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
                 FileOutputStream fos = new FileOutputStream(stringBuilder.toString());
@@ -72,8 +59,9 @@ public class HwpEntryHandler {
                 IOUtils.closeQuietly(fos);
 
             }else if(root.hasEntry(OleEntry.PPT.getValue())){
-                //log.info("이 파일은 97-03버전의 ppt");
+
                 fileName=parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
+
                 //Ole, OlePrev000등을 삭제하는 코드 -> 삭제가 불필요하면 제거하기
                 List<Entry> entriesToDelete = new ArrayList<>();
                 Iterator<Entry> entries = root.getEntries();
@@ -88,14 +76,7 @@ public class HwpEntryHandler {
                     root.getEntry(entry.getName()).delete();
                 }
 
-               /* String uuid = UUID.randomUUID().toString();
-                ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
-
-                stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName))*/;
-
                 String uuid = addUniqueFileNameMapping(fileName);
-
-                //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
                 stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
                 FileOutputStream fos = new FileOutputStream(stringBuilder.toString());
@@ -104,11 +85,11 @@ public class HwpEntryHandler {
                 pof.writeFilesystem(fos);
 
                 IOUtils.closeQuietly(fos);
-                //fos.close();
 
             } else if (root.hasEntry(OleEntry.XLS.getValue())) {
-                //log.info("이 파일은 97-03버전의 xlsx");
+
                 fileName=parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
+
                 //Ole, OlePrev000등을 삭제하는 코드 -> 삭제가 불필요하면 제거하기
                 List<Entry> entriesToDelete = new ArrayList<>();
                 Iterator<Entry> entries = root.getEntries();
@@ -123,14 +104,7 @@ public class HwpEntryHandler {
                     root.getEntry(entry.getName()).delete();
                 }
 
-                /*String uuid = UUID.randomUUID().toString();
-                ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
-
-                stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));*/
-
                 String uuid = addUniqueFileNameMapping(fileName);
-
-                //ExternalFileMap.addFileNameMapping(fileName,uuid+FileUtil.getFileExtension(fileName));
 
                 stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
                 FileOutputStream fos = new FileOutputStream(stringBuilder.toString());
@@ -139,23 +113,21 @@ public class HwpEntryHandler {
                 pof.writeFilesystem(fos);
 
                 IOUtils.closeQuietly(fos);
-                //fos.close();
 
             } else if (root.hasEntry(Ole10Native.OLE10_NATIVE)) {
-                //log.info("Ole10Native있음");
+
                 DocumentEntry ole10Native = (DocumentEntry) root.getEntry(Ole10Native.OLE10_NATIVE);
 
                 EmbeddedFileExtractor.parseOle10NativeEntry(new DocumentInputStream(ole10Native), fileOlePath);
 
             }else if (root.hasEntry(OleEntry.PACKAGE.getValue())) {
-                //log.info("Package있음");
 
                 if(root.hasEntry(OleEntry.COMPOBJ.getValue())){
                     DocumentEntry packageEntry = (DocumentEntry) root.getEntry((OleEntry.PACKAGE.getValue()));
                     EmbeddedFileExtractor.parsePackageEntry(parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue())),
                             packageEntry, fileOlePath);
                 }else{
-                    //log.info("package는 있지만, CompObj는 없음");
+
                     DocumentEntry packageEntry = (DocumentEntry) root.getEntry((OleEntry.PACKAGE.getValue()));
                     EmbeddedFileExtractor.parsePackageEntry(packageEntry, fileOlePath);
                 }

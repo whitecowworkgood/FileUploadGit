@@ -9,8 +9,4 @@ import org.springframework.context.annotation.Configuration;
 @ComponentScan
 public class FileUploadConfig {
 
-    @Bean
-    public ModelMapper modelMapper() {
-        return new ModelMapper();
-    }
 }

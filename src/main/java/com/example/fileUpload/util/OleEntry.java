@@ -1,4 +1,4 @@
-package com.example.fileUpload.unit;
+package com.example.fileUpload.util;
 
 public enum OleEntry {
     OBJECTPOOL("ObjectPool"),
@@ -8,9 +8,7 @@ public enum OleEntry {
 
     WORD("WordDocument"),
     PPT("PowerPoint Document"),
-    XLS("Workbook")
-    ;
-
+    XLS("Workbook");
 
     private final String value;
     OleEntry(String value){

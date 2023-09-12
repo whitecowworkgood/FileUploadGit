@@ -1,4 +1,4 @@
-package com.example.fileUpload.dto;
+package com.example.fileUpload.message;
 
 import lombok.Data;
 

@@ -1,20 +1,18 @@
-package com.example.fileUpload.dto;
+package com.example.fileUpload.model;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 
 @Getter
 @Setter
 @AllArgsConstructor
-@Builder
-public class OleDto {
+public class FileVO {
     private Long id;
-    private Long superId;
     private String UUIDFileName;
+    private String fileOlePath;
+    private String fileSavePath;
+    private Long fileSize;
+    private String fileType;
     private String originalFileName;
-
-    public OleDto() {
-    }
 }

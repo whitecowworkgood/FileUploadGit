@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 @Component
 public class FileParserFactory {
     public FileParser createParser(String mimeType, String fileName){
-        log.info(mimeType);
+        //log.info(mimeType);
         switch (mimeType){
             case "application/vnd.ms-powerpoint"->{
                 return new PowerPointParser();
@@ -34,9 +34,7 @@ public class FileParserFactory {
             case "application/octet-stream" -> {
                 if (fileName.equals(".hwpx")) {
                     return new XHwpParser();
-                    // return new XHwpParser();
                 }
-                //return new HwpParser();
                 return new HwpParser();
             }
             default -> {
