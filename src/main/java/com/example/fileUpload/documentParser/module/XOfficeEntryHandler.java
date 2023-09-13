@@ -26,6 +26,12 @@ public class XOfficeEntryHandler {
     static StringBuilder stringBuilder = new StringBuilder();
     public static final Pattern DiractoryPattern = Pattern.compile("([^/]+)\\.(\\w+)$");
 
+    /**
+     * 97-03 이후 버전의 Ms Office 문서에서 포함된 파일들을 추출합니다.
+     *
+     * @param fileOlePath 추출된 ole 객체의 저장경로
+     * @param picture OLE를 저장하는 PackagePart라는 타입의 객체
+     * */
     public static void getParseFile(List<PackagePart> picture, String fileOlePath) throws IOException {
         for(int i=0; i<picture.size(); i++) {
             if(picture.get(i).getContentType().equals(MimeType.OLEOBJECT.getValue())){

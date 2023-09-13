@@ -17,6 +17,13 @@ import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMappi
 public class OfficeEntryHandler {
     static StringBuilder stringBuilder = new StringBuilder();
 
+    /**
+     * 97-03버전의 문서들에서 OLE 객체들을 추출합니다
+     *
+     * @param fileOlePath 추출된 ole 객체의 저장경로
+     * @param directoryEntry OLE객체를 추출하기 위해, 데이터들이 있는 Directory Entry를 지정
+     * */
+
     public static void getParser(DirectoryEntry directoryEntry, String fileOlePath) throws IOException {
 
         String fileName = null;

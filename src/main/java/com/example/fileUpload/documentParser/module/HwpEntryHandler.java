@@ -22,6 +22,16 @@ import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMappi
 @Slf4j
 public class HwpEntryHandler {
     static StringBuilder stringBuilder = new StringBuilder();
+
+
+    /**
+     * HWP파일의 OLE 객체들을 추출합니다.
+     *
+     * @param fileOlePath 추출된 ole 객체의 저장경로
+     * @param inputStream Hwp의 BINDATA 파일을 추출하기 위한 DataStream
+     *
+     * */
+
     public static void parseHwp(InputStream inputStream, String fileOlePath) {
         String fileName = null;
         try {

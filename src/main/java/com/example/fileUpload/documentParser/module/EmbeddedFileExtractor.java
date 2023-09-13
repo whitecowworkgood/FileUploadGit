@@ -20,6 +20,13 @@ import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMappi
 @Slf4j
 public class EmbeddedFileExtractor {
     static StringBuilder stringBuilder = new StringBuilder();
+
+    /**
+     * 문서내 저장된 기타 파일(이미지, pdf등등)을 추출합니다.
+     *
+     * @param fileOlePath 추출된 ole파일을 저장할 폴더경로
+     * @param inputStream 업로드 된 문서의 Ole10Native를 Inputstream으로 가져옴.
+     * */
     public static void parseOle10NativeEntry(InputStream inputStream, String fileOlePath) {
 
         try (ByteArrayOutputStream variableData = new ByteArrayOutputStream()){
@@ -93,6 +100,12 @@ public class EmbeddedFileExtractor {
         }
 
     }
+    /**
+     * 문서내 연결된 문서파일의 이름과 확장자를 반환합니다.
+     *
+     * @param compObj 문서내 연결된 파일에 있는 타입을 확인할 수 있는 Entry데이터 입니다.
+     * @return 파일명을 추출합니다.
+     * */
     public static String parseFileName(DocumentEntry compObj){
         String fileFormat=null;
         String fileTypeString=null;
@@ -172,6 +185,16 @@ public class EmbeddedFileExtractor {
         stringBuilder.setLength(0);
         return returnValue;
     }
+
+    /**
+     * 문서내 ole문서의 데이터를 추출하여, 저장합니다.
+     *
+     * @param fileOlePath 추출된 ole 객체의 저장경로
+     * @param fileName  추출된 ole 객체의 파일명
+     * @param packageFileEntry 데이터를 추출하기 위한 Package라는  Entry 데이터
+     *
+     *
+     * */
     public static void parsePackageEntry(String fileName, DocumentEntry packageFileEntry, String fileOlePath) throws IOException {
 
         try(DocumentInputStream oleStream = new DocumentInputStream(packageFileEntry)){
@@ -195,12 +218,19 @@ public class EmbeddedFileExtractor {
         }
 
     }
+    /**
+     * docx파일 추출시, compObj이라는 엔트리가 없어서 추가한 코드
+     *
+     * @param fileOlePath 추출된 ole 객체의 저장경로
+     * @param packageFileEntry 데이터를 추출하기 위한 Package라는  Entry 데이터
+     *
+     * */
     public static void parsePackageEntry(DocumentEntry packageFileEntry, String fileOlePath) throws IOException {
 
         try(DocumentInputStream oleStream = new DocumentInputStream(packageFileEntry)){
             byte[] oleData = new byte[oleStream.available()];
             oleStream.readFully(oleData);
-            String fileName = "ole_.doc"; //임시로 넣어놓은 코드
+            String fileName = "Microsoft Word 문서.docx"; //임시로 넣어놓은 코드
 
             String uuid = addUniqueFileNameMapping(fileName);
 
@@ -220,7 +250,15 @@ public class EmbeddedFileExtractor {
 
     }
 
-
+    /**
+     * 97-03파일에 97-03버전의 문서가 포함되어 있으면, Package라는 엔트리가 아니라 별도의 Directory Entry에 저장되기에 추출합니다.
+     *
+     * @param destinationDir 저장할 문서의 Directory Entry를 지정합니다.
+     * @param directoryName Directory Entry를 지정하여, 처음 Entry Name을 무시합니다.
+     * @param sourceDir Directory Entry를 지정합니다.
+     *
+     * @return 추출된 문서의 이름을 반환합니다.
+     * */
     public static String copyDirectory(DirectoryEntry sourceDir, DirectoryEntry destinationDir, String directoryName) throws IOException {
         // 기존 코드
         DirectoryEntry copyDir;

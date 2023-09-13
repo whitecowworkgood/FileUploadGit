@@ -24,6 +24,13 @@ public class Aop {
     @Value("${Save-Directory}")
     String dir;
 
+    /**
+     *
+     * @author 임재준
+     * AOP를 이용하여, service 클래스(컴포넌트) 호출시, 트랜잭션을 감지 및 출력
+     *
+     * */
+
     @Around("execution(* com.example.fileUpload.service.*.*(..))")
     public Object serviceLogger(ProceedingJoinPoint joinPoint) throws Throwable{
 
@@ -42,6 +49,11 @@ public class Aop {
         }
     }
 
+    /**
+     *
+     * @author 임재준
+     * AOP를 이용하여, controller 클래스(컴포넌트) 호출시, 트랜잭션을 감지 및 출력
+     * */
     @Around("execution(* com.example.fileUpload.controller.*.*(..))")
     public Object controllerLogger(ProceedingJoinPoint joinPoint) throws Throwable{
 
@@ -58,6 +70,12 @@ public class Aop {
             log.info("[컨트롤러 리소스 릴리즈] {}", joinPoint.getSignature());
         }
     }
+
+    /***
+     *
+     * 서비스 클래스(컴포넌트) 수행 전에, 다운로드 폴더가 있는지 확인 후, 없으면 생성
+     * @throws Throwable
+     */
     @Before("execution(* com.example.fileUpload.service.*.*(..))")
     public void downloadFolderCheck() throws Throwable{
         Path folder = Paths.get(dir);

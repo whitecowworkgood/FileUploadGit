@@ -1,0 +1,65 @@
+.aac	AAC 오디오	audio/aac
+.abw	AbiWord 문서	application/x-abiword
+.arc	보관 문서(여러 파일 포함)	application/x-freearc
+.avif	AVIF 이미지	image/avif
+.avi	AVI: 오디오 비디오 인터리브	video/x-msvideo
+.azw	Amazon Kindle eBook 형식	application/vnd.amazon.ebook
+.bz	BZip 아카이브	application/x-bzip
+.cda	CD 오디오	application/x-cdf
+.epub	전자 출판물(EPUB)	application/epub+zip
+.ics	iCalendar 형식	text/calendar
+.jsonld	JSON-LD 형식	application/ld+json
+.mid,.midi	악기 디지털 인터페이스(MIDI)	audio/midi,audio/x-midi
+.mjs	자바스크립트 모듈	text/javascript
+.mp3	MP3 오디오	audio/mpeg
+.mpeg	MPEG 비디오	video/mpeg
+.mpkg	Apple 설치 프로그램 패키지	application/vnd.apple.installer+xml
+.oga	OGG 오디오	audio/ogg
+.ogv	OGG 영상	video/ogg
+.ogx	OGG	application/ogg
+.opus	Opus 오디오	audio/opus
+.rar	RAR 아카이브	application/vnd.rar
+.ts	MPEG 전송 스트림	video/mp2t
+.vsd	마이크로소프트 비지오	application/vnd.visio
+.wav	파형 오디오 형식	audio/wav
+.weba	웹오디오	audio/webm
+.webm	웹 비디오	video/webm
+.webp	WEBP 이미지	image/webp
+.xul	XUL	application/vnd.mozilla.xul+xml
+.3gp	3GPP 오디오/비디오 컨테이너	video/3gpp; audio/3gpp동영상이 포함되어 있지 않은 경우
+.3g2	3GPP2 오디오/비디오 컨테이너	video/3gpp2; audio/3gpp2동영상이 포함되어 있지 않은 경우
+.7z
+
+파일 확보
+.bmp
+.gif
+.css
+.js
+.json
+.html
+.csv
+.xml
+.zip
+.txt
+.jar
+.php
+.sh
+.svg
+.bin
+.csh
+.tar
+.gz
+.bz2
+.odt
+.odp
+.ods
+.mp4
+.tif
+.rtf
+.ttf
+.eot
+.woff
+.woff2
+.otf
+.ico
+.xhtml

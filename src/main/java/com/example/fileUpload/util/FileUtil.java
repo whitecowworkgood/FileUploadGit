@@ -12,7 +12,12 @@ import java.util.*;
 @Slf4j
 public class FileUtil {
 
-
+    /**
+     * 업로드한 파일이 mime-type을 비교합니다.
+     *
+     * @param fileDto 업로드 파일의 정보를 가지고 있는 DTO
+     * @return mime-type을 처리하면 true, 아니면 false
+     * */
     public static boolean validateUploadedFileMimeType(FileDto fileDto){
 
         List<String> validTypeList = Arrays.stream(MimeType.values())
@@ -22,6 +27,14 @@ public class FileUtil {
         return validTypeList.contains(fileDto.getFileType());
     }
 
+
+    /**
+     * 업로드 경로와, 저장 실제 경로가 같은지 비교합니다.
+     *
+     * @param defaultPath 스프링에 저장된 저장 경로입니다.
+     * @param savePath 업로드시 저장된 경로입니다.
+     * @return 두 경로가 같으면 true, 틀리면 false반환
+     * */
     public static boolean isPathValidForStorage(String defaultPath, String savePath){
         if (defaultPath == null || savePath == null || defaultPath.isEmpty() || savePath.isEmpty()) {
             return false;
@@ -46,19 +59,13 @@ public class FileUtil {
             return false;
         }
     }
-    public static List<String> folderSearch(String savePath){
-        List<String> fileList = new ArrayList<>();
 
-        File Folder = new File(savePath);
-
-        File[] files = Folder.listFiles();
-
-        for(File file : Objects.requireNonNull(files)){
-            fileList.add(savePath+"\\"+file.getName());
-        }
-        return fileList;
-    }
-
+    /**
+     * 파일의 확장자를 가져옵니다.
+     *
+     * @param file MultipartFile의 데이터를 가져옵니다.
+     * @return 확장자를 반환합니다.
+     * */
     public static String getFileExtension(MultipartFile file) {
         String originalFileName = file.getOriginalFilename();
         if (originalFileName != null && originalFileName.contains(".")) {
@@ -67,6 +74,13 @@ public class FileUtil {
             return ""; // 확장자가 없을 경우 빈 문자열 반환
         }
     }
+
+    /**
+     * 파일의 확장자를 가져옵니다.
+     *
+     * @param originalFileName 파일이름을 가져옵니다.
+     * @return 확장자를 반환합니다.
+     * */
     public static String getFileExtension(String originalFileName) {
         if (originalFileName != null && originalFileName.contains(".")) {
             return "." + StringUtils.getFilenameExtension(originalFileName);
@@ -74,7 +88,11 @@ public class FileUtil {
             return ""; // 확장자가 없을 경우 빈 문자열 반환
         }
     }
-
+    /**
+     * compObj에서 이름을 가져올때, 끝의 null을 삭제합니다.
+     *
+     * @param input 파일이름을 가져옵니다.
+     * */
     public static String removeNullCharacters(String input) {
         StringBuilder output = new StringBuilder();
 
@@ -87,6 +105,12 @@ public class FileUtil {
 
         return output.toString();
     }
+
+    /**
+     * 폴더를 삭제합니다.
+     *
+     * @param folder 폴더에 대한 File타입의 값을 가져옴
+     * */
     public static void deleteFolder(File folder) {
         if (folder.isDirectory()) {
             File[] files = folder.listFiles();
@@ -102,8 +126,6 @@ public class FileUtil {
                 }
             }
         }
-    }
-    private FileUtil() {
     }
 }
 

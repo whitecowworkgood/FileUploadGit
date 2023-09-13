@@ -51,6 +51,12 @@ public class FileUploadController {
     /*
      * 해당 영역은 API 영역
      */
+
+    /**
+     * 전체 파일을 조회합니다.
+     *
+     * @return ResponseEntity<GetMessage> 파일 목록 조회 결과를 반환합니다.
+     */
     @Operation(summary = "전체 파일 조회", description = "저장된 파일 정보들을 조회 합니다.")
     @GetMapping("/files")
     public ResponseEntity<GetMessage> printFiles(){
@@ -65,6 +71,13 @@ public class FileUploadController {
         }
         return ResponseEntity.status(HttpStatus.OK).body(getMessage);
     }
+
+    /**
+     * 선택한 파일을 조회합니다.
+     *
+     * @param id 조회할 파일의 ID입니다.
+     * @return ResponseEntity<GetMessage> 선택한 파일의 정보를 반환합니다.
+     */
     @Operation(summary = "선택 파일 조회", description = "파일 id를 통해 파일 정보를 조회 합니다.")
     @GetMapping("/file/{id}")
     @ResponseBody
@@ -82,6 +95,13 @@ public class FileUploadController {
         return ResponseEntity.status(HttpStatus.OK).body(getMessage);
     }
 
+
+    /**
+     * 선택한 파일의 OLE 정보를 조회합니다.
+     *
+     * @param id 조회할 파일의 ID입니다.
+     * @return ResponseEntity<GetMessage> 선택한 파일의 OLE 정보를 반환합니다.
+     */
     @Operation(summary = "선택 파일 OLE 파일 조회", description = "파일 id를 통해 파일에 대한 OLE 정보를 출력 한다.")
     @GetMapping("/file/{id}/ole")
     @ResponseBody
@@ -96,6 +116,12 @@ public class FileUploadController {
         return ResponseEntity.status(HttpStatus.OK).body(getMessage);
     }
 
+    /**
+     * 파일을 삭제합니다.
+     *
+     * @param id 삭제할 파일의 ID입니다.
+     * @return ResponseEntity<PostDeleteMessage> 파일 삭제 결과를 반환합니다.
+     */
     @Operation(summary = "파일 삭제", description = "파일 id를 통해 파일 정보를 삭제 합니다.")
     @DeleteMapping("")
     public ResponseEntity<PostDeleteMessage> DeleteFile(@RequestParam("id") Long id){
@@ -110,6 +136,12 @@ public class FileUploadController {
         return ResponseEntity.status(HttpStatus.OK).body(postDeleteMessage);
     }
 
+    /**
+     * 파일을 업로드합니다.
+     *
+     * @param file 업로드할 파일입니다.
+     * @return ResponseEntity<PostDeleteMessage> 파일 업로드 결과를 반환합니다.
+     */
     @Operation(summary = "파일 업로드", description = "파일을 저장 합니다.")
     @PostMapping("")
     public ResponseEntity<PostDeleteMessage> uploadFile(@RequestParam("file") MultipartFile file){

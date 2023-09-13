@@ -10,6 +10,15 @@ import org.springframework.stereotype.Component;
 @Slf4j
 @Component
 public class FileParserFactory {
+
+    /**
+     * 업로드한 파일의 mime-type를 비교해서 알맞은 Parser를 호출합니다.
+     *
+     * @param fileName hwp파일에서 mime-type이 hwp와 hwpx가 같아서 확장자로 구분하기 위한 String
+     * @param mimeType 업로드된 파일의 mime-type을 비교하여 알맞은 Parser를 호출하기 위한 String
+     *
+     * @return FileParser 알맞은 Parser를 반환합니다.
+     * */
     public FileParser createParser(String mimeType, String fileName){
         //log.info(mimeType);
         switch (mimeType){
