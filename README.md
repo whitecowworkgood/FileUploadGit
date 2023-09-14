@@ -86,3 +86,14 @@
     //https://cloudconvert.com/mpeg-converter
     //https://convertio.co/kr/avi-mpeg/
     //를 통해 모든 common-mimetype 테스트 파일 생성하기
+
+
+    //9월 14일
+    //select * (x) -> select colum1, colum2 ... 이런식이 옳다
+    //추출에 실패한 파일들은 구현을 해보고, 안되면 안된다고 적기
+    //-> 그래도 시도는 계속 해보기
+    //문서들 이름 추출 형식 바꾸기 -> ex) ms office word.doc -> 원본명_ole.doc로 바꾸기
+    //ExternalFileMap의 코드들 static으로 하지말고 객체를 필요하때 생성해서 사용해야 안전함.
+    //csv파일에서 데이터가 sharedStrings.xml라는 파일에 저장이 됨
+    //-> 압축이 되어있거나, 별도의 방법으로 저장이 되는 것 같음
+    // 구현은 가능할 것 같음....

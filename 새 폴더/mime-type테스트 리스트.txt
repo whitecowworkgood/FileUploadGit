@@ -1,66 +1,71 @@
-
-.abw	AbiWord 문서	application/x-abiword
 .arc	보관 문서(여러 파일 포함)	application/x-freearc
-.azw	Amazon Kindle eBook 형식	application/vnd.amazon.ebook
-.bz	BZip 아카이브	application/x-bzip
-.cda	CD 오디오	application/x-cdf
-.ics	iCalendar 형식	text/calendar
 .jsonld	JSON-LD 형식	application/ld+json
 .mid,.midi	악기 디지털 인터페이스(MIDI)	audio/midi,audio/x-midi
-.mjs	자바스크립트 모듈	text/javascript
-.mpeg	MPEG 비디오	video/mpeg
 .mpkg	Apple 설치 프로그램 패키지	application/vnd.apple.installer+xml
 .ogx	OGG	application/ogg
-.rar	RAR 아카이브	application/vnd.rar
 .vsd	마이크로소프트 비지오	application/vnd.visio
 .weba	웹오디오	audio/webm
-.xul	XUL	application/vnd.mozilla.xul+xml
-.3g2	3GPP2 오디오/비디오 컨테이너	video/3gpp2; audio/3gpp2동영상이 포함되어 있지 않은 경우
+.cda
+.azw
+.xul
+.mjs
 
 파일 확보
-.bmp
-.gif
-.css
-.js
-.json
-.html
-.csv
-.xml
-.zip
-.txt
-.jar
-.php
-.sh
-.svg
-.bin
-.csh
-.tar
-.gz
-.bz2
-.odt
-.odp
-.ods
-.mp4
-.tif
-.rtf
-.ttf
-.eot
-.woff
-.woff2
-.otf
-.ico
-.xhtml
-.7z
-.aac
-.mp3
-.wav
-.avi
-.webm
-.webp
-.opus
-.oga
-.ogv
-.epub
-.avif
-.3gp
-.ts
+1------
+3g2
+3gp
+7z
+acc
+abw
+avi
+avif
+bin
+bin.bin.gz
+bz
+2-------
+csh
+css
+eot
+epub
+gif
+html
+ico
+ics
+jar
+js
+3------
+oga
+ogv
+opus
+otf
+json
+mp3
+mp4
+mpeg
+4----
+php
+rar
+sh
+ssh.ssh.bz2
+svg
+tar
+tif
+ts
+ttf
+txt
+5------
+wav
+webm
+webp
+woff
+woff2
+xhtml
+xml
+zip
+오류------
+bmp
+csv
+odp
+ods
+odt
+rtf

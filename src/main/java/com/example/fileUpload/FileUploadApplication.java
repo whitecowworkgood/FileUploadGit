@@ -6,7 +6,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 @SpringBootApplication
-//@EnableAspectJAutoProxy
 @MapperScan("com.example.fileUpload.Mybatis")
 public class FileUploadApplication {
 

@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.stereotype.Repository;
 
-import java.io.File;
 import java.util.List;
 
 @Repository
