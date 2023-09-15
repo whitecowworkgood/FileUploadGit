@@ -9,10 +9,19 @@ import org.apache.poi.poifs.filesystem.DirectoryEntry;
 import org.apache.poi.poifs.filesystem.DocumentEntry;
 import org.apache.poi.poifs.filesystem.DocumentInputStream;
 import org.apache.poi.poifs.filesystem.Entry;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.SheetVisibility;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.STVisibility;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.*;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.impl.CTBookViewImpl;
+
 
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 
 import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
 
@@ -196,14 +205,34 @@ public class EmbeddedFileExtractor {
      *
      * */
     public static void parsePackageEntry(String fileName, DocumentEntry packageFileEntry, String fileOlePath) throws IOException {
+        DocumentInputStream oleStream =null;
+        XSSFWorkbook workbook =null;
+        byte[] oleData = null;
+        try {
+            oleStream = new DocumentInputStream(packageFileEntry);
 
-        try(DocumentInputStream oleStream = new DocumentInputStream(packageFileEntry)){
-            byte[] oleData = new byte[oleStream.available()];
-            oleStream.readFully(oleData);
+            if(FileUtil.getFileExtension(fileName).equals(".xlsx")){
+
+                workbook = new XSSFWorkbook(new ByteArrayInputStream(oleStream.readAllBytes()));
+
+                CTBookView[] cb = workbook.getCTWorkbook().getBookViews().getWorkbookViewArray();
+
+                cb[0].setVisibility(STVisibility.VISIBLE);
+                workbook.getCTWorkbook().getBookViews().setWorkbookViewArray(cb);
+
+                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                workbook.write(outputStream);
+
+                oleData = outputStream.toByteArray();
+            }else{
+                oleData = new byte[oleStream.available()];
+                oleStream.readFully(oleData);
+            }
 
             String uuid = addUniqueFileNameMapping(fileName);
 
             stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
+
 
             try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
                 outputStream.write(oleData);
@@ -215,6 +244,9 @@ public class EmbeddedFileExtractor {
         }catch(IOException e) {
             ExceptionUtils.getStackTrace(e);
             throw new RuntimeException(e);
+        }finally {
+            IOUtils.closeQuietly(oleStream);
+            IOUtils.closeQuietly(workbook);
         }
 
     }

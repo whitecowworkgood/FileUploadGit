@@ -97,3 +97,18 @@
     //csv파일에서 데이터가 sharedStrings.xml라는 파일에 저장이 됨
     //-> 압축이 되어있거나, 별도의 방법으로 저장이 되는 것 같음
     // 구현은 가능할 것 같음....
+
+    9월 15일
+    //추출된 엑셀파일의 시트가 안보이는 원인 발견
+    <bookViews>
+        <workbookView xr2:uid="{A0C1F887-518D-420A-97FE-F65BC950C842}" activeTab="1" windowHeight="8964" 
+        windowWidth="17280" yWindow="2304" xWindow="2304" visibility="hidden"/>
+    </bookViews>
+    태그에서 visibility가 hidden이여서 생기는 문제, 해당 부분을 지우면 출력이 잘 됨을 확인함.
+    ->XLSX파일은 성공! 아직 XLS파일 남았다. -> 우선 xls파일은 바이너리 형식이므로 나중에 시도해 보기.
+
+    9월 14일 피드백 반영하기, csv추출 구현하기, 나머지 common mime-Type파일들 테스트해보기
+    //수정해야 하는 상황
+    -> hwp파일에서 추출할때, 97-2003버전의 확장자가 2번 적용되는 현상 -> 해결 완료
+    -> entry가 중복해서 저장되는 현상(저장방식의 문제) -> Ole로 시작하는 엔트리를 안지우니 해결됨
+    

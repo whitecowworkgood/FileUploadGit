@@ -2,17 +2,19 @@ package com.example.fileUpload.documentParser.module;
 
 import com.example.fileUpload.util.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.poifs.filesystem.DirectoryEntry;
 import org.apache.poi.poifs.filesystem.DocumentEntry;
 import org.apache.poi.poifs.filesystem.Ole10Native;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBookView;
+import org.openxmlformats.schemas.spreadsheetml.x2006.main.STVisibility;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.regex.Matcher;
@@ -124,6 +126,29 @@ public class XOfficeEntryHandler {
 
             if(matcher.find()){
                 String fileName = matcher.group(0);
+                XSSFWorkbook workbook = null;
+                byte[] oleData=null;
+
+                if(FileUtil.getFileExtension(fileName).equals(".xlsx")){
+                    log.info("xlsx파일임");
+                    workbook = new XSSFWorkbook(new ByteArrayInputStream(picture.get(i).getInputStream().readAllBytes()));
+
+                    CTBookView[] cb = workbook.getCTWorkbook().getBookViews().getWorkbookViewArray();
+
+                    //log.info(Arrays.toString(cb));
+
+                    cb[0].setVisibility(STVisibility.VISIBLE);
+                    workbook.getCTWorkbook().getBookViews().setWorkbookViewArray(cb);
+
+                    //log.info(Arrays.toString(cb));
+
+                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+                    workbook.write(outputStream);
+
+                    oleData = outputStream.toByteArray();
+                }else{
+                    oleData = picture.get(i).getInputStream().readAllBytes();
+                }
 
                 String uuid = UUID.randomUUID()+FileUtil.getFileExtension(fileName);
 
@@ -131,11 +156,14 @@ public class XOfficeEntryHandler {
 
                 stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
 
+
                 try (FileOutputStream fileOutputStream = new FileOutputStream(stringBuilder.toString())) {
-                    fileOutputStream.write(picture.get(i).getInputStream().readAllBytes());
+                    fileOutputStream.write(oleData);
                 } catch (IOException e) {
                     ExceptionUtils.getStackTrace(e);
                     log.error("파일 저장 실패");
+                }finally {
+                    IOUtils.closeQuietly(workbook);
                 }
                 stringBuilder.setLength(0);
             }

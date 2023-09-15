@@ -5,7 +5,9 @@ import com.example.fileUpload.util.OleEntry;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.*;
+import org.apache.poi.ss.usermodel.SheetVisibility;
 
 
 import java.io.File;
@@ -34,6 +36,7 @@ public class HwpEntryHandler {
 
     public static void parseHwp(InputStream inputStream, String fileOlePath) {
         String fileName = null;
+        FileOutputStream fos = null;
         try {
             // 앞의 4바이트를 제외하고 남은 데이터를 POI 읽기
             inputStream.skipNBytes(4);// 앞의 4바이트를 건너뜀
@@ -44,85 +47,57 @@ public class HwpEntryHandler {
             if(root.hasEntry(OleEntry.WORD.getValue())){
                 fileName=parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
 
-                //Ole, OlePrev000등을 삭제하는 코드 -> 삭제가 불필요하면 제거하기
-                List<Entry> entriesToDelete = new ArrayList<>();
-                Iterator<Entry> entries = root.getEntries();
-                while (entries.hasNext()) {
-                    Entry entry = entries.next();
-                    if (entry.getName().startsWith("Ole", 1)) {
-                        entriesToDelete.add(entry);
-                    }
-                }
-
-                for (Entry entry : entriesToDelete) {
-                    root.getEntry(entry.getName()).delete();
-                }
-
                 String uuid = addUniqueFileNameMapping(fileName);
 
-                stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
-                FileOutputStream fos = new FileOutputStream(stringBuilder.toString());
+                stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
+                try{
+                    fos = new FileOutputStream(stringBuilder.toString());
+                    stringBuilder.setLength(0);
+                    pof.writeFilesystem(fos);
+                }catch(IOException e){
+                    ExceptionUtils.getStackTrace(e);
+                }
+                finally{
+                    IOUtils.closeQuietly(fos);
+                }
 
-                stringBuilder.setLength(0);
-                pof.writeFilesystem(fos);
-
-                IOUtils.closeQuietly(fos);
 
             }else if(root.hasEntry(OleEntry.PPT.getValue())){
 
                 fileName=parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
 
-                //Ole, OlePrev000등을 삭제하는 코드 -> 삭제가 불필요하면 제거하기
-                List<Entry> entriesToDelete = new ArrayList<>();
-                Iterator<Entry> entries = root.getEntries();
-                while (entries.hasNext()) {
-                    Entry entry = entries.next();
-                    if (entry.getName().startsWith("Ole", 1)) {
-                        entriesToDelete.add(entry);
-                    }
-                }
-
-                for (Entry entry : entriesToDelete) {
-                    root.getEntry(entry.getName()).delete();
-                }
-
                 String uuid = addUniqueFileNameMapping(fileName);
 
-                stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
-                FileOutputStream fos = new FileOutputStream(stringBuilder.toString());
-
-                stringBuilder.setLength(0);
-                pof.writeFilesystem(fos);
-
-                IOUtils.closeQuietly(fos);
+                stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
+                try{
+                    fos = new FileOutputStream(stringBuilder.toString());
+                    stringBuilder.setLength(0);
+                    pof.writeFilesystem(fos);
+                }catch(IOException e){
+                    ExceptionUtils.getStackTrace(e);
+                }
+                finally{
+                    IOUtils.closeQuietly(fos);
+                }
 
             } else if (root.hasEntry(OleEntry.XLS.getValue())) {
 
                 fileName=parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
 
-                //Ole, OlePrev000등을 삭제하는 코드 -> 삭제가 불필요하면 제거하기
-                List<Entry> entriesToDelete = new ArrayList<>();
-                Iterator<Entry> entries = root.getEntries();
-                while (entries.hasNext()) {
-                    Entry entry = entries.next();
-                    if (entry.getName().startsWith("Ole", 1)) {
-                        entriesToDelete.add(entry);
-                    }
-                }
-
-                for (Entry entry : entriesToDelete) {
-                    root.getEntry(entry.getName()).delete();
-                }
-
                 String uuid = addUniqueFileNameMapping(fileName);
 
-                stringBuilder.append(fileOlePath).append(File.separator).append(uuid).append(FileUtil.getFileExtension(fileName));
-                FileOutputStream fos = new FileOutputStream(stringBuilder.toString());
-
-                stringBuilder.setLength(0);
-                pof.writeFilesystem(fos);
-
-                IOUtils.closeQuietly(fos);
+                stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
+                try{
+                    fos = new FileOutputStream(stringBuilder.toString());
+                    stringBuilder.setLength(0);
+                    pof.writeFilesystem(fos);
+                    //hw.write(fos);
+                }catch(IOException e){
+                    ExceptionUtils.getStackTrace(e);
+                }
+                finally{
+                    IOUtils.closeQuietly(fos);
+                }
 
             } else if (root.hasEntry(Ole10Native.OLE10_NATIVE)) {
 
