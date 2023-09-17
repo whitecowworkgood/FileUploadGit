@@ -112,3 +112,10 @@
     -> hwp파일에서 추출할때, 97-2003버전의 확장자가 2번 적용되는 현상 -> 해결 완료
     -> entry가 중복해서 저장되는 현상(저장방식의 문제) -> Ole로 시작하는 엔트리를 안지우니 해결됨
     
+    //9월 16일
+    //https://poi.apache.org/components/spreadsheet/quick-guide.html#Embedded 참고하기
+    //및 코드 전면 수정하기!!
+
+    //9월 17일
+    //csv와 rtf 파일(odt, ods, odp는 해결함)은 아직 미해결
+    //최근 피드백 적용, hwp파일 추출 다시 구현, 기본 추출 코드 정리(리마스터 작업) 진행하기

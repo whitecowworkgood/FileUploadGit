@@ -15,7 +15,11 @@ public enum FileType {
     HWP(".hwp"),
     POWERPOINT("PowerPoint"),
     EXCEL("Excel"),
-    WORD("Word");
+    WORD("Word"),
+    BMP(".bmp"),
+    ODP(".odp"),
+    ODT(".odt"),
+    ODS(".ods");
 
     private final String value;
     FileType(String value){

@@ -1,171 +1,267 @@
 package com.example.fileUpload.documentParser.module;
 
-import com.example.fileUpload.util.*;
-import lombok.extern.slf4j.Slf4j;
+import com.example.fileUpload.util.FileType;
+import com.example.fileUpload.util.OleEntry;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.poi.hslf.usermodel.HSLFSlideShow;
+import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.hwpf.HWPFDocument;
+import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
+import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
-import org.apache.poi.poifs.filesystem.DirectoryEntry;
-import org.apache.poi.poifs.filesystem.DocumentEntry;
-import org.apache.poi.poifs.filesystem.Ole10Native;
-import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.poifs.filesystem.*;
+import org.apache.poi.xslf.usermodel.XSLFSlideShow;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.apache.xmlbeans.XmlException;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBookView;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.STVisibility;
 
-import java.io.*;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+
 
 import static com.example.fileUpload.documentParser.module.EmbeddedFileExtractor.parseFileName;
 import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
+import static com.example.fileUpload.util.FileUtil.removeFileExtension;
+import static com.example.fileUpload.util.FileUtil.removePath;
 
-@Slf4j
 public class XOfficeEntryHandler {
     static StringBuilder stringBuilder = new StringBuilder();
-    public static final Pattern DiractoryPattern = Pattern.compile("([^/]+)\\.(\\w+)$");
+    public static void parser(PackagePart pPart, String OriginalFileName, String OLESavePath) throws IOException, OpenXML4JException, XmlException {
 
-    /**
-     * 97-03 이후 버전의 Ms Office 문서에서 포함된 파일들을 추출합니다.
-     *
-     * @param fileOlePath 추출된 ole 객체의 저장경로
-     * @param picture OLE를 저장하는 PackagePart라는 타입의 객체
-     * */
-    public static void getParseFile(List<PackagePart> picture, String fileOlePath) throws IOException {
-        for(int i=0; i<picture.size(); i++) {
-            if(picture.get(i).getContentType().equals(MimeType.OLEOBJECT.getValue())){
-                try(POIFSFileSystem poifs = new POIFSFileSystem(picture.get(i).getInputStream())){
-                    DirectoryEntry root = poifs.getRoot();
+        //XLS파일 처리
+        if (pPart.getContentType().equals("application/vnd.ms-excel")) {
 
-                    if(root.hasEntry(Ole10Native.OLE10_NATIVE)){
-                        DocumentEntry ole10NativeEntry = (DocumentEntry)root.getEntry(Ole10Native.OLE10_NATIVE);
-                        InputStream oleInputStream = poifs.createDocumentInputStream(ole10NativeEntry.getName());
-                        EmbeddedFileExtractor.parseOle10NativeEntry(oleInputStream, fileOlePath);
+            FileOutputStream outputStream = null;
+            HSSFWorkbook embeddedWorkbook = new HSSFWorkbook(pPart.getInputStream());
+            embeddedWorkbook.setHidden(false);
 
-                        //가끔가다 한컴워드인 경우 bin파일에 package가 있음, 없을때도 있음....? 뭐지?
-                    }/*else if(root.hasEntry(OleEntry.PACKAGE.getValue())){
-                   // log.info("한컴 워드임");
-                    DocumentEntry Package = (DocumentEntry)root.getEntry(OleEntry.PACKAGE.getValue());
-                    InputStream oleInputStream = poifs.createDocumentInputStream(Package.getName());
-                    //EmbeddedFileExtractor.parsePackageEntry((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()), Package, fileOlePath);
+            String uuid = addUniqueFileNameMapping(removePath(String.valueOf(pPart.getPartName())));
 
-                    try (FileOutputStream outputStream = new FileOutputStream(fileOlePath +File.separator+ FileUtil.getRtNum()+ FileType.DOCX.getValue())) {
-                        outputStream.write(oleInputStream.readAllBytes());
-                    } catch (IOException e) {
-                        ExceptionUtils.getStackTrace(e);
-                        log.error("파일 저장 실패");
-                    }
+            stringBuilder.append(OLESavePath).append(uuid);
 
-                }*/ else if (root.hasEntry(OleEntry.HWPINFO.getValue())) {
+            try {
+                outputStream = new FileOutputStream(stringBuilder.toString());
+                embeddedWorkbook.write(outputStream);
 
-                        stringBuilder.append("HWP_Document").append(FileType.HWP.getValue());
-                        String fileName = stringBuilder.toString();
-                        stringBuilder.setLength(0);
+            }catch (IOException e){
+                ExceptionUtils.getStackTrace(e);
+            }finally{
+                stringBuilder.setLength(0);
+                IOUtils.closeQuietly(embeddedWorkbook);
+                IOUtils.closeQuietly(outputStream);
+            }
+        }
+        // XLSX파일 처리
+        else if (pPart.getContentType().equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
 
-                        String uuid = addUniqueFileNameMapping(fileName);
+            FileOutputStream outputStream = null;
 
-                        stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
-                        try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
-                            log.info("try안에 들어옴");
-                            outputStream.write(picture.get(i).getInputStream().readAllBytes());
-                        } catch (IOException e) {
-                            ExceptionUtils.getStackTrace(e);
-                            log.error("한컴 파일 저장 실패");
-                        }
-                        stringBuilder.setLength(0);
-                    }else if (root.hasEntry(OleEntry.WORD.getValue())) {
+            OPCPackage docPackage = OPCPackage.open(pPart.getInputStream());
+            XSSFWorkbook embeddedWorkbook = new XSSFWorkbook(docPackage);
 
-                        String fileName = parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
-                        String uuid = addUniqueFileNameMapping(fileName);
+            CTBookView[] cb = embeddedWorkbook.getCTWorkbook().getBookViews().getWorkbookViewArray();
 
-                        stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
-                        try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
-                            outputStream.write(picture.get(i).getInputStream().readAllBytes());
-                        } catch (IOException e) {
-                            ExceptionUtils.getStackTrace(e);
-                            log.error("파일 저장 실패");
-                        }
-                        stringBuilder.setLength(0);
-                    }else if (root.hasEntry(OleEntry.PPT.getValue())) {
+            cb[0].setVisibility(STVisibility.VISIBLE);
+            embeddedWorkbook.getCTWorkbook().getBookViews().setWorkbookViewArray(cb);
 
-                        String fileName = parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
-                        String uuid = addUniqueFileNameMapping(fileName);
+            String uuid = addUniqueFileNameMapping(removePath(String.valueOf(pPart.getPartName())));
 
-                        stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
-                        try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
-                            outputStream.write(picture.get(i).getInputStream().readAllBytes());
-                        } catch (IOException e) {
-                            ExceptionUtils.getStackTrace(e);
-                            log.error("파일 저장 실패");
-                        }
-                        stringBuilder.setLength(0);
-                    } else if (root.hasEntry(OleEntry.XLS.getValue())) {
+            stringBuilder.append(OLESavePath).append(uuid);
 
-                        String fileName = parseFileName((DocumentEntry) root.getEntry(OleEntry.COMPOBJ.getValue()));
-                        String uuid = addUniqueFileNameMapping(fileName);
+            try {
+                outputStream = new FileOutputStream(stringBuilder.toString());
+                embeddedWorkbook.write(outputStream);
 
-                        stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
-                        try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
-                            outputStream.write(picture.get(i).getInputStream().readAllBytes());
-                        } catch (IOException e) {
-                            ExceptionUtils.getStackTrace(e);
-                            log.error("파일 저장 실패");
-                        }
-                        stringBuilder.setLength(0);
-                    }
-                }catch(IOException e){
-                    ExceptionUtils.getStackTrace(e);
-                }
-                continue;
+            }catch (IOException e){
+                ExceptionUtils.getStackTrace(e);
+            }finally{
+                stringBuilder.setLength(0);
+                IOUtils.closeQuietly(embeddedWorkbook);
+                IOUtils.closeQuietly(outputStream);
             }
 
-            Matcher matcher = DiractoryPattern.matcher(picture.get(i).getPartName().getName());
+        }
+        // DOC문서 처리
+        else if (pPart.getContentType().equals("application/msword")) {
 
-            if(matcher.find()){
-                String fileName = matcher.group(0);
-                XSSFWorkbook workbook = null;
-                byte[] oleData=null;
+            FileOutputStream outputStream = null;
+            HWPFDocument document = new HWPFDocument(pPart.getInputStream());
 
-                if(FileUtil.getFileExtension(fileName).equals(".xlsx")){
-                    log.info("xlsx파일임");
-                    workbook = new XSSFWorkbook(new ByteArrayInputStream(picture.get(i).getInputStream().readAllBytes()));
+            String uuid = addUniqueFileNameMapping(removePath(String.valueOf(pPart.getPartName())));
 
-                    CTBookView[] cb = workbook.getCTWorkbook().getBookViews().getWorkbookViewArray();
+            stringBuilder.append(OLESavePath).append(uuid);
 
-                    //log.info(Arrays.toString(cb));
+            try {
+                outputStream = new FileOutputStream(stringBuilder.toString());
+                document.write(outputStream);
 
-                    cb[0].setVisibility(STVisibility.VISIBLE);
-                    workbook.getCTWorkbook().getBookViews().setWorkbookViewArray(cb);
+            }catch (IOException e){
+                ExceptionUtils.getStackTrace(e);
+            }finally{
+                stringBuilder.setLength(0);
+                IOUtils.closeQuietly(document);
+                IOUtils.closeQuietly(outputStream);
+            }
+        }
+        // DOCX문서 처리
+        else if (pPart.getContentType().equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
+            FileOutputStream outputStream = null;
 
-                    //log.info(Arrays.toString(cb));
+            OPCPackage docPackage = OPCPackage.open(pPart.getInputStream());
+            XWPFDocument document = new XWPFDocument(docPackage);
 
-                    ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                    workbook.write(outputStream);
+            String uuid = addUniqueFileNameMapping(removePath(String.valueOf(pPart.getPartName())));
 
-                    oleData = outputStream.toByteArray();
-                }else{
-                    oleData = picture.get(i).getInputStream().readAllBytes();
-                }
+            stringBuilder.append(OLESavePath).append(uuid);
 
-                String uuid = UUID.randomUUID()+FileUtil.getFileExtension(fileName);
+            try {
+                outputStream = new FileOutputStream(stringBuilder.toString());
+                document.write(outputStream);
 
-                ExternalFileMap.addFileNameMapping(fileName,uuid);
+            }catch (IOException e){
+                ExceptionUtils.getStackTrace(e);
+            }finally{
+                stringBuilder.setLength(0);
+                IOUtils.closeQuietly(document);
+                IOUtils.closeQuietly(outputStream);
+            }
+        }
+        // PPT문서 처리
+        else if (pPart.getContentType().equals("application/vnd.ms-powerpoint")) {
+            FileOutputStream outputStream = null;
+            HSLFSlideShow slideShow = new HSLFSlideShow(pPart.getInputStream());
 
-                stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
+            String uuid = addUniqueFileNameMapping(removePath(String.valueOf(pPart.getPartName())));
 
+            stringBuilder.append(OLESavePath).append(uuid);
 
-                try (FileOutputStream fileOutputStream = new FileOutputStream(stringBuilder.toString())) {
-                    fileOutputStream.write(oleData);
+            try {
+                outputStream = new FileOutputStream(stringBuilder.toString());
+                slideShow.write(outputStream);
+
+            }catch (IOException e){
+                ExceptionUtils.getStackTrace(e);
+            }finally{
+                stringBuilder.setLength(0);
+                IOUtils.closeQuietly(slideShow);
+                IOUtils.closeQuietly(outputStream);
+            }
+        }
+        // PPTX문서 처리
+        else if (pPart.getContentType().equals("application/vnd.openxmlformats-officedocument.presentationml.presentation")) {
+            FileOutputStream outputStream = null;
+
+            OPCPackage docPackage = OPCPackage.open(pPart.getInputStream());
+            XSLFSlideShow slideShow = new XSLFSlideShow(docPackage);
+
+            String uuid = addUniqueFileNameMapping(removePath(String.valueOf(pPart.getPartName())));
+
+            stringBuilder.append(OLESavePath).append(uuid);
+
+            try {
+                outputStream = new FileOutputStream(stringBuilder.toString());
+                slideShow.write(outputStream);
+
+            }catch (IOException e){
+                ExceptionUtils.getStackTrace(e);
+            }finally{
+                stringBuilder.setLength(0);
+                IOUtils.closeQuietly(slideShow);
+                IOUtils.closeQuietly(outputStream);
+            }
+        }
+        // HWP, 기타 OLE들 처리
+        else if(pPart.getContentType().equals("application/vnd.openxmlformats-officedocument.oleObject")) {
+            
+            POIFSFileSystem poifsFileSystem = new POIFSFileSystem(pPart.getInputStream());
+            FileOutputStream outputStream = null;
+
+            DirectoryNode directoryNode = poifsFileSystem.getRoot();
+
+            if(directoryNode.hasEntry(OleEntry.HWPINFO.getValue())){
+
+                stringBuilder.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.HWP.getValue());
+                String fileName = stringBuilder.toString();
+                stringBuilder.setLength(0);
+
+                String uuid = addUniqueFileNameMapping(fileName);
+
+                stringBuilder.append(OLESavePath).append(File.separator).append(uuid);
+                try {
+
+                    outputStream = new FileOutputStream(stringBuilder.toString());
+                    poifsFileSystem.writeFilesystem(outputStream);
+
                 } catch (IOException e) {
                     ExceptionUtils.getStackTrace(e);
-                    log.error("파일 저장 실패");
                 }finally {
-                    IOUtils.closeQuietly(workbook);
+                    stringBuilder.setLength(0);
+                    //IOUtils.closeQuietly(pPart.getInputStream());
+                    IOUtils.closeQuietly(poifsFileSystem);
+
                 }
+
+            }else if(directoryNode.hasEntry(Ole10Native.OLE10_NATIVE)){
+                String bmpType = parseFileName((DocumentEntry) poifsFileSystem.getRoot().getEntry(OleEntry.COMPOBJ.getValue()));
+
+                if(bmpType!=null && bmpType.equals(FileType.BMP.getValue())){
+                    DocumentInputStream oleStream = new DocumentInputStream((DocumentEntry) directoryNode.getEntry(Ole10Native.OLE10_NATIVE));
+                    oleStream.skipNBytes(4);
+
+                    stringBuilder.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.BMP.getValue());
+                    String uuid = addUniqueFileNameMapping(stringBuilder.toString());
+                    stringBuilder.setLength(0);
+
+                    stringBuilder.append(OLESavePath).append(uuid);
+
+                    try {
+                        outputStream = new FileOutputStream(stringBuilder.toString());
+                        outputStream.write(oleStream.readAllBytes());
+
+                    } catch (IOException e) {
+                        ExceptionUtils.getStackTrace(e);
+
+                    } finally {
+                        stringBuilder.setLength(0);
+                        IOUtils.closeQuietly(oleStream);
+                        IOUtils.closeQuietly(outputStream);
+                    }
+
+                }else{
+                    DocumentEntry ole10Native = (DocumentEntry) directoryNode.getEntry(Ole10Native.OLE10_NATIVE);
+                    EmbeddedFileExtractor.parseOle10NativeEntry(new DocumentInputStream(ole10Native), OLESavePath);
+                }
+
+            }else if (directoryNode.hasEntry("EmbeddedOdf")) {
+
+                DocumentInputStream oleStream = new DocumentInputStream((DocumentEntry) directoryNode.getEntry("EmbeddedOdf"));
+
+                if(!directoryNode.hasEntry(OleEntry.COMPOBJ.getValue())){
+                    stringBuilder.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.ODT.getValue());
+                }else{
+                    stringBuilder.append(removeFileExtension(OriginalFileName)).append("_OLE").append(parseFileName((DocumentEntry) directoryNode.getEntry(OleEntry.COMPOBJ.getValue())));
+                }
+
+                String uuid = addUniqueFileNameMapping(stringBuilder.toString());
                 stringBuilder.setLength(0);
+
+                stringBuilder.append(OLESavePath).append(uuid);
+
+                try {
+                    outputStream = new FileOutputStream(stringBuilder.toString());
+                    outputStream.write(oleStream.readAllBytes());
+
+                } catch (IOException e) {
+                    ExceptionUtils.getStackTrace(e);
+                } finally {
+                    stringBuilder.setLength(0);
+                    IOUtils.closeQuietly(oleStream);
+                    IOUtils.closeQuietly(outputStream);
+                }
             }
         }
     }

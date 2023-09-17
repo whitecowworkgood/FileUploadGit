@@ -88,6 +88,24 @@ public class FileUtil {
             return ""; // 확장자가 없을 경우 빈 문자열 반환
         }
     }
+
+    public static String removePath(String filePath){
+        int lastSlashIndex = filePath.lastIndexOf('/');
+        if (lastSlashIndex != -1 && lastSlashIndex < filePath.length() - 1) {
+            String fileName = filePath.substring(lastSlashIndex + 1);
+            //System.out.println("추출된 파일명: " + fileName);
+            return fileName;
+        }
+        return null;
+    }
+
+    public static String removeFileExtension(String fileName) {
+        int lastDotIndex = fileName.lastIndexOf('.');
+        if (lastDotIndex != -1) {
+            return fileName.substring(0, lastDotIndex);
+        }
+        return fileName;
+    }
     /**
      * compObj에서 이름을 가져올때, 끝의 null을 삭제합니다.
      *
