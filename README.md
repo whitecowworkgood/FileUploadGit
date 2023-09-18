@@ -122,4 +122,4 @@
 
     //9월 18일
     //리마스터 작업 완료
-    //피드백 적용(hashmap저장 static제거, select(끝), csv, rtf파일)
+    //피드백 적용(hashmap저장 static제거(ConcurrentHashMap로 처리), select(끝), csv(끝), rtf파일)

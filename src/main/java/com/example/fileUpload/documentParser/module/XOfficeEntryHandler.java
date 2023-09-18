@@ -2,6 +2,7 @@ package com.example.fileUpload.documentParser.module;
 
 import com.example.fileUpload.util.FileType;
 import com.example.fileUpload.util.OleEntry;
+import jdk.swing.interop.SwingInterOpUtils;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -12,16 +13,21 @@ import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.poifs.filesystem.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xslf.usermodel.XSLFSlideShow;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.xmlbeans.XmlException;
+import org.hibernate.event.spi.SaveOrUpdateEvent;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBookView;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.STVisibility;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 
 import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
 import static com.example.fileUpload.util.FileUtil.removeFileExtension;
@@ -34,18 +40,21 @@ public class XOfficeEntryHandler {
 
         EmbeddedFileExtractor embeddedFileExtractor = new EmbeddedFileExtractor();
 
+        System.out.println(pPart.getContentType());
         //XLS파일 처리
         if (pPart.getContentType().equals("application/vnd.ms-excel")) {
 
             FileOutputStream outputStream = null;
-            HSSFWorkbook embeddedWorkbook = new HSSFWorkbook(pPart.getInputStream());
-            embeddedWorkbook.setHidden(false);
-
-            String uuid = addUniqueFileNameMapping(removePath(String.valueOf(pPart.getPartName())));
-
-            stringBuilder.append(OLESavePath).append(uuid);
+            HSSFWorkbook embeddedWorkbook = null;
 
             try {
+                embeddedWorkbook = new HSSFWorkbook(pPart.getInputStream());
+                embeddedWorkbook.setHidden(false);
+
+                String uuid = addUniqueFileNameMapping(removePath(String.valueOf(pPart.getPartName())));
+
+                stringBuilder.append(OLESavePath).append(uuid);
+
                 outputStream = new FileOutputStream(stringBuilder.toString());
                 embeddedWorkbook.write(outputStream);
 
@@ -61,20 +70,21 @@ public class XOfficeEntryHandler {
         else if (pPart.getContentType().equals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")) {
 
             FileOutputStream outputStream = null;
-
-            OPCPackage docPackage = OPCPackage.open(pPart.getInputStream());
-            XSSFWorkbook embeddedWorkbook = new XSSFWorkbook(docPackage);
-
-            CTBookView[] cb = embeddedWorkbook.getCTWorkbook().getBookViews().getWorkbookViewArray();
-
-            cb[0].setVisibility(STVisibility.VISIBLE);
-            embeddedWorkbook.getCTWorkbook().getBookViews().setWorkbookViewArray(cb);
-
-            String uuid = addUniqueFileNameMapping(removePath(String.valueOf(pPart.getPartName())));
-
-            stringBuilder.append(OLESavePath).append(uuid);
+            OPCPackage docPackage = null;
+            XSSFWorkbook embeddedWorkbook = null;
 
             try {
+                docPackage = OPCPackage.open(pPart.getInputStream());
+                embeddedWorkbook = new XSSFWorkbook(docPackage);
+
+                CTBookView[] cb = embeddedWorkbook.getCTWorkbook().getBookViews().getWorkbookViewArray();
+
+                cb[0].setVisibility(STVisibility.VISIBLE);
+                embeddedWorkbook.getCTWorkbook().getBookViews().setWorkbookViewArray(cb);
+
+                String uuid = addUniqueFileNameMapping(removePath(String.valueOf(pPart.getPartName())));
+
+                stringBuilder.append(OLESavePath).append(uuid);
                 outputStream = new FileOutputStream(stringBuilder.toString());
                 embeddedWorkbook.write(outputStream);
 
@@ -84,20 +94,74 @@ public class XOfficeEntryHandler {
                 stringBuilder.setLength(0);
                 IOUtils.closeQuietly(embeddedWorkbook);
                 IOUtils.closeQuietly(outputStream);
+                IOUtils.closeQuietly(docPackage);
             }
 
+        } else if (pPart.getContentType().equals("application/vnd.ms-excel.sheet.macroEnabled.12")) {
+            OPCPackage docPackage = null;
+            Workbook workbook = null;
+            BufferedWriter csvWriter = null;
+
+            try {
+                docPackage = OPCPackage.open(pPart.getInputStream());
+                workbook = new XSSFWorkbook(docPackage);
+
+                // 시트 선택 (시트 인덱스 또는 이름 사용 가능)
+                Sheet sheet = workbook.getSheetAt(0); // 첫 번째 시트 선택 (인덱스 0부터 시작)
+
+                // CSV 파일 경로 및 파일명 설정
+                stringBuilder.append(sheet.getSheetName()).append(".csv");
+                String uuid = addUniqueFileNameMapping(stringBuilder.toString());
+                stringBuilder.setLength(0);
+
+                stringBuilder.append(OLESavePath).append(uuid);
+
+                csvWriter = new BufferedWriter(new FileWriter(stringBuilder.toString(), Charset.forName("EUC-KR")));
+
+                // 각 행을 반복하여 CSV로 쓰기
+                for (Row row : sheet) {
+                    for (Cell cell : row) {
+                        String cellValue = switch (cell.getCellType()) {
+                            case STRING -> cell.getStringCellValue();
+                            case NUMERIC -> String.valueOf(cell.getNumericCellValue());
+                            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
+                            case BLANK -> "";
+                            default -> "";
+                        };
+                        // CSV 파일에 쓰기
+                        csvWriter.write(cellValue);
+
+                        // 다음 셀에 데이터가 없으면 줄바꿈
+                        if (cell.getColumnIndex() < row.getLastCellNum() - 1) {
+                            csvWriter.write(",");
+                        } else {
+                            csvWriter.newLine();
+                        }
+                    }
+                }
+
+            } catch (IOException e) {
+                ExceptionUtils.getStackTrace(e);
+            }finally {
+                stringBuilder.setLength(0);
+                IOUtils.closeQuietly(docPackage);
+                IOUtils.closeQuietly(workbook);
+                IOUtils.closeQuietly(csvWriter);
+            }
         }
+
         // DOC문서 처리
         else if (pPart.getContentType().equals("application/msword")) {
 
             FileOutputStream outputStream = null;
-            HWPFDocument document = new HWPFDocument(pPart.getInputStream());
-
-            String uuid = addUniqueFileNameMapping(removePath(String.valueOf(pPart.getPartName())));
-
-            stringBuilder.append(OLESavePath).append(uuid);
+            HWPFDocument document = null;
 
             try {
+                document = new HWPFDocument(pPart.getInputStream());
+                String uuid = addUniqueFileNameMapping(removePath(String.valueOf(pPart.getPartName())));
+
+                stringBuilder.append(OLESavePath).append(uuid);
+
                 outputStream = new FileOutputStream(stringBuilder.toString());
                 document.write(outputStream);
 
@@ -112,15 +176,17 @@ public class XOfficeEntryHandler {
         // DOCX문서 처리
         else if (pPart.getContentType().equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
             FileOutputStream outputStream = null;
-
-            OPCPackage docPackage = OPCPackage.open(pPart.getInputStream());
-            XWPFDocument document = new XWPFDocument(docPackage);
-
-            String uuid = addUniqueFileNameMapping(removePath(String.valueOf(pPart.getPartName())));
-
-            stringBuilder.append(OLESavePath).append(uuid);
+            OPCPackage docPackage = null;
+            XWPFDocument document = null;
 
             try {
+                docPackage = OPCPackage.open(pPart.getInputStream());
+                document = new XWPFDocument(docPackage);
+
+                String uuid = addUniqueFileNameMapping(removePath(String.valueOf(pPart.getPartName())));
+
+                stringBuilder.append(OLESavePath).append(uuid);
+
                 outputStream = new FileOutputStream(stringBuilder.toString());
                 document.write(outputStream);
 
@@ -128,6 +194,7 @@ public class XOfficeEntryHandler {
                 ExceptionUtils.getStackTrace(e);
             }finally{
                 stringBuilder.setLength(0);
+                IOUtils.closeQuietly(docPackage);
                 IOUtils.closeQuietly(document);
                 IOUtils.closeQuietly(outputStream);
             }
@@ -135,13 +202,15 @@ public class XOfficeEntryHandler {
         // PPT문서 처리
         else if (pPart.getContentType().equals("application/vnd.ms-powerpoint")) {
             FileOutputStream outputStream = null;
-            HSLFSlideShow slideShow = new HSLFSlideShow(pPart.getInputStream());
-
-            String uuid = addUniqueFileNameMapping(removePath(String.valueOf(pPart.getPartName())));
-
-            stringBuilder.append(OLESavePath).append(uuid);
+            HSLFSlideShow slideShow = null;
 
             try {
+                slideShow = new HSLFSlideShow(pPart.getInputStream());
+
+                String uuid = addUniqueFileNameMapping(removePath(String.valueOf(pPart.getPartName())));
+
+                stringBuilder.append(OLESavePath).append(uuid);
+
                 outputStream = new FileOutputStream(stringBuilder.toString());
                 slideShow.write(outputStream);
 
@@ -156,15 +225,17 @@ public class XOfficeEntryHandler {
         // PPTX문서 처리
         else if (pPart.getContentType().equals("application/vnd.openxmlformats-officedocument.presentationml.presentation")) {
             FileOutputStream outputStream = null;
-
-            OPCPackage docPackage = OPCPackage.open(pPart.getInputStream());
-            XSLFSlideShow slideShow = new XSLFSlideShow(docPackage);
-
-            String uuid = addUniqueFileNameMapping(removePath(String.valueOf(pPart.getPartName())));
-
-            stringBuilder.append(OLESavePath).append(uuid);
+            OPCPackage docPackage = null;
+            XSLFSlideShow slideShow = null;
 
             try {
+                docPackage = OPCPackage.open(pPart.getInputStream());
+                slideShow = new XSLFSlideShow(docPackage);
+
+                String uuid = addUniqueFileNameMapping(removePath(String.valueOf(pPart.getPartName())));
+
+                stringBuilder.append(OLESavePath).append(uuid);
+
                 outputStream = new FileOutputStream(stringBuilder.toString());
                 slideShow.write(outputStream);
 
@@ -172,6 +243,7 @@ public class XOfficeEntryHandler {
                 ExceptionUtils.getStackTrace(e);
             }finally{
                 stringBuilder.setLength(0);
+                IOUtils.closeQuietly(docPackage);
                 IOUtils.closeQuietly(slideShow);
                 IOUtils.closeQuietly(outputStream);
             }
@@ -202,7 +274,7 @@ public class XOfficeEntryHandler {
                     ExceptionUtils.getStackTrace(e);
                 }finally {
                     stringBuilder.setLength(0);
-                    //IOUtils.closeQuietly(pPart.getInputStream());
+                    IOUtils.closeQuietly(outputStream);
                     IOUtils.closeQuietly(poifsFileSystem);
 
                 }

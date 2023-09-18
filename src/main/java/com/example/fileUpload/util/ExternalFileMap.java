@@ -2,16 +2,16 @@ package com.example.fileUpload.util;
 
 import lombok.Getter;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 public class ExternalFileMap {
 
     @Getter
-    private static Map<String, String> fileNameMap = new HashMap<>();
-    private static Map<String, Integer> fileNameCountMap = new HashMap<>();
+    private static Map<String, String> fileNameMap = new ConcurrentHashMap<>();
+    private static Map<String, Integer> fileNameCountMap = new ConcurrentHashMap<>();
 
     /**
      * 추출할 OLE파일들의 이름을 가져와 UUID로 랜덤이름을 생성하고, MAP에 넣어서 관리합니다.

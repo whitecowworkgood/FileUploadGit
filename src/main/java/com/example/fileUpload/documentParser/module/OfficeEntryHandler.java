@@ -7,16 +7,20 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
+import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.poifs.filesystem.*;
 import org.apache.poi.ss.extractor.EmbeddedData;
 import org.apache.poi.ss.extractor.EmbeddedExtractor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBookView;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.STVisibility;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
+import java.nio.charset.Charset;
 
 import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
 import static com.example.fileUpload.util.FileUtil.removeFileExtension;
@@ -234,7 +238,59 @@ public class OfficeEntryHandler {
                     IOUtils.closeQuietly(xs);
                 }
 
-            }else{
+            }else if(type!=null && type.equals(FileType.CSV.getValue())){
+
+                Workbook workbook = null;
+                BufferedWriter csvWriter = null;
+
+                try {
+                    oleStream = new DocumentInputStream((DocumentEntry) directoryNode.getEntry(OleEntry.PACKAGE.getValue()));
+                    workbook = new XSSFWorkbook(oleStream);
+
+                    // 시트 선택 (시트 인덱스 또는 이름 사용 가능)
+                    Sheet sheet = workbook.getSheetAt(0); // 첫 번째 시트 선택 (인덱스 0부터 시작)
+
+                    // CSV 파일 경로 및 파일명 설정
+                    stringBuilder.append(sheet.getSheetName()).append(".csv");
+                    String uuid = addUniqueFileNameMapping(stringBuilder.toString());
+                    stringBuilder.setLength(0);
+
+                    stringBuilder.append(OLESavePath).append(uuid);
+
+                    csvWriter = new BufferedWriter(new FileWriter(stringBuilder.toString(), Charset.forName("EUC-KR")));
+
+                    // 각 행을 반복하여 CSV로 쓰기
+                    for (Row row : sheet) {
+                        for (Cell cell : row) {
+                            String cellValue = switch (cell.getCellType()) {
+                                case STRING -> cell.getStringCellValue();
+                                case NUMERIC -> String.valueOf(cell.getNumericCellValue());
+                                case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
+                                case BLANK -> "";
+                                default -> "";
+                            };
+                            // CSV 파일에 쓰기
+                            csvWriter.write(cellValue);
+
+                            // 다음 셀에 데이터가 없으면 줄바꿈
+                            if (cell.getColumnIndex() < row.getLastCellNum() - 1) {
+                                csvWriter.write(",");
+                            } else {
+                                csvWriter.newLine();
+                            }
+                        }
+                    }
+
+                } catch (IOException e) {
+                    ExceptionUtils.getStackTrace(e);
+                }finally {
+                    stringBuilder.setLength(0);
+                    IOUtils.closeQuietly(oleStream);
+                    IOUtils.closeQuietly(workbook);
+                    IOUtils.closeQuietly(csvWriter);
+                }
+
+            } else{
                 stringBuilder.append(removeFileExtension(OriginalFileName)).append("_OLE").append(type);
 
                 String uuid = addUniqueFileNameMapping(stringBuilder.toString());

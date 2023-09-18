@@ -8,6 +8,7 @@ public enum FileType {
     DOCX(".docx"),
     PPTX(".pptx"),
     XLSX(".xlsx"),
+    CSV(".csv"),
     DOC(".doc"),
     PPT(".ppt"),
     XLS(".xls"),
