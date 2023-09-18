@@ -1,27 +1,22 @@
 package com.example.fileUpload.documentParser.module;
 
 import com.example.fileUpload.util.FileUtil;
-import com.example.fileUpload.util.OleEntry;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.poi.poifs.filesystem.DirectoryEntry;
 import org.apache.poi.poifs.filesystem.DocumentEntry;
 import org.apache.poi.poifs.filesystem.DocumentInputStream;
-import org.apache.poi.poifs.filesystem.Entry;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.STVisibility;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.openxmlformats.schemas.spreadsheetml.x2006.main.*;
 
 
 import java.io.*;
 import java.nio.charset.Charset;
-import java.util.Iterator;
 
 import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
 
 
 @Slf4j
+@NoArgsConstructor
 public class EmbeddedFileExtractor {
     static StringBuilder stringBuilder = new StringBuilder();
 
@@ -31,9 +26,11 @@ public class EmbeddedFileExtractor {
      * @param fileOlePath 추출된 ole파일을 저장할 폴더경로
      * @param inputStream 업로드 된 문서의 Ole10Native를 Inputstream으로 가져옴.
      * */
-    public static void parseOle10NativeEntry(InputStream inputStream, String fileOlePath) {
+    public void parseOle10NativeEntry(InputStream inputStream, String fileOlePath) {
+        ByteArrayOutputStream variableData =null;
+        try{
+            variableData = new ByteArrayOutputStream();
 
-        try (ByteArrayOutputStream variableData = new ByteArrayOutputStream()){
             inputStream.skipNBytes(6);
 
             int byteRead;
@@ -43,6 +40,7 @@ public class EmbeddedFileExtractor {
                 }
                 variableData.write(byteRead);
             }
+
             String fileName = variableData.toString(Charset.forName("euc-kr"));
 
             while (true) {
@@ -57,14 +55,12 @@ public class EmbeddedFileExtractor {
                         && variableData.toByteArray()[variableData.size() - 3] == 0x00
                         && variableData.toByteArray()[variableData.size() - 2] == 0x03
                         && variableData.toByteArray()[variableData.size() - 1] == 0x00) {
-                    //log.info("0x 00 00 00 03 00발견!!");
                     break;
                 }
             }
 
             byte[] tempPathSizeBytes = new byte[4];
             inputStream.read(tempPathSizeBytes);
-
 
             int dataSize = (tempPathSizeBytes[3] & 0xFF) << 24 |
                     (tempPathSizeBytes[2] & 0xFF) << 16 |
@@ -85,7 +81,6 @@ public class EmbeddedFileExtractor {
             byte[] embeddedData = new byte[realSize];
             inputStream.read(embeddedData);
 
-
             String uuid = addUniqueFileNameMapping(fileName);
 
             stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
@@ -95,14 +90,12 @@ public class EmbeddedFileExtractor {
                 ExceptionUtils.getStackTrace(e);
             }
             stringBuilder.setLength(0);
-
-        } catch (IOException e) {
+        }catch (IOException e){
             ExceptionUtils.getStackTrace(e);
-            log.error("IO 오류 발생");
         }finally {
             IOUtils.closeQuietly(inputStream);
+            IOUtils.closeQuietly(variableData);
         }
-
     }
     /**
      * 문서내 연결된 문서파일의 이름과 확장자를 반환합니다.
@@ -110,12 +103,15 @@ public class EmbeddedFileExtractor {
      * @param compObj 문서내 연결된 파일에 있는 타입을 확인할 수 있는 Entry데이터 입니다.
      * @return 파일명을 추출합니다.
      * */
-    public static String parseFileName(DocumentEntry compObj){
+    public String parseFileType(DocumentEntry compObj){
+        DocumentInputStream compObjStream = null;
+
         String fileFormat=null;
         String fileTypeString=null;
         String fileType=null;
 
-        try(DocumentInputStream compObjStream = new DocumentInputStream(compObj)){
+        try{
+            compObjStream = new DocumentInputStream(compObj);
 
             compObjStream.skipNBytes(28);
 
@@ -131,9 +127,6 @@ public class EmbeddedFileExtractor {
             compObjStream.readFully(fileNameData);
 
             fileFormat = FileUtil.removeNullCharacters(new String(fileNameData, Charset.forName("euc-kr")));
-
-
-            //---------상단으로 파일명 확인------------
 
             byte[] skipSizeBytes = new byte[4];
             compObjStream.readFully(skipSizeBytes);
@@ -176,151 +169,11 @@ public class EmbeddedFileExtractor {
             }else if(fileTypeString.startsWith("PBrush")){
                 fileType=".bmp";
             }
-
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-
-        /*String returnValue = stringBuilder.append(fileFormat).append(fileType).toString();
-        stringBuilder.setLength(0);*/
-        return fileType;
-    }
-
-    /**
-     * 문서내 ole문서의 데이터를 추출하여, 저장합니다.
-     *
-     * @param fileOlePath 추출된 ole 객체의 저장경로
-     * @param fileName  추출된 ole 객체의 파일명
-     * @param packageFileEntry 데이터를 추출하기 위한 Package라는  Entry 데이터
-     *
-     *
-     * */
-    public static void parsePackageEntry(String fileName, DocumentEntry packageFileEntry, String fileOlePath) throws IOException {
-        DocumentInputStream oleStream =null;
-        XSSFWorkbook workbook =null;
-        byte[] oleData = null;
-        try {
-            oleStream = new DocumentInputStream(packageFileEntry);
-
-            if(FileUtil.getFileExtension(fileName).equals(".xlsx")){
-
-                workbook = new XSSFWorkbook(new ByteArrayInputStream(oleStream.readAllBytes()));
-
-                CTBookView[] cb = workbook.getCTWorkbook().getBookViews().getWorkbookViewArray();
-
-                cb[0].setVisibility(STVisibility.VISIBLE);
-                workbook.getCTWorkbook().getBookViews().setWorkbookViewArray(cb);
-
-                ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-                workbook.write(outputStream);
-
-                oleData = outputStream.toByteArray();
-            }else{
-                oleData = new byte[oleStream.available()];
-                oleStream.readFully(oleData);
-            }
-
-            String uuid = addUniqueFileNameMapping(fileName);
-
-            stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
-
-
-            try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
-                outputStream.write(oleData);
-            } catch (IOException e) {
-                ExceptionUtils.getStackTrace(e);
-                log.error("파일 저장 실패");
-            }
-            stringBuilder.setLength(0);
-        }catch(IOException e) {
+        }catch (IOException e){
             ExceptionUtils.getStackTrace(e);
-            throw new RuntimeException(e);
         }finally {
-            IOUtils.closeQuietly(oleStream);
-            IOUtils.closeQuietly(workbook);
+            IOUtils.closeQuietly(compObjStream);
         }
-
+        return  fileType;
     }
-    /**
-     * docx파일 추출시, compObj이라는 엔트리가 없어서 추가한 코드
-     *
-     * @param fileOlePath 추출된 ole 객체의 저장경로
-     * @param packageFileEntry 데이터를 추출하기 위한 Package라는  Entry 데이터
-     *
-     * */
-    public static void parsePackageEntry(DocumentEntry packageFileEntry, String fileOlePath) throws IOException {
-
-        try(DocumentInputStream oleStream = new DocumentInputStream(packageFileEntry)){
-            byte[] oleData = new byte[oleStream.available()];
-            oleStream.readFully(oleData);
-            String fileName = "Microsoft Word 문서.docx"; //임시로 넣어놓은 코드
-
-            String uuid = addUniqueFileNameMapping(fileName);
-
-            stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
-
-            try (FileOutputStream outputStream = new FileOutputStream(stringBuilder.toString())) {
-                outputStream.write(oleData);
-            } catch (IOException e) {
-                ExceptionUtils.getStackTrace(e);
-                log.error("파일 저장 실패");
-            }
-            stringBuilder.setLength(0);
-        }catch(IOException e) {
-            ExceptionUtils.getStackTrace(e);
-            throw new RuntimeException(e);
-        }
-
-    }
-
-    /**
-     * 97-03파일에 97-03버전의 문서가 포함되어 있으면, Package라는 엔트리가 아니라 별도의 Directory Entry에 저장되기에 추출합니다.
-     *
-     * @param destinationDir 저장할 문서의 Directory Entry를 지정합니다.
-     * @param directoryName Directory Entry를 지정하여, 처음 Entry Name을 무시합니다.
-     * @param sourceDir Directory Entry를 지정합니다.
-     *
-     * @return 추출된 문서의 이름을 반환합니다.
-     * */
-    public static String copyDirectory(DirectoryEntry sourceDir, DirectoryEntry destinationDir, String directoryName) throws IOException {
-        // 기존 코드
-        DirectoryEntry copyDir;
-
-        String fileName = null;
-
-        if (!sourceDir.getName().equals(directoryName)) {
-            if (destinationDir.hasEntry(sourceDir.getName())) {
-                copyDir = (DirectoryEntry) destinationDir.getEntry(sourceDir.getName());
-            } else {
-                copyDir = destinationDir.createDirectory(sourceDir.getName());
-            }
-        }else{
-            copyDir=destinationDir;
-        }
-
-        // 하위 엔트리를 탐색하면서 복사
-        Iterator<Entry> entries = sourceDir.getEntries();
-        while (entries.hasNext()) {
-            Entry entry = entries.next();
-            if (entry.isDirectoryEntry()) {
-                // 디렉터리 엔트리인 경우, 재귀적으로 복사
-                DirectoryEntry sourceSubDir = (DirectoryEntry) entry;
-                copyDirectory(sourceSubDir, copyDir, "");
-            } else if (entry.isDocumentEntry()) {
-
-                if(entry.getName().equals(OleEntry.COMPOBJ.getValue())){
-                    fileName=parseFileName((DocumentEntry) entry);
-                }
-                // 문서 엔트리인 경우, 스트림 데이터를 읽어서 복사본에 생성 또는 업데이트
-                try(InputStream sourceDocEntry = new DocumentInputStream((DocumentEntry) entry)){
-                    DocumentEntry copyDocEntry = copyDir.createDocument(entry.getName(), sourceDocEntry);
-                }catch (IOException e) {
-                    ExceptionUtils.getStackTrace(e);
-                    throw new RuntimeException(e);
-                }
-            }
-        }
-        return fileName;
-    }
-
 }

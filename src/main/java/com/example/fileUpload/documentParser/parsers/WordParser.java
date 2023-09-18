@@ -1,5 +1,6 @@
 package com.example.fileUpload.documentParser.parsers;
 
+import com.example.fileUpload.documentParser.module.OfficeEntryHandler;
 import com.example.fileUpload.documentParser.parsers.abstracts.FileParser;
 import com.example.fileUpload.model.FileDto;
 import com.example.fileUpload.util.OleEntry;
@@ -17,8 +18,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Iterator;
 
-import static com.example.fileUpload.documentParser.module.OfficeEntryHandler.parser;
-
 @Slf4j
 @NoArgsConstructor
 public class WordParser extends FileParser {
@@ -29,6 +28,7 @@ public class WordParser extends FileParser {
         //log.info("파서 돌입!");
 
         HWPFDocumentCore hwpfDocument =null;
+        OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
 
         try{
             hwpfDocument = new HWPFDocument(new FileInputStream(fileDto.getFileSavePath()));
@@ -40,7 +40,7 @@ public class WordParser extends FileParser {
 
                     Entry entry = it.next();
 
-                    parser((DirectoryNode)entry, fileDto.getOriginFileName(), fileDto.getFileOlePath());
+                    officeEntryHandler.parser((DirectoryNode)entry, fileDto.getOriginFileName(), fileDto.getFileOlePath());
                 }
             }
 

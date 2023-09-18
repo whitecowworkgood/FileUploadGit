@@ -33,6 +33,7 @@ public class FileProcessor {
             ExceptionUtils.getStackTrace(e);
             throw new IllegalArgumentException("Unsupported MIME type: " + fileDto.getFileType());
         } catch (Exception e) {
+            ExceptionUtils.getStackTrace(e);
             throw new RuntimeException(e);
         }
     }

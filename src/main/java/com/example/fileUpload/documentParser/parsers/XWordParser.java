@@ -1,5 +1,6 @@
 package com.example.fileUpload.documentParser.parsers;
 
+import com.example.fileUpload.documentParser.module.XOfficeEntryHandler;
 import com.example.fileUpload.documentParser.parsers.abstracts.FileParser;
 import com.example.fileUpload.model.FileDto;
 import lombok.NoArgsConstructor;
@@ -15,7 +16,6 @@ import org.apache.xmlbeans.XmlException;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import static com.example.fileUpload.documentParser.module.XOfficeEntryHandler.parser;
 
 @NoArgsConstructor
 @Slf4j
@@ -27,13 +27,14 @@ public class XWordParser extends FileParser {
 
         FileInputStream fs = null;
         XWPFDocument docx = null;
+        XOfficeEntryHandler xOfficeEntryHandler = new XOfficeEntryHandler();
         try{
             fs = new FileInputStream(fileDto.getFileSavePath());
             docx = new XWPFDocument(OPCPackage.open(fs));
 
             for (PackagePart pPart : docx.getAllEmbeddedParts()) {
                 System.out.println(pPart.getContentType());
-                parser(pPart, fileDto.getOriginFileName(), fileDto.getFileOlePath());
+                xOfficeEntryHandler.parser(pPart, fileDto.getOriginFileName(), fileDto.getFileOlePath());
             }
 
         }catch (IOException e){

@@ -1,5 +1,6 @@
 package com.example.fileUpload.documentParser.parsers;
 
+import com.example.fileUpload.documentParser.module.OfficeEntryHandler;
 import com.example.fileUpload.documentParser.parsers.abstracts.FileParser;
 import com.example.fileUpload.model.FileDto;
 import lombok.NoArgsConstructor;
@@ -12,7 +13,6 @@ import org.apache.poi.poifs.filesystem.DirectoryNode;
 
 import java.io.*;
 
-import static com.example.fileUpload.documentParser.module.OfficeEntryHandler.parser;
 
 @NoArgsConstructor
 public class ExcelParser extends FileParser {
@@ -22,13 +22,15 @@ public class ExcelParser extends FileParser {
         FileInputStream fs = null;
         HSSFWorkbook hssfWorkbook=null;
 
+        OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
+
         try{
             fs = new FileInputStream(fileDto.getFileSavePath());
             hssfWorkbook= new HSSFWorkbook(fs);
 
             for (HSSFObjectData hssfObjectData : hssfWorkbook.getAllEmbeddedObjects()) {
 
-                parser((DirectoryNode) hssfObjectData.getDirectory(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
+                officeEntryHandler.parser((DirectoryNode) hssfObjectData.getDirectory(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
             }
         }catch (IOException e){
             ExceptionUtils.getStackTrace(e);

@@ -5,7 +5,7 @@ public enum OleEntry {
     PACKAGE("Package"),
     COMPOBJ("\u0001CompObj"),
     HWPINFO("\u0005HwpSummaryInformation"),
-
+    ODF("EmbeddedOdf"),
     WORD("WordDocument"),
     PPT("PowerPoint Document"),
     XLS("Workbook");

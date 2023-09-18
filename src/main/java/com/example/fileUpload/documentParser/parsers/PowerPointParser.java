@@ -1,5 +1,6 @@
 package com.example.fileUpload.documentParser.parsers;
 
+import com.example.fileUpload.documentParser.module.OfficeEntryHandler;
 import com.example.fileUpload.documentParser.parsers.abstracts.FileParser;
 import com.example.fileUpload.model.FileDto;
 import lombok.NoArgsConstructor;
@@ -13,8 +14,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
-import static com.example.fileUpload.documentParser.module.OfficeEntryHandler.parser;
-
 
 @NoArgsConstructor
 public class PowerPointParser extends FileParser {
@@ -24,6 +23,7 @@ public class PowerPointParser extends FileParser {
         FileInputStream fs =null;
         POIFSFileSystem poifs =null;
         HSLFSlideShow hslfSlideShow =null;
+        OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
         try{
             fs = new FileInputStream(fileDto.getFileSavePath());
             hslfSlideShow = new HSLFSlideShow(fs);
@@ -35,7 +35,7 @@ public class PowerPointParser extends FileParser {
 
                 poifs = new POIFSFileSystem(object.getInputStream());
 
-                parser(poifs.getRoot(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
+                officeEntryHandler.parser(poifs.getRoot(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
 
             }
         }catch (IOException e){

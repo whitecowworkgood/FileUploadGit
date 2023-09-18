@@ -1,5 +1,6 @@
 package com.example.fileUpload.documentParser.parsers;
 
+import com.example.fileUpload.documentParser.module.XOfficeEntryHandler;
 import com.example.fileUpload.documentParser.parsers.abstracts.FileParser;
 import com.example.fileUpload.model.FileDto;
 import lombok.NoArgsConstructor;
@@ -14,8 +15,6 @@ import org.apache.xmlbeans.XmlException;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-import static com.example.fileUpload.documentParser.module.XOfficeEntryHandler.parser;
-
 @NoArgsConstructor
 public class XPowerPointParser extends FileParser {
 
@@ -24,12 +23,13 @@ public class XPowerPointParser extends FileParser {
 
         FileInputStream fs = null;
         XMLSlideShow pptx = null;
+        XOfficeEntryHandler xOfficeEntryHandler = new XOfficeEntryHandler();
         try{
             fs = new FileInputStream(fileDto.getFileSavePath());
             pptx = new XMLSlideShow(OPCPackage.open(fs));
 
             for (PackagePart pPart : pptx.getAllEmbeddedParts()) {
-                parser(pPart, fileDto.getOriginFileName(), fileDto.getFileOlePath());
+                xOfficeEntryHandler.parser(pPart, fileDto.getOriginFileName(), fileDto.getFileOlePath());
             }
 
         }catch (IOException e){

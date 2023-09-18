@@ -2,6 +2,7 @@ package com.example.fileUpload.documentParser.module;
 
 import com.example.fileUpload.util.FileType;
 import com.example.fileUpload.util.OleEntry;
+import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.hslf.usermodel.HSLFSlideShow;
@@ -22,15 +23,16 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-
-import static com.example.fileUpload.documentParser.module.EmbeddedFileExtractor.parseFileName;
 import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
 import static com.example.fileUpload.util.FileUtil.removeFileExtension;
 import static com.example.fileUpload.util.FileUtil.removePath;
 
+@NoArgsConstructor
 public class XOfficeEntryHandler {
     static StringBuilder stringBuilder = new StringBuilder();
-    public static void parser(PackagePart pPart, String OriginalFileName, String OLESavePath) throws IOException, OpenXML4JException, XmlException {
+    public void parser(PackagePart pPart, String OriginalFileName, String OLESavePath) throws IOException, OpenXML4JException, XmlException {
+
+        EmbeddedFileExtractor embeddedFileExtractor = new EmbeddedFileExtractor();
 
         //XLS파일 처리
         if (pPart.getContentType().equals("application/vnd.ms-excel")) {
@@ -206,7 +208,7 @@ public class XOfficeEntryHandler {
                 }
 
             }else if(directoryNode.hasEntry(Ole10Native.OLE10_NATIVE)){
-                String bmpType = parseFileName((DocumentEntry) poifsFileSystem.getRoot().getEntry(OleEntry.COMPOBJ.getValue()));
+                String bmpType =embeddedFileExtractor.parseFileType((DocumentEntry) poifsFileSystem.getRoot().getEntry(OleEntry.COMPOBJ.getValue()));
 
                 if(bmpType!=null && bmpType.equals(FileType.BMP.getValue())){
                     DocumentInputStream oleStream = new DocumentInputStream((DocumentEntry) directoryNode.getEntry(Ole10Native.OLE10_NATIVE));
@@ -233,17 +235,18 @@ public class XOfficeEntryHandler {
 
                 }else{
                     DocumentEntry ole10Native = (DocumentEntry) directoryNode.getEntry(Ole10Native.OLE10_NATIVE);
-                    EmbeddedFileExtractor.parseOle10NativeEntry(new DocumentInputStream(ole10Native), OLESavePath);
+                    embeddedFileExtractor.parseOle10NativeEntry(new DocumentInputStream(ole10Native), OLESavePath);
                 }
 
-            }else if (directoryNode.hasEntry("EmbeddedOdf")) {
 
-                DocumentInputStream oleStream = new DocumentInputStream((DocumentEntry) directoryNode.getEntry("EmbeddedOdf"));
+            }else if (directoryNode.hasEntry(OleEntry.ODF.getValue())) {
+
+                DocumentInputStream oleStream = new DocumentInputStream((DocumentEntry) directoryNode.getEntry(OleEntry.ODF.getValue()));
 
                 if(!directoryNode.hasEntry(OleEntry.COMPOBJ.getValue())){
                     stringBuilder.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.ODT.getValue());
                 }else{
-                    stringBuilder.append(removeFileExtension(OriginalFileName)).append("_OLE").append(parseFileName((DocumentEntry) directoryNode.getEntry(OleEntry.COMPOBJ.getValue())));
+                    stringBuilder.append(removeFileExtension(OriginalFileName)).append("_OLE").append(embeddedFileExtractor.parseFileType((DocumentEntry) directoryNode.getEntry(OleEntry.COMPOBJ.getValue())));
                 }
 
                 String uuid = addUniqueFileNameMapping(stringBuilder.toString());
