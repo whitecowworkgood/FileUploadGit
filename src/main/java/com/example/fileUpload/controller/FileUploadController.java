@@ -167,4 +167,38 @@ public class FileUploadController {
         }
         return ResponseEntity.status(HttpStatus.OK).body(postDeleteMessage);
     }
+
+
+    //나중에 파일업로드 여러개를 구현하는 코드 - 아직 구현계획 없음
+    /*@Operation(summary = "파일 업로드", description = "여러개의 파일을 저장합니다.")
+    @PostMapping("/uploads")
+    public ResponseEntity<PostDeleteMessage> uploadFiles(@RequestParam("files") MultipartFile[] files) {
+        List<FileDto> uploadedFiles = new ArrayList<>();
+
+        for (MultipartFile file : files) {
+            String uuidName = UUID.randomUUID().toString();
+
+            FileDto fileDto = FileDto.builder()
+                    .UUIDFileName(uuidName + FileUtil.getFileExtension(file))
+                    .originFileName(file.getOriginalFilename())
+                    .fileSize(file.getSize())
+                    .fileType(file.getContentType())
+                    .fileSavePath(dir + File.separator + uuidName + FileUtil.getFileExtension(file))
+                    .fileOlePath(dir + File.separator + "ole" + File.separator + uuidName + File.separator)
+                    .fileData(file)
+                    .build();
+
+            boolean createResult = fileUploadService.fileUpload(fileDto);
+
+            if (createResult) {
+                uploadedFiles.add(fileDto);
+            }
+        }
+
+        PostDeleteMessage postDeleteMessage = new PostDeleteMessage();
+        postDeleteMessage.setMessage("CREATE");
+
+        return ResponseEntity.status(HttpStatus.OK).body(postDeleteMessage);
+    }*/
+
 }

@@ -123,3 +123,4 @@
     //9월 18일
     //리마스터 작업 완료
     //피드백 적용(hashmap저장 static제거(ConcurrentHashMap로 처리), select(끝), csv(끝), rtf파일)
+    //rtf파일과 기본 doc의 특별한 차이점을 찾으면 바로 추출할 수 있을 것 같음
