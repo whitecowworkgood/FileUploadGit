@@ -40,7 +40,6 @@ public class XOfficeEntryHandler {
 
         EmbeddedFileExtractor embeddedFileExtractor = new EmbeddedFileExtractor();
 
-        System.out.println(pPart.getContentType());
         //XLS파일 처리
         if (pPart.getContentType().equals("application/vnd.ms-excel")) {
 
