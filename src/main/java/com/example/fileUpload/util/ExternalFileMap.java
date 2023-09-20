@@ -41,7 +41,7 @@ public class ExternalFileMap {
         // 파일 이름 생성
 
         if (count > 1) {
-            originalFileName = removeFileExtension(originalFileName) + --count + "." + extension;
+            originalFileName = removeFileExtension(originalFileName) +"_"+ --count + "." + extension;
         }
 
 
