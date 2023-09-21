@@ -18,6 +18,7 @@ public enum FileType {
     EXCEL("Excel"),
     WORD("Word"),
     BMP(".bmp"),
+    RTF(".rtf"),
     ODP(".odp"),
     ODT(".odt"),
     ODS(".ods");

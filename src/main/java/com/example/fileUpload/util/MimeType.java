@@ -9,6 +9,7 @@ public enum MimeType {
     XLS("application/vnd.ms-excel"),
     DOC("application/msword"),
     OLEOBJECT("application/vnd.openxmlformats-officedocument.oleObject"),
+    ZIP("application/zip"),
     HWP("application/octet-stream");
 
     private final String value;

@@ -29,7 +29,7 @@ public class XPowerPointParser extends FileParser {
             pptx = new XMLSlideShow(OPCPackage.open(fs));
 
             for (PackagePart pPart : pptx.getAllEmbeddedParts()) {
-                //xOfficeEntryHandler.parser(pPart, fileDto.getOriginFileName(), fileDto.getFileOlePath());
+                xOfficeEntryHandler.parser(pPart, fileDto.getOriginFileName(), fileDto.getFileOlePath());
             }
 
         }catch (IOException e){

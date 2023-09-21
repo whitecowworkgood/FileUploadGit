@@ -40,7 +40,7 @@ import static com.example.fileUpload.util.FileUtil.removePath;
 @NoArgsConstructor
 public class XOfficeEntryHandler {
     static StringBuilder stringBuilder = new StringBuilder();
-    public void parser(PackagePart pPart, String ExtractName, String OriginalFileName, String OLESavePath) throws IOException, OpenXML4JException, XmlException {
+    /*public void parser(PackagePart pPart, String ExtractName, String OriginalFileName, String OLESavePath) throws IOException, OpenXML4JException, XmlException {
 
         EmbeddedFileExtractor embeddedFileExtractor = new EmbeddedFileExtractor();
         System.out.println(pPart.getPartName());
@@ -420,14 +420,10 @@ public class XOfficeEntryHandler {
                 }
             }
         }
-    }
-}
+    }*/
 
-/*
-//기존코드 백업
-@NoArgsConstructor
-public class XOfficeEntryHandler {
-    static StringBuilder stringBuilder = new StringBuilder();
+
+    //기존코드 백업
     public void parser(PackagePart pPart, String OriginalFileName, String OLESavePath) throws IOException, OpenXML4JException, XmlException {
 
         EmbeddedFileExtractor embeddedFileExtractor = new EmbeddedFileExtractor();
@@ -670,6 +666,29 @@ public class XOfficeEntryHandler {
 
                 }
 
+            }else if(directoryNode.hasEntry(OleEntry.WORD.getValue())){
+
+                stringBuilder.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.RTF.getValue());
+                String fileName = stringBuilder.toString();
+                stringBuilder.setLength(0);
+
+                String uuid = addUniqueFileNameMapping(fileName);
+
+                stringBuilder.append(OLESavePath).append(File.separator).append(uuid);
+                try {
+
+                    outputStream = new FileOutputStream(stringBuilder.toString());
+                    poifsFileSystem.writeFilesystem(outputStream);
+
+                } catch (IOException e) {
+                    ExceptionUtils.getStackTrace(e);
+                }finally {
+                    stringBuilder.setLength(0);
+                    IOUtils.closeQuietly(outputStream);
+                    IOUtils.closeQuietly(poifsFileSystem);
+
+                }
+
             }else if(directoryNode.hasEntry(Ole10Native.OLE10_NATIVE)){
                 String bmpType =embeddedFileExtractor.parseFileType((DocumentEntry) poifsFileSystem.getRoot().getEntry(OleEntry.COMPOBJ.getValue()));
 
@@ -731,5 +750,9 @@ public class XOfficeEntryHandler {
             }
         }
     }
+
+
 }
-*/
+
+
+

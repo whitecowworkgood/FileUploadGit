@@ -41,10 +41,13 @@ public class FileParserFactory {
                 return new XExcelParser();
             }
             case "application/octet-stream" -> {
-                if (fileName.equals(".hwpx")) {
-                    return new XHwpParser();
+                if (fileName.equals("hwp")) {
+                    return new HwpParser();
                 }
-                return new HwpParser();
+                return null;
+            }
+            case "application/zip"->{
+                return new ZipParser();
             }
             default -> {
                 throw new IllegalArgumentException("Unsupported MIME type: " + mimeType);

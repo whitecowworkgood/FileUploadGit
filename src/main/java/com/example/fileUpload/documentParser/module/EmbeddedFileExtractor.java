@@ -154,6 +154,10 @@ public class EmbeddedFileExtractor {
 
             fileTypeString = new String(fileTypeData, Charset.forName("euc-kr"));
 
+            System.out.println(fileTypeString);
+            System.out.println(fileFormat);
+
+
             if (fileTypeString.startsWith("Excel.Sheet.12") || fileFormat.equals("Microsoft Excel Worksheet")) {
                 fileType=".xlsx";
             } else if (fileTypeString.startsWith("Word.Document.12") || fileFormat.equals("Microsoft Word Document")) {
@@ -168,9 +172,11 @@ public class EmbeddedFileExtractor {
                 fileType=".odt";
             }else if(fileTypeString.startsWith("PBrush")){
                 fileType=".bmp";
-            } else if(fileTypeString.startsWith("Excel.SheetMacroEnabled.12")){
+            } else if(fileTypeString.startsWith("Excel.SheetMacroEnabled.12") || fileFormat.startsWith("Microsoft Excel Macro-Enabled")){
                 fileType=".csv";
             }
+            System.out.println(fileType);
+            System.out.println();
         }catch (IOException e){
             ExceptionUtils.getStackTrace(e);
         }finally {

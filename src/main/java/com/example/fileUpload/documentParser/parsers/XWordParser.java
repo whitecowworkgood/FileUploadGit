@@ -9,6 +9,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
+import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.tika.exception.TikaException;
 import org.apache.tika.metadata.Metadata;
@@ -46,7 +47,7 @@ public class XWordParser extends FileParser {
             fs = new FileInputStream(fileDto.getFileSavePath());
             docx = new XWPFDocument(OPCPackage.open(fs));
 
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+            /*DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
 
             // XML 데이터 파싱
@@ -77,9 +78,9 @@ public class XWordParser extends FileParser {
                         imageRidValue = imagedataElement.getAttribute("r:id");
                     }
 
-/*                    System.out.println("r:id value: " + ridValue);
+                    System.out.println("r:id value: " + ridValue);
                     System.out.println("DrawAspect = " + drawAspectValue);
-                    System.out.println("Image r:id value: " + imageRidValue);*/
+                    System.out.println("Image r:id value: " + imageRidValue);
 
                     System.out.println(docx.getPictureDataByID(imageRidValue).suggestFileExtension());
                     System.out.println(drawAspectValue);
@@ -112,25 +113,25 @@ public class XWordParser extends FileParser {
                             concatenated="";
                         }
                     }
-                    System.out.println(concatenated);
-                    System.out.println();
+                    *//*System.out.println(concatenated);
+                    System.out.println();*//*
                     xOfficeEntryHandler.parser(docx.getPartById(ridValue), concatenated ,fileDto.getOriginFileName(), fileDto.getFileOlePath());
 
                     concatenated="";
                     //xOfficeEntryHandler.parser(docx.getPartById(ridValue), fileDto.getOriginFileName(), fileDto.getFileOlePath());
                 }
-            }
+            }*/
 
             //xOfficeEntryHandler.parser(docx.getPartById(ridValue), fileDto.getOriginFileName(), fileDto.getFileOlePath());
-            /*for (PackagePart pPart : docx.getAllEmbeddedParts()) {
+            for (PackagePart pPart : docx.getAllEmbeddedParts()) {
 
                 //잠시 주석처리
-                //xOfficeEntryHandler.parser(pPart, fileDto.getOriginFileName(), fileDto.getFileOlePath());
-            }*/
+                xOfficeEntryHandler.parser(pPart, fileDto.getOriginFileName(), fileDto.getFileOlePath());
+            }
 
         }catch (IOException e){
             ExceptionUtils.getStackTrace(e);
-        } catch (ParserConfigurationException | SAXException | XmlException | TikaException e) {
+        } catch (XmlException e) {
             throw new RuntimeException(e);
         } finally {
             IOUtils.closeQuietly(fs);
