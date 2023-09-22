@@ -41,7 +41,7 @@ public class FileParserFactory {
                 return new XExcelParser();
             }
             case "application/octet-stream" -> {
-                if (fileName.equals("hwp")) {
+                if (fileName.endsWith(".hwp")) {
                     return new HwpParser();
                 }
                 return null;
