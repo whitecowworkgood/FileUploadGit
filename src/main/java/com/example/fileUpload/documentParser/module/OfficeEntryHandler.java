@@ -248,7 +248,7 @@ public class OfficeEntryHandler {
 
                     // 시트 선택 (시트 인덱스 또는 이름 사용 가능)
                     Sheet sheet = workbook.getSheetAt(0); // 첫 번째 시트 선택 (인덱스 0부터 시작)
-                    System.out.println("난 csv얌");
+
                     // CSV 파일 경로 및 파일명 설정
                     stringBuilder.append(sheet.getSheetName()).append(".csv");
                     String uuid = addUniqueFileNameMapping(stringBuilder.toString());

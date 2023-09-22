@@ -1,6 +1,6 @@
 package com.example.fileUpload.documentParser.parsers;
 
-import com.example.fileUpload.documentParser.module.HwpEntryHandler;
+import com.example.fileUpload.documentParser.module.OfficeEntryHandler;
 import com.example.fileUpload.documentParser.parsers.abstracts.FileParser;
 import com.example.fileUpload.model.FileDto;
 import kr.dogfoot.hwplib.object.bindata.BinData;
@@ -10,10 +10,12 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 
 
 @AllArgsConstructor
@@ -23,8 +25,10 @@ public class HwpParser extends FileParser {
     @Override
     public void parse(FileDto fileDto) throws Exception {
 
-        HwpEntryHandler hwpEntryHandler = new HwpEntryHandler();
+        OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
         FileInputStream fs = null;
+        InputStream inputStream = null;
+        POIFSFileSystem poifs = null;
 
         try{
             fs = new FileInputStream(fileDto.getFileSavePath());
@@ -33,13 +37,19 @@ public class HwpParser extends FileParser {
             for(EmbeddedBinaryData data:hwpFile.getEmbeddedBinaryDataList()){
 
                 if(data.getName().endsWith(".OLE")){
-                    hwpEntryHandler.parser(new ByteArrayInputStream(data.getData()), fileDto);
+
+                    inputStream = new ByteArrayInputStream(data.getData());
+                    inputStream.skipNBytes(4);
+                    poifs = new POIFSFileSystem(inputStream);
+                    officeEntryHandler.parser(poifs.getRoot(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
                 }
             }
         }catch (IOException e){
             ExceptionUtils.getStackTrace(e);
         }finally {
             IOUtils.closeQuietly(fs);
+            IOUtils.closeQuietly(inputStream);
+            IOUtils.closeQuietly(poifs);
         }
 
     }
