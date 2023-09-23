@@ -1,7 +1,7 @@
 package com.example.fileUpload.documentParser.parsers;
 
 import com.example.fileUpload.documentParser.module.OfficeEntryHandler;
-import com.example.fileUpload.documentParser.parsers.abstracts.FileParser;
+import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
 import com.example.fileUpload.model.FileDto;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;
@@ -16,10 +16,10 @@ import java.util.List;
 
 
 @NoArgsConstructor
-public class PowerPointParser extends FileParser {
+public class PowerPointParser extends OleExtractor {
 
     @Override
-    public void parse(FileDto fileDto) throws IOException {
+    public void extractOleFromDocumentFile(FileDto fileDto) throws IOException {
         FileInputStream fs =null;
         POIFSFileSystem poifs =null;
         HSLFSlideShow hslfSlideShow =null;

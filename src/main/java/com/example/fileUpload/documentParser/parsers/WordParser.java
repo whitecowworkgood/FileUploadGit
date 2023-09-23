@@ -1,7 +1,7 @@
 package com.example.fileUpload.documentParser.parsers;
 
 import com.example.fileUpload.documentParser.module.OfficeEntryHandler;
-import com.example.fileUpload.documentParser.parsers.abstracts.FileParser;
+import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
 import com.example.fileUpload.model.FileDto;
 import com.example.fileUpload.util.OleEntry;
 import lombok.NoArgsConstructor;
@@ -20,12 +20,11 @@ import java.util.Iterator;
 
 @Slf4j
 @NoArgsConstructor
-public class WordParser extends FileParser {
+public class WordParser extends OleExtractor {
 
 
     @Override
-    public void parse(FileDto fileDto) throws IOException, InvalidFormatException {
-        //log.info("파서 돌입!");
+    public void extractOleFromDocumentFile(FileDto fileDto) throws IOException, InvalidFormatException {
 
         HWPFDocumentCore hwpfDocument =null;
         OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
@@ -38,9 +37,7 @@ public class WordParser extends FileParser {
 
                 for (Iterator<Entry> it = objectPools.getEntries(); it.hasNext(); ) {
 
-                    Entry entry = it.next();
-
-                    officeEntryHandler.parser((DirectoryNode)entry, fileDto.getOriginFileName(), fileDto.getFileOlePath());
+                    officeEntryHandler.parser((DirectoryNode)it.next(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
                 }
             }
 

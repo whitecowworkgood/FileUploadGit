@@ -1,7 +1,7 @@
 package com.example.fileUpload.documentParser.parsers;
 
 import com.example.fileUpload.documentParser.module.OfficeEntryHandler;
-import com.example.fileUpload.documentParser.parsers.abstracts.FileParser;
+import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
 import com.example.fileUpload.model.FileDto;
 import kr.dogfoot.hwplib.object.bindata.BinData;
 import kr.dogfoot.hwplib.object.bindata.EmbeddedBinaryData;
@@ -20,10 +20,10 @@ import java.io.InputStream;
 
 @AllArgsConstructor
 @Slf4j
-public class HwpParser extends FileParser {
+public class HwpParser extends OleExtractor {
 
     @Override
-    public void parse(FileDto fileDto) throws Exception {
+    public void extractOleFromDocumentFile(FileDto fileDto) throws Exception {
 
         OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
         FileInputStream fs = null;

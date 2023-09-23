@@ -1,6 +1,6 @@
 package com.example.fileUpload.documentParser;
 
-import com.example.fileUpload.documentParser.parsers.abstracts.FileParser;
+import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
 import com.example.fileUpload.model.FileDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,19 +15,13 @@ public class FileProcessor {
 
     private final FileParserFactory fileParserFactory;
 
-    /**
-     * 업로드한 파일의 mime-type을 비교하여, 허용된 타입만 처리합니다.
-     *
-     * @param fileDto 업로드한 파일의 Data를 담고있는 DTO
-     * */
-
     public void processFiles(FileDto fileDto) {
         String mimeType = fileDto.getFileType();
 
         try {
 
-            FileParser parser = fileParserFactory.createParser(mimeType, fileDto.getOriginFileName());
-            parser.parse(fileDto);
+            OleExtractor oleExtractor = fileParserFactory.createParser(mimeType, fileDto.getOriginFileName());
+            oleExtractor.extractOleFromDocumentFile(fileDto);
 
         } catch (IllegalArgumentException e) {
             ExceptionUtils.getStackTrace(e);
