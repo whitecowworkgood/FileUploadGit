@@ -17,12 +17,12 @@ import java.io.*;
 @NoArgsConstructor
 public class ExcelParser extends OleExtractor {
 
+    FileInputStream fs = null;
+    HSSFWorkbook hssfWorkbook=null;
+    OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
+
     @Override
     public void extractOleFromDocumentFile(FileDto fileDto) throws IOException {
-        FileInputStream fs = null;
-        HSSFWorkbook hssfWorkbook=null;
-
-        OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
 
         try{
             fs = new FileInputStream(fileDto.getFileSavePath());
@@ -33,10 +33,16 @@ public class ExcelParser extends OleExtractor {
                 officeEntryHandler.parser((DirectoryNode) hssfObjectData.getDirectory(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
             }
         }catch (IOException e){
-            ExceptionUtils.getStackTrace(e);
+            catchIOException(e);
+
         }finally{
-            IOUtils.closeQuietly(fs);
-            IOUtils.closeQuietly(hssfWorkbook);
+            closeResources();
         }
+    }
+
+    @Override
+    protected void closeResources() {
+        IOUtils.closeQuietly(fs);
+        IOUtils.closeQuietly(hssfWorkbook);
     }
 }

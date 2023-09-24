@@ -21,13 +21,12 @@ import java.util.Iterator;
 @Slf4j
 @NoArgsConstructor
 public class WordParser extends OleExtractor {
-
+    HWPFDocumentCore hwpfDocument =null;
+    OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
 
     @Override
     public void extractOleFromDocumentFile(FileDto fileDto) throws IOException, InvalidFormatException {
 
-        HWPFDocumentCore hwpfDocument =null;
-        OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
 
         try{
             hwpfDocument = new HWPFDocument(new FileInputStream(fileDto.getFileSavePath()));
@@ -42,11 +41,16 @@ public class WordParser extends OleExtractor {
             }
 
         }catch (IOException e){
-            ExceptionUtils.getStackTrace(e);
+            catchIOException(e);
         }finally{
-            IOUtils.closeQuietly(hwpfDocument);
+            closeResources();
         }
 
     }
 
+
+    @Override
+    protected void closeResources() {
+        IOUtils.closeQuietly(hwpfDocument);
+    }
 }

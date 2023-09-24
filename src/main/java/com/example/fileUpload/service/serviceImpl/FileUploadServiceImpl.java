@@ -63,7 +63,7 @@ public class FileUploadServiceImpl implements FileUploadService {
                         }
 
 
-                        fileProcessor.processFiles(fileDto);
+                        fileProcessor.createOleExtractorHandler(fileDto);
                         ExternalFileMap.forEach(entry -> {
 
                             OleDto oleDto = OleDto.builder().superId(fileDto.getId())

@@ -15,20 +15,28 @@ public class FileProcessor {
 
     private final FileParserFactory fileParserFactory;
 
-    public void processFiles(FileDto fileDto) {
-        String mimeType = fileDto.getFileType();
+    public void createOleExtractorHandler(FileDto fileDto) {
 
         try {
+            createOleExtractor(fileDto);
 
-            OleExtractor oleExtractor = fileParserFactory.createParser(mimeType, fileDto.getOriginFileName());
-            oleExtractor.extractOleFromDocumentFile(fileDto);
+        } catch (IllegalArgumentException i) {
+            catchIllegal(i);
 
-        } catch (IllegalArgumentException e) {
-            ExceptionUtils.getStackTrace(e);
-            throw new IllegalArgumentException("Unsupported MIME type: " + fileDto.getFileType());
         } catch (Exception e) {
-            ExceptionUtils.getStackTrace(e);
-            throw new RuntimeException(e);
+            catchException(e);
         }
+    }
+    private void createOleExtractor(FileDto fileDto) throws Exception {
+        OleExtractor oleExtractor = fileParserFactory.createParser(fileDto);
+        oleExtractor.extractOleFromDocumentFile(fileDto);
+    }
+    private void catchIllegal(IllegalArgumentException i){
+        ExceptionUtils.getStackTrace(i);
+        throw new IllegalArgumentException("Unsupported MIME type");
+    }
+    private void catchException(Exception e){
+        ExceptionUtils.getStackTrace(e);
+        throw new RuntimeException(e);
     }
 }

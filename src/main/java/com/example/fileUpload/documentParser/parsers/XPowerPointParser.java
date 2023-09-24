@@ -18,12 +18,14 @@ import java.io.IOException;
 @NoArgsConstructor
 public class XPowerPointParser extends OleExtractor {
 
+    FileInputStream fs = null;
+    XMLSlideShow pptx = null;
+    XOfficeEntryHandler xOfficeEntryHandler = new XOfficeEntryHandler();
+
     @Override
     public void extractOleFromDocumentFile(FileDto fileDto) throws OpenXML4JException, IOException, XmlException {
 
-        FileInputStream fs = null;
-        XMLSlideShow pptx = null;
-        XOfficeEntryHandler xOfficeEntryHandler = new XOfficeEntryHandler();
+
         try{
             fs = new FileInputStream(fileDto.getFileSavePath());
             pptx = new XMLSlideShow(OPCPackage.open(fs));
@@ -33,10 +35,16 @@ public class XPowerPointParser extends OleExtractor {
             }
 
         }catch (IOException e){
-            ExceptionUtils.getStackTrace(e);
+            catchIOException(e);
+
         }finally {
-            IOUtils.closeQuietly(fs);
-            IOUtils.closeQuietly(pptx);
+            closeResources();
         }
+    }
+
+    @Override
+    protected void closeResources() {
+        IOUtils.closeQuietly(fs);
+        IOUtils.closeQuietly(pptx);
     }
 }

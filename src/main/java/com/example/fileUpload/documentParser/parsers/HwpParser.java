@@ -7,6 +7,7 @@ import kr.dogfoot.hwplib.object.bindata.BinData;
 import kr.dogfoot.hwplib.object.bindata.EmbeddedBinaryData;
 import kr.dogfoot.hwplib.reader.HWPReader;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -18,17 +19,16 @@ import java.io.IOException;
 import java.io.InputStream;
 
 
-@AllArgsConstructor
+@NoArgsConstructor
 @Slf4j
 public class HwpParser extends OleExtractor {
+    OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
+    FileInputStream fs = null;
+    InputStream inputStream = null;
+    POIFSFileSystem poifs = null;
 
     @Override
     public void extractOleFromDocumentFile(FileDto fileDto) throws Exception {
-
-        OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
-        FileInputStream fs = null;
-        InputStream inputStream = null;
-        POIFSFileSystem poifs = null;
 
         try{
             fs = new FileInputStream(fileDto.getFileSavePath());
@@ -45,12 +45,17 @@ public class HwpParser extends OleExtractor {
                 }
             }
         }catch (IOException e){
-            ExceptionUtils.getStackTrace(e);
+            catchIOException(e);
         }finally {
-            IOUtils.closeQuietly(fs);
-            IOUtils.closeQuietly(inputStream);
-            IOUtils.closeQuietly(poifs);
+            closeResources();
         }
 
+    }
+
+    @Override
+    protected void closeResources() {
+        IOUtils.closeQuietly(fs);
+        IOUtils.closeQuietly(inputStream);
+        IOUtils.closeQuietly(poifs);
     }
 }

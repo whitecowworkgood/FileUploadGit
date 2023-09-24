@@ -17,13 +17,14 @@ import java.util.List;
 
 @NoArgsConstructor
 public class PowerPointParser extends OleExtractor {
+    FileInputStream fs =null;
+    POIFSFileSystem poifs =null;
+    HSLFSlideShow hslfSlideShow =null;
+    OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
 
     @Override
     public void extractOleFromDocumentFile(FileDto fileDto) throws IOException {
-        FileInputStream fs =null;
-        POIFSFileSystem poifs =null;
-        HSLFSlideShow hslfSlideShow =null;
-        OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
+
         try{
             fs = new FileInputStream(fileDto.getFileSavePath());
             hslfSlideShow = new HSLFSlideShow(fs);
@@ -39,12 +40,18 @@ public class PowerPointParser extends OleExtractor {
 
             }
         }catch (IOException e){
-            ExceptionUtils.getStackTrace(e);
+            catchIOException(e);
+
         }finally {
-            IOUtils.closeQuietly(fs);
-            IOUtils.closeQuietly(poifs);
-            IOUtils.closeQuietly(hslfSlideShow);
+            closeResources();
         }
 
+    }
+
+    @Override
+    protected void closeResources() {
+        IOUtils.closeQuietly(fs);
+        IOUtils.closeQuietly(poifs);
+        IOUtils.closeQuietly(hslfSlideShow);
     }
 }
