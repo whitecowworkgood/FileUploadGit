@@ -1,12 +1,10 @@
 package com.example.fileUpload.documentParser.parsers;
 
-import com.example.fileUpload.documentParser.module.XOfficeEntryHandler;
+import com.example.fileUpload.documentParser.module.OleExtractor.OleExtractorFactory;
 import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
 import com.example.fileUpload.model.FileDto;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
@@ -21,7 +19,6 @@ public class XPowerPointParser extends OleExtractor {
 
     FileInputStream fs = null;
     XMLSlideShow pptx = null;
-    XOfficeEntryHandler xOfficeEntryHandler = new XOfficeEntryHandler();
 
     @Override
     public void extractOleFromDocumentFile(FileDto fileDto) throws OpenXML4JException, IOException, XmlException {
@@ -30,8 +27,8 @@ public class XPowerPointParser extends OleExtractor {
         try{
             callOfficeHandler(fileDto);
 
-        }catch (IOException e){
-            catchIOException(e);
+        }catch (Exception e){
+            catchException(e);
 
         }finally {
             closeResources();
@@ -39,13 +36,13 @@ public class XPowerPointParser extends OleExtractor {
     }
 
     @Override
-    protected void callOfficeHandler(FileDto fileDto) throws IOException, OpenXML4JException, XmlException {
+    protected void callOfficeHandler(FileDto fileDto) throws Exception {
         fs = new FileInputStream(fileDto.getFileSavePath());
         pptx = new XMLSlideShow(OPCPackage.open(fs));
 
-        for (PackagePart pPart : pptx.getAllEmbeddedParts()) {
-            xOfficeEntryHandler.parser(pPart, fileDto.getOriginFileName(), fileDto.getFileOlePath());
-        }
+        for (PackagePart pPart : pptx.getAllEmbeddedParts())
+            new OleExtractorFactory().createOleExtractor(pPart, fileDto);
+
     }
 
     @Override

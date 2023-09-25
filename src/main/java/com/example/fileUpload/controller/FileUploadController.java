@@ -33,25 +33,6 @@ public class FileUploadController {
     private String dir;
     private final FileUploadService fileUploadService;
 
-/*
- * 해당 영역은 페이지를 넘겨만 주는 영역
- */
-/*
-    @GetMapping("/")
-    public String root(){
-        return "redirect:/file/upload";
-    }
-
-    @GetMapping("/upload")
-    public String printForm(){
-        log.debug("form 출력");
-        return "file-form";
-    }
-*/
-    /*
-     * 해당 영역은 API 영역
-     */
-
     /**
      * 전체 파일을 조회합니다.
      *

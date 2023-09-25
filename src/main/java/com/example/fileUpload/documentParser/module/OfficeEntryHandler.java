@@ -27,7 +27,8 @@ import static com.example.fileUpload.util.FileUtil.removeFileExtension;
 @Slf4j
 @NoArgsConstructor
 public class OfficeEntryHandler {
-    static StringBuilder stringBuilder = new StringBuilder();
+
+    static  StringBuffer stringBuffer = new StringBuffer();
     public void parser(DirectoryNode directoryNode, String OriginalFileName, String OLESavePath) throws IOException {
 
         EmbeddedFileExtractor embeddedFileExtractor = new EmbeddedFileExtractor();
@@ -41,21 +42,21 @@ public class OfficeEntryHandler {
                 DocumentInputStream oleStream = new DocumentInputStream((DocumentEntry) directoryNode.getEntry(Ole10Native.OLE10_NATIVE));
                 oleStream.skipNBytes(4);
 
-                stringBuilder.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.BMP.getValue());
-                String uuid = addUniqueFileNameMapping(stringBuilder.toString());
-                stringBuilder.setLength(0);
+                stringBuffer.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.BMP.getValue());
+                String uuid = addUniqueFileNameMapping(stringBuffer.toString());
+                stringBuffer.delete(0, stringBuffer.length());
 
-                stringBuilder.append(OLESavePath).append(uuid);
+                stringBuffer.append(OLESavePath).append(uuid);
 
                 try {
-                    outputStream = new FileOutputStream(stringBuilder.toString());
+                    outputStream = new FileOutputStream(stringBuffer.toString());
                     outputStream.write(oleStream.readAllBytes());
 
                 } catch (IOException e) {
                     ExceptionUtils.getStackTrace(e);
                     log.error("파일 저장 실패");
                 } finally {
-                    stringBuilder.setLength(0);
+                    stringBuffer.delete(0, stringBuffer.length());
                     IOUtils.closeQuietly(oleStream);
                     IOUtils.closeQuietly(outputStream);
                 }
@@ -78,21 +79,21 @@ public class OfficeEntryHandler {
                 HSSFWorkbook hs = new HSSFWorkbook(new ByteArrayInputStream(embeddedData.getEmbeddedData()));
                 hs.setHidden(false);
 
-                stringBuilder.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.XLS.getValue());
-                String uuid = addUniqueFileNameMapping(stringBuilder.toString());
-                stringBuilder.setLength(0);
+                stringBuffer.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.XLS.getValue());
+                String uuid = addUniqueFileNameMapping(stringBuffer.toString());
+                stringBuffer.delete(0, stringBuffer.length());
 
-                stringBuilder.append(OLESavePath).append(uuid);
+                stringBuffer.append(OLESavePath).append(uuid);
 
                 try {
-                    outputStream = new FileOutputStream(stringBuilder.toString());
+                    outputStream = new FileOutputStream(stringBuffer.toString());
                     hs.write(outputStream);
 
                 } catch (IOException e) {
                     ExceptionUtils.getStackTrace(e);
                     log.error("파일 저장 실패");
                 } finally {
-                    stringBuilder.setLength(0);
+                    stringBuffer.delete(0, stringBuffer.length());
                     IOUtils.closeQuietly(outputStream);
                     IOUtils.closeQuietly(hs);
                 }
@@ -104,21 +105,21 @@ public class OfficeEntryHandler {
             EmbeddedExtractor extractor = new EmbeddedExtractor();
             EmbeddedData embeddedData = extractor.extractOne(directoryNode);
 
-            stringBuilder.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.PPT.getValue());
-            String uuid = addUniqueFileNameMapping(stringBuilder.toString());
-            stringBuilder.setLength(0);
+            stringBuffer.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.PPT.getValue());
+            String uuid = addUniqueFileNameMapping(stringBuffer.toString());
+            stringBuffer.delete(0, stringBuffer.length());
 
-            stringBuilder.append(OLESavePath).append(uuid);
+            stringBuffer.append(OLESavePath).append(uuid);
 
             try {
-                outputStream = new FileOutputStream(stringBuilder.toString());
+                outputStream = new FileOutputStream(stringBuffer.toString());
                 outputStream.write(embeddedData.getEmbeddedData());
 
             } catch (IOException e) {
                 ExceptionUtils.getStackTrace(e);
                 log.error("파일 저장 실패");
             } finally {
-                stringBuilder.setLength(0);
+                stringBuffer.delete(0, stringBuffer.length());
                 IOUtils.closeQuietly(outputStream);
             }
 
@@ -132,21 +133,21 @@ public class OfficeEntryHandler {
 
             EmbeddedData embeddedData = extractor.extractOne(directoryNode);
 
-            stringBuilder.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.DOC.getValue());
-            String uuid = addUniqueFileNameMapping(stringBuilder.toString());
-            stringBuilder.setLength(0);
+            stringBuffer.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.DOC.getValue());
+            String uuid = addUniqueFileNameMapping(stringBuffer.toString());
+            stringBuffer.delete(0, stringBuffer.length());
 
-            stringBuilder.append(OLESavePath).append(uuid);
+            stringBuffer.append(OLESavePath).append(uuid);
 
             try {
-                outputStream = new FileOutputStream(stringBuilder.toString());
+                outputStream = new FileOutputStream(stringBuffer.toString());
                 outputStream.write(embeddedData.getEmbeddedData());
 
             } catch (IOException e) {
                 ExceptionUtils.getStackTrace(e);
                 log.error("파일 저장 실패");
             } finally {
-                stringBuilder.setLength(0);
+                stringBuffer.delete(0, stringBuffer.length());
                 IOUtils.closeQuietly(outputStream);
             }
         }else if (directoryNode.hasEntry(OleEntry.HWPINFO.getValue())) {
@@ -158,21 +159,21 @@ public class OfficeEntryHandler {
 
             EmbeddedData embeddedData = extractor.extractOne(directoryNode);
 
-            stringBuilder.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.HWP.getValue());
-            String uuid = addUniqueFileNameMapping(stringBuilder.toString());
-            stringBuilder.setLength(0);
+            stringBuffer.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.HWP.getValue());
+            String uuid = addUniqueFileNameMapping(stringBuffer.toString());
+            stringBuffer.delete(0, stringBuffer.length());
 
-            stringBuilder.append(OLESavePath).append(uuid);
+            stringBuffer.append(OLESavePath).append(uuid);
 
             try {
-                outputStream = new FileOutputStream(stringBuilder.toString());
+                outputStream = new FileOutputStream(stringBuffer.toString());
                 outputStream.write(embeddedData.getEmbeddedData());
 
             } catch (IOException e) {
                 ExceptionUtils.getStackTrace(e);
                 log.error("파일 저장 실패");
             } finally {
-                stringBuilder.setLength(0);
+                stringBuffer.delete(0, stringBuffer.length());
                 IOUtils.closeQuietly(outputStream);
             }
 
@@ -181,25 +182,25 @@ public class OfficeEntryHandler {
             DocumentInputStream oleStream = new DocumentInputStream((DocumentEntry) directoryNode.getEntry(OleEntry.ODF.getValue()));
 
             if(!directoryNode.hasEntry(OleEntry.COMPOBJ.getValue())){
-                stringBuilder.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.ODT.getValue());
+                stringBuffer.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.ODT.getValue());
             }else{
-                stringBuilder.append(removeFileExtension(OriginalFileName)).append("_OLE").append(embeddedFileExtractor.parseFileType((DocumentEntry) directoryNode.getEntry(OleEntry.COMPOBJ.getValue())));
+                stringBuffer.append(removeFileExtension(OriginalFileName)).append("_OLE").append(embeddedFileExtractor.parseFileType((DocumentEntry) directoryNode.getEntry(OleEntry.COMPOBJ.getValue())));
             }
 
-            String uuid = addUniqueFileNameMapping(stringBuilder.toString());
-            stringBuilder.setLength(0);
+            String uuid = addUniqueFileNameMapping(stringBuffer.toString());
+            stringBuffer.delete(0, stringBuffer.length());
 
-            stringBuilder.append(OLESavePath).append(uuid);
+            stringBuffer.append(OLESavePath).append(uuid);
 
             try {
-                outputStream = new FileOutputStream(stringBuilder.toString());
+                outputStream = new FileOutputStream(stringBuffer.toString());
                 outputStream.write(oleStream.readAllBytes());
 
             } catch (IOException e) {
                 ExceptionUtils.getStackTrace(e);
                 log.error("파일 저장 실패");
             } finally {
-                stringBuilder.setLength(0);
+                stringBuffer.delete(0, stringBuffer.length());
                 IOUtils.closeQuietly(oleStream);
                 IOUtils.closeQuietly(outputStream);
             }
@@ -217,21 +218,21 @@ public class OfficeEntryHandler {
                 cb[0].setVisibility(STVisibility.VISIBLE);
                 xs.getCTWorkbook().getBookViews().setWorkbookViewArray(cb);
 
-                stringBuilder.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.XLSX.getValue());
-                String uuid = addUniqueFileNameMapping(stringBuilder.toString());
-                stringBuilder.setLength(0);
+                stringBuffer.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.XLSX.getValue());
+                String uuid = addUniqueFileNameMapping(stringBuffer.toString());
+                stringBuffer.delete(0, stringBuffer.length());
 
-                stringBuilder.append(OLESavePath).append(uuid);
+                stringBuffer.append(OLESavePath).append(uuid);
 
                 try {
-                    outputStream = new FileOutputStream(stringBuilder.toString());
+                    outputStream = new FileOutputStream(stringBuffer.toString());
                     xs.write(outputStream);
 
                 } catch (IOException e) {
                     ExceptionUtils.getStackTrace(e);
                     log.error("파일 저장 실패");
                 } finally {
-                    stringBuilder.setLength(0);
+                    stringBuffer.delete(0, stringBuffer.length());
                     IOUtils.closeQuietly(oleStream);
                     IOUtils.closeQuietly(outputStream);
                     IOUtils.closeQuietly(xs);
@@ -250,13 +251,13 @@ public class OfficeEntryHandler {
                     Sheet sheet = workbook.getSheetAt(0); // 첫 번째 시트 선택 (인덱스 0부터 시작)
 
                     // CSV 파일 경로 및 파일명 설정
-                    stringBuilder.append(sheet.getSheetName()).append(".csv");
-                    String uuid = addUniqueFileNameMapping(stringBuilder.toString());
-                    stringBuilder.setLength(0);
+                    stringBuffer.append(sheet.getSheetName()).append(".csv");
+                    String uuid = addUniqueFileNameMapping(stringBuffer.toString());
+                    stringBuffer.delete(0, stringBuffer.length());
 
-                    stringBuilder.append(OLESavePath).append(uuid);
+                    stringBuffer.append(OLESavePath).append(uuid);
 
-                    csvWriter = new BufferedWriter(new FileWriter(stringBuilder.toString(), Charset.forName("EUC-KR")));
+                    csvWriter = new BufferedWriter(new FileWriter(stringBuffer.toString(), Charset.forName("EUC-KR")));
 
                     // 각 행을 반복하여 CSV로 쓰기
                     for (Row row : sheet) {
@@ -283,29 +284,29 @@ public class OfficeEntryHandler {
                 } catch (IOException e) {
                     ExceptionUtils.getStackTrace(e);
                 }finally {
-                    stringBuilder.setLength(0);
+                    stringBuffer.delete(0, stringBuffer.length());
                     IOUtils.closeQuietly(oleStream);
                     IOUtils.closeQuietly(workbook);
                     IOUtils.closeQuietly(csvWriter);
                 }
 
             } else{
-                stringBuilder.append(removeFileExtension(OriginalFileName)).append("_OLE").append(type);
+                stringBuffer.append(removeFileExtension(OriginalFileName)).append("_OLE").append(type);
 
-                String uuid = addUniqueFileNameMapping(stringBuilder.toString());
-                stringBuilder.setLength(0);
+                String uuid = addUniqueFileNameMapping(stringBuffer.toString());
+                stringBuffer.delete(0, stringBuffer.length());
 
-                stringBuilder.append(OLESavePath).append(uuid);
+                stringBuffer.append(OLESavePath).append(uuid);
 
                 try {
-                    outputStream = new FileOutputStream(stringBuilder.toString());
+                    outputStream = new FileOutputStream(stringBuffer.toString());
                     outputStream.write(oleStream.readAllBytes());
 
                 } catch (IOException e) {
                     ExceptionUtils.getStackTrace(e);
                     log.error("파일 저장 실패");
                 } finally {
-                    stringBuilder.setLength(0);
+                    stringBuffer.delete(0, stringBuffer.length());
                     IOUtils.closeQuietly(oleStream);
                     IOUtils.closeQuietly(outputStream);
                 }

@@ -18,35 +18,36 @@ public class FileParserFactory {
 
     public OleExtractor createParser(FileDto fileDto) {
 
-        switch (MimeType.valueOf(fileDto.getFileType())) {
-            case PPT -> {
+        switch (fileDto.getFileType()) {
+
+            case "application/vnd.ms-powerpoint" -> {
                 return new PowerPointParser();
             }
-            case XLS -> {
+            case "application/vnd.ms-excel" -> {
                 return new ExcelParser();
             }
-            case DOC -> {
+            case "application/msword" -> {
                 return new WordParser();
             }
-            case DOCX -> {
+            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document" -> {
                 return new XWordParser();
             }
-            case PPTX -> {
+            case "application/vnd.openxmlformats-officedocument.presentationml.presentation" -> {
                 return new XPowerPointParser();
             }
-            case XLSX -> {
+            case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" -> {
                 return new XExcelParser();
             }
-            case HWP -> {
+            case "application/octet-stream" -> {
                 if (!fileDto.getOriginFileName().endsWith(".hwp")) {
                     throw new IllegalArgumentException();
                 }
                 return new HwpParser();
             }
-            case ZIP -> {
+            case "application/zip" -> {
                 return new ZipParser();
             }
-            default -> throw new IllegalArgumentException();
+            default -> throw new IllegalArgumentException("Unsupported MIME type");
         }
     }
 }

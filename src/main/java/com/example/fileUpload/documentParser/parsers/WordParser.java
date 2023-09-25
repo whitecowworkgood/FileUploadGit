@@ -25,7 +25,7 @@ public class WordParser extends OleExtractor {
     OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
 
     @Override
-    public void extractOleFromDocumentFile(FileDto fileDto) throws IOException, InvalidFormatException {
+    public void extractOleFromDocumentFile(FileDto fileDto) throws IOException {
 
 
         try{
@@ -33,8 +33,10 @@ public class WordParser extends OleExtractor {
 
         }catch (IOException e){
             catchIOException(e);
+
         }finally{
             closeResources();
+
         }
 
     }

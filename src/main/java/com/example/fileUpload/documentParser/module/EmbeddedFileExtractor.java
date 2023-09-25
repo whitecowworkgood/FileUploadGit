@@ -127,7 +127,7 @@ public class EmbeddedFileExtractor {
             byte[] fileNameData = new byte[fileNameSize];
             compObjStream.readFully(fileNameData);
 
-            fileFormat = FileUtil.removeNullCharacters(new String(fileNameData, Charset.forName("euc-kr")));
+            fileFormat = new String(fileNameData, Charset.forName("euc-kr")).trim();
 
             byte[] skipSizeBytes = new byte[4];
             compObjStream.readFully(skipSizeBytes);
