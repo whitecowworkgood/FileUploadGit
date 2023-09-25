@@ -25,19 +25,23 @@ public class ExcelParser extends OleExtractor {
     public void extractOleFromDocumentFile(FileDto fileDto) throws IOException {
 
         try{
-            fs = new FileInputStream(fileDto.getFileSavePath());
-            hssfWorkbook= new HSSFWorkbook(fs);
+            callOfficeHandler(fileDto);
 
-            for (HSSFObjectData hssfObjectData : hssfWorkbook.getAllEmbeddedObjects()) {
-
-                officeEntryHandler.parser((DirectoryNode) hssfObjectData.getDirectory(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
-            }
         }catch (IOException e){
             catchIOException(e);
 
         }finally{
             closeResources();
         }
+    }
+
+    @Override
+    protected void callOfficeHandler(FileDto fileDto) throws IOException {
+        fs = new FileInputStream(fileDto.getFileSavePath());
+        hssfWorkbook= new HSSFWorkbook(fs);
+
+        for (HSSFObjectData hssfObjectData : hssfWorkbook.getAllEmbeddedObjects())
+            officeEntryHandler.parser((DirectoryNode) hssfObjectData.getDirectory(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
     }
 
     @Override

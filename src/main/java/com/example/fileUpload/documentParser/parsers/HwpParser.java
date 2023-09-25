@@ -31,25 +31,31 @@ public class HwpParser extends OleExtractor {
     public void extractOleFromDocumentFile(FileDto fileDto) throws Exception {
 
         try{
-            fs = new FileInputStream(fileDto.getFileSavePath());
-            BinData hwpFile = HWPReader.fromInputStream(fs).getBinData();
+            callOfficeHandler(fileDto);
 
-            for(EmbeddedBinaryData data:hwpFile.getEmbeddedBinaryDataList()){
-
-                if(data.getName().endsWith(".OLE")){
-
-                    inputStream = new ByteArrayInputStream(data.getData());
-                    inputStream.skipNBytes(4);
-                    poifs = new POIFSFileSystem(inputStream);
-                    officeEntryHandler.parser(poifs.getRoot(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
-                }
-            }
         }catch (IOException e){
             catchIOException(e);
         }finally {
             closeResources();
         }
 
+    }
+
+    @Override
+    protected void callOfficeHandler(FileDto fileDto) throws Exception {
+        fs = new FileInputStream(fileDto.getFileSavePath());
+        BinData hwpFile = HWPReader.fromInputStream(fs).getBinData();
+
+        for(EmbeddedBinaryData data:hwpFile.getEmbeddedBinaryDataList()){
+
+            if(data.getName().endsWith(".OLE")){
+
+                inputStream = new ByteArrayInputStream(data.getData());
+                inputStream.skipNBytes(4);
+                poifs = new POIFSFileSystem(inputStream);
+                officeEntryHandler.parser(poifs.getRoot(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
+            }
+        }
     }
 
     @Override

@@ -9,7 +9,6 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.tika.Tika;
 
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class ZipParser extends OleExtractor {

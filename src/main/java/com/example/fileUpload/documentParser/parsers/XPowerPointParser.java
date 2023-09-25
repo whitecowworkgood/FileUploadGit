@@ -6,6 +6,7 @@ import com.example.fileUpload.model.FileDto;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
@@ -27,18 +28,23 @@ public class XPowerPointParser extends OleExtractor {
 
 
         try{
-            fs = new FileInputStream(fileDto.getFileSavePath());
-            pptx = new XMLSlideShow(OPCPackage.open(fs));
-
-            for (PackagePart pPart : pptx.getAllEmbeddedParts()) {
-                xOfficeEntryHandler.parser(pPart, fileDto.getOriginFileName(), fileDto.getFileOlePath());
-            }
+            callOfficeHandler(fileDto);
 
         }catch (IOException e){
             catchIOException(e);
 
         }finally {
             closeResources();
+        }
+    }
+
+    @Override
+    protected void callOfficeHandler(FileDto fileDto) throws IOException, OpenXML4JException, XmlException {
+        fs = new FileInputStream(fileDto.getFileSavePath());
+        pptx = new XMLSlideShow(OPCPackage.open(fs));
+
+        for (PackagePart pPart : pptx.getAllEmbeddedParts()) {
+            xOfficeEntryHandler.parser(pPart, fileDto.getOriginFileName(), fileDto.getFileOlePath());
         }
     }
 

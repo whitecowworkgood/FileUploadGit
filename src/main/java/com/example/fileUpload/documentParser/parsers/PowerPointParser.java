@@ -26,19 +26,8 @@ public class PowerPointParser extends OleExtractor {
     public void extractOleFromDocumentFile(FileDto fileDto) throws IOException {
 
         try{
-            fs = new FileInputStream(fileDto.getFileSavePath());
-            hslfSlideShow = new HSLFSlideShow(fs);
+            callOfficeHandler(fileDto);
 
-            List<HSLFObjectData> objects = List.of(hslfSlideShow.getEmbeddedObjects());
-            for (HSLFObjectData object : objects) {
-
-                IOUtils.closeQuietly(poifs);
-
-                poifs = new POIFSFileSystem(object.getInputStream());
-
-                officeEntryHandler.parser(poifs.getRoot(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
-
-            }
         }catch (IOException e){
             catchIOException(e);
 
@@ -46,6 +35,23 @@ public class PowerPointParser extends OleExtractor {
             closeResources();
         }
 
+    }
+
+    @Override
+    protected void callOfficeHandler(FileDto fileDto) throws IOException {
+        fs = new FileInputStream(fileDto.getFileSavePath());
+        hslfSlideShow = new HSLFSlideShow(fs);
+
+        List<HSLFObjectData> objects = List.of(hslfSlideShow.getEmbeddedObjects());
+        for (HSLFObjectData object : objects) {
+
+            IOUtils.closeQuietly(poifs);
+
+            poifs = new POIFSFileSystem(object.getInputStream());
+
+            officeEntryHandler.parser(poifs.getRoot(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
+
+        }
     }
 
     @Override

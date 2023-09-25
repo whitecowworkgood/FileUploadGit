@@ -5,7 +5,7 @@ import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
 import com.example.fileUpload.model.FileDto;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
@@ -26,21 +26,23 @@ public class XExcelParser extends OleExtractor {
 
 
         try{
-            fs = new FileInputStream(fileDto.getFileSavePath());
-            xlsx = new XSSFWorkbook(OPCPackage.open(fs));
+            callOfficeHandler(fileDto);
 
-            for (PackagePart pPart : xlsx.getAllEmbeddedParts()) {
-                xOfficeEntryHandler.parser(pPart, fileDto.getOriginFileName(), fileDto.getFileOlePath());
-            }
-
-        }catch (IOException e){
-            catchIOException(e);
-
-        } catch (XmlException e) {
-            catchXmlException(e);
+        }catch (Exception e){
+            catchException(e);
 
         } finally {
             closeResources();
+        }
+    }
+
+    @Override
+    protected void callOfficeHandler(FileDto fileDto) throws IOException, OpenXML4JException, XmlException {
+        fs = new FileInputStream(fileDto.getFileSavePath());
+        xlsx = new XSSFWorkbook(OPCPackage.open(fs));
+
+        for (PackagePart pPart : xlsx.getAllEmbeddedParts()) {
+            xOfficeEntryHandler.parser(pPart, fileDto.getOriginFileName(), fileDto.getFileOlePath());
         }
     }
 
