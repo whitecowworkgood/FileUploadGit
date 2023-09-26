@@ -19,7 +19,7 @@ import java.nio.charset.Charset;
 import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
 
 public class CSVExtractor extends OleExtractor {
-    private final String oleSavePath;
+    //private final String oleSavePath;
     private final PackagePart packagePart;
 
     OPCPackage docPackage = null;
@@ -91,7 +91,7 @@ public class CSVExtractor extends OleExtractor {
     }
 
     public CSVExtractor(PackagePart pPart, FileDto fileDto) {
-        this.oleSavePath = fileDto.getFileOlePath();
+        super.oleSavePath = fileDto.getFileOlePath();
         this.packagePart = pPart;
 
         doExtract();

@@ -14,6 +14,8 @@ import org.apache.xmlbeans.XmlException;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import static com.example.fileUpload.documentParser.module.OleExtractor.OleExtractorFactory.choiceExtractor;
+
 @NoArgsConstructor
 public class XPowerPointParser extends OleExtractor {
 
@@ -41,7 +43,9 @@ public class XPowerPointParser extends OleExtractor {
         pptx = new XMLSlideShow(OPCPackage.open(fs));
 
         for (PackagePart pPart : pptx.getAllEmbeddedParts())
-            new OleExtractorFactory().createOleExtractor(pPart, fileDto);
+            new OleExtractorFactory().createMordernOleExtractor(pPart, fileDto);
+            //choiceExtractor(pPart, fileDto);
+           //
 
     }
 

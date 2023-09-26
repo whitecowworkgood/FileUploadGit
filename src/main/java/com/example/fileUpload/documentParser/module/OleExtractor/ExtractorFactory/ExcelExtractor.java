@@ -14,7 +14,7 @@ import static com.example.fileUpload.util.FileUtil.removePath;
 
 public class ExcelExtractor extends OleExtractor {
 
-    private final String oleSavePath;
+    //private final String oleSavePath;
     private final PackagePart packagePart;
 
     FileOutputStream outputStream = null;
@@ -54,7 +54,7 @@ public class ExcelExtractor extends OleExtractor {
     }
 
     public ExcelExtractor(PackagePart pPart, FileDto fileDto) {
-        this.oleSavePath = fileDto.getFileOlePath();
+        super.oleSavePath = fileDto.getFileOlePath();
         this.packagePart = pPart;
         doExtract();
     }

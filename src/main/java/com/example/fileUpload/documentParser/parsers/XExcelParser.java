@@ -14,6 +14,8 @@ import org.apache.xmlbeans.XmlException;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import static com.example.fileUpload.documentParser.module.OleExtractor.OleExtractorFactory.choiceExtractor;
+
 @NoArgsConstructor
 public class XExcelParser extends OleExtractor {
     FileInputStream fs = null;
@@ -40,7 +42,10 @@ public class XExcelParser extends OleExtractor {
         xlsx = new XSSFWorkbook(OPCPackage.open(fs));
 
         for (PackagePart pPart : xlsx.getAllEmbeddedParts())
-            new OleExtractorFactory().createOleExtractor(pPart, fileDto);
+            new OleExtractorFactory().createMordernOleExtractor(pPart, fileDto);
+            //choiceExtractor(pPart, fileDto);
+            //
+
 
     }
 

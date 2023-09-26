@@ -14,6 +14,8 @@ import org.apache.xmlbeans.XmlException;
 
 import java.io.*;
 
+import static com.example.fileUpload.documentParser.module.OleExtractor.OleExtractorFactory.choiceExtractor;
+
 @NoArgsConstructor
 @Slf4j
 public class XWordParser extends OleExtractor {
@@ -41,7 +43,9 @@ public class XWordParser extends OleExtractor {
         docx = new XWPFDocument(OPCPackage.open(fs));
 
         for (PackagePart pPart : docx.getAllEmbeddedParts())
-            new OleExtractorFactory().createOleExtractor(pPart, fileDto);
+            new OleExtractorFactory().createMordernOleExtractor(pPart, fileDto);
+            //choiceExtractor(pPart, fileDto);
+            //
 
     }
 

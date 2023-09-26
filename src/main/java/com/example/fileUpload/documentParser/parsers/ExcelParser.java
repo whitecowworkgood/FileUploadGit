@@ -1,6 +1,7 @@
 package com.example.fileUpload.documentParser.parsers;
 
 import com.example.fileUpload.documentParser.module.OfficeEntryHandler;
+
 import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
 import com.example.fileUpload.model.FileDto;
 import lombok.NoArgsConstructor;
@@ -27,8 +28,8 @@ public class ExcelParser extends OleExtractor {
         try{
             callOfficeHandler(fileDto);
 
-        }catch (IOException e){
-            catchIOException(e);
+        }catch (Exception e){
+            catchException(e);
 
         }finally{
             closeResources();
@@ -36,12 +37,14 @@ public class ExcelParser extends OleExtractor {
     }
 
     @Override
-    protected void callOfficeHandler(FileDto fileDto) throws IOException {
-        fs = new FileInputStream(fileDto.getFileSavePath());
-        hssfWorkbook= new HSSFWorkbook(fs);
+    protected void callOfficeHandler(FileDto fileDto) throws Exception {
+        /*fs = new FileInputStream(fileDto.getFileSavePath());
+        hssfWorkbook= new HSSFWorkbook(fs);*/
 
         for (HSSFObjectData hssfObjectData : hssfWorkbook.getAllEmbeddedObjects())
             officeEntryHandler.parser((DirectoryNode) hssfObjectData.getDirectory(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
+
+
     }
 
     @Override
