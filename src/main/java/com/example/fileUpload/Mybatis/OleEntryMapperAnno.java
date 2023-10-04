@@ -17,12 +17,7 @@ public interface OleEntryMapperAnno {
     List<OleDto> selectById(Long id);
 
     @Select("SELECT id, uuidfile_name, original_file_name, super_id FROM ole_entry")
-    @Results({
-            @Result(column ="id", property="id"),
-            @Result(column ="uuidfile_name", property="UUIDFileName"),
-            @Result(column ="original_file_name", property="originalFileName"),
-            @Result(column ="super_id", property="superId")
-    })
+
     List<OleDto> findAllEntry();
 
     @Insert("INSERT INTO ole_entry (uuidfile_name, original_file_name, super_id) " +

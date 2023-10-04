@@ -13,6 +13,7 @@ import org.apache.xmlbeans.XmlException;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 
 import static com.example.fileUpload.documentParser.module.OleExtractor.OleExtractorFactory.choiceExtractor;
 
@@ -44,8 +45,6 @@ public class XPowerPointParser extends OleExtractor {
 
         for (PackagePart pPart : pptx.getAllEmbeddedParts())
             new OleExtractorFactory().createMordernOleExtractor(pPart, fileDto);
-            //choiceExtractor(pPart, fileDto);
-           //
 
     }
 

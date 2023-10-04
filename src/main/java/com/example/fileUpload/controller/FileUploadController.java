@@ -6,11 +6,13 @@ import com.example.fileUpload.message.PostDeleteMessage;
 import com.example.fileUpload.model.FileDto;
 import com.example.fileUpload.message.GetMessage;
 import com.example.fileUpload.model.FileVO;
+import com.example.fileUpload.service.FileEncryptService;
 import com.example.fileUpload.service.FileUploadService;
 import com.example.fileUpload.util.FileUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -38,6 +40,7 @@ public class FileUploadController {
      *
      * @return ResponseEntity<GetMessage> 파일 목록 조회 결과를 반환합니다.
      */
+    @SneakyThrows
     @Operation(summary = "전체 파일 조회", description = "저장된 파일 정보들을 조회 합니다.")
     @GetMapping("/files")
     public ResponseEntity<GetMessage> printFiles(){
@@ -50,6 +53,7 @@ public class FileUploadController {
             //getMessage.setHttpStatus(200);
             getMessage.setData(fileVOS);
         }
+
         return ResponseEntity.status(HttpStatus.OK).body(getMessage);
     }
 

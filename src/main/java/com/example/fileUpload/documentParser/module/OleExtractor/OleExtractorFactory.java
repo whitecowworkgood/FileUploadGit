@@ -12,7 +12,7 @@ import org.apache.poi.poifs.filesystem.DirectoryNode;
 public class OleExtractorFactory {
 
     public OleExtractor createMordernOleExtractor(PackagePart pPart, FileDto fileDto) throws Exception {
-        ;
+
         switch(pPart.getContentType()){
 
             case "application/vnd.ms-excel"->{

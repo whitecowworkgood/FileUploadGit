@@ -13,6 +13,7 @@ import org.apache.poi.poifs.filesystem.DirectoryNode;
 
 
 import java.io.*;
+import java.util.Arrays;
 
 
 @NoArgsConstructor
@@ -38,8 +39,9 @@ public class ExcelParser extends OleExtractor {
 
     @Override
     protected void callOfficeHandler(FileDto fileDto) throws Exception {
-        /*fs = new FileInputStream(fileDto.getFileSavePath());
-        hssfWorkbook= new HSSFWorkbook(fs);*/
+        fs = new FileInputStream(fileDto.getFileSavePath());
+
+        hssfWorkbook= new HSSFWorkbook(fs);
 
         for (HSSFObjectData hssfObjectData : hssfWorkbook.getAllEmbeddedObjects())
             officeEntryHandler.parser((DirectoryNode) hssfObjectData.getDirectory(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
