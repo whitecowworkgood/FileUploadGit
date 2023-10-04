@@ -19,5 +19,6 @@ public class FileDto {
     private String fileType;
     private String originFileName;
     private MultipartFile fileData;
+    //private String tempPath;
 
 }

@@ -17,6 +17,7 @@ import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Arrays;
 
 
 @NoArgsConstructor
@@ -44,9 +45,10 @@ public class HwpParser extends OleExtractor {
     @Override
     protected void callOfficeHandler(FileDto fileDto) throws Exception {
         fs = new FileInputStream(fileDto.getFileSavePath());
-        BinData hwpFile = HWPReader.fromInputStream(fs).getBinData();
 
-        for(EmbeddedBinaryData data:hwpFile.getEmbeddedBinaryDataList()){
+        //BinData hwpFile = HWPReader.fromInputStream(fs).getBinData();
+
+        for(EmbeddedBinaryData data:HWPReader.fromInputStream(fs).getBinData().getEmbeddedBinaryDataList()){
 
             if(data.getName().endsWith(".OLE")){
 

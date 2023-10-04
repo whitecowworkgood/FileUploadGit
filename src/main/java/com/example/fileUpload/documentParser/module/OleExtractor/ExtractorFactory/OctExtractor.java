@@ -27,6 +27,9 @@ public class OctExtractor extends OleExtractor {
     private POIFSFileSystem poifsFileSystem =null;
     private DirectoryNode directoryNode = null;
     private DocumentInputStream oleStream = null;
+
+    private FileOutputStream fs = null;
+
     //private String fileName = null;
 
     private void doExtract() throws Exception {
@@ -71,7 +74,8 @@ public class OctExtractor extends OleExtractor {
 
     private void tryFileSaveUseOleStream(){
         try {
-            new FileOutputStream(buildOutputPath()).write(oleStream.readAllBytes());
+            fs = new FileOutputStream(buildOutputPath());
+            fs.write(oleStream.readAllBytes());
 
         } catch (IOException e) {
             catchIOException(e);
@@ -83,7 +87,8 @@ public class OctExtractor extends OleExtractor {
 
     private void tryFileSaveUsePOIFStream(){
         try {
-            poifsFileSystem.writeFilesystem(new FileOutputStream(buildOutputPath()));
+            fs = new FileOutputStream(buildOutputPath());
+            poifsFileSystem.writeFilesystem(fs);
 
         }catch (IOException e) {
             catchIOException(e);
@@ -104,6 +109,7 @@ public class OctExtractor extends OleExtractor {
     protected void closeResources() {
         IOUtils.closeQuietly(poifsFileSystem);
         IOUtils.closeQuietly(oleStream);
+        IOUtils.closeQuietly(fs);
     }
 
     public OctExtractor(PackagePart pPart, FileDto fileDto) throws Exception {

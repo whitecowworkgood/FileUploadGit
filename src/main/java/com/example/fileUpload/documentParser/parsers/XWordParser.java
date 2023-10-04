@@ -13,6 +13,7 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 import org.apache.xmlbeans.XmlException;
 
 import java.io.*;
+import java.util.Arrays;
 
 import static com.example.fileUpload.documentParser.module.OleExtractor.OleExtractorFactory.choiceExtractor;
 
@@ -44,9 +45,6 @@ public class XWordParser extends OleExtractor {
 
         for (PackagePart pPart : docx.getAllEmbeddedParts())
             new OleExtractorFactory().createMordernOleExtractor(pPart, fileDto);
-            //choiceExtractor(pPart, fileDto);
-            //
-
     }
 
     @Override

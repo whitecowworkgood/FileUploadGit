@@ -3,6 +3,7 @@ package com.example.fileUpload.documentParser.module.OleExtractor.abstracts;
 import com.example.fileUpload.documentParser.module.EmbeddedFileExtractor;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 
@@ -14,6 +15,8 @@ public abstract class OleExtractor {
 
     protected String  originalFileName;
     protected String oleSavePath;
+
+    protected DataInputStream inputStream =null;
 
     protected String fileName;
 

@@ -12,6 +12,7 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -39,6 +40,7 @@ public class PowerPointParser extends OleExtractor {
 
     @Override
     protected void callOfficeHandler(FileDto fileDto) throws IOException {
+
         fs = new FileInputStream(fileDto.getFileSavePath());
         hslfSlideShow = new HSLFSlideShow(fs);
 

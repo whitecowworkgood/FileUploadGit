@@ -7,6 +7,7 @@
     <mappers>
         <mapper class="OleEntryMapperAnno"/>
         <mapper class="FileEntryMapperAnno"/>
+        <mapper class="FileEncryptMapperAnno"/>
         <!-- 계속 추가 가능~~-->
     </mappers>
 </configuration>

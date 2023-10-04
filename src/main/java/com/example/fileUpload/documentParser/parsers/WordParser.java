@@ -16,11 +16,13 @@ import org.apache.poi.poifs.filesystem.Entry;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Iterator;
 
 @Slf4j
 @NoArgsConstructor
 public class WordParser extends OleExtractor {
+    FileInputStream fs = null;
     HWPFDocumentCore hwpfDocument =null;
     OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
 
@@ -43,7 +45,9 @@ public class WordParser extends OleExtractor {
 
     @Override
     protected void callOfficeHandler(FileDto fileDto) throws IOException {
-        hwpfDocument = new HWPFDocument(new FileInputStream(fileDto.getFileSavePath()));
+        fs = new FileInputStream(fileDto.getFileSavePath());
+
+        hwpfDocument = new HWPFDocument(fs);
 
         if (hwpfDocument.getDirectory().hasEntry(OleEntry.OBJECTPOOL.getValue())) {
             DirectoryNode objectPools = (DirectoryNode) hwpfDocument.getDirectory().getEntry(OleEntry.OBJECTPOOL.getValue());
@@ -57,6 +61,7 @@ public class WordParser extends OleExtractor {
 
     @Override
     protected void closeResources() {
+        IOUtils.closeQuietly(fs);
         IOUtils.closeQuietly(hwpfDocument);
     }
 }
