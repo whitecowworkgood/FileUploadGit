@@ -16,8 +16,6 @@ public abstract class OleExtractor {
     protected String  originalFileName;
     protected String oleSavePath;
 
-    protected DataInputStream inputStream =null;
-
     protected String fileName;
 
     protected EmbeddedFileExtractor embeddedFileExtractor = new EmbeddedFileExtractor();

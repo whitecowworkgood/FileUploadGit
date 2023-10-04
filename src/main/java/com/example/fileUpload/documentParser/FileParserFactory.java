@@ -39,13 +39,10 @@ public class FileParserFactory {
                 return new XExcelParser();
             }
             case "application/octet-stream" -> {
-<<<<<<< HEAD
+
                 if (!fileDto.getOriginFileName().endsWith(".hwp")) {
                     throw new IllegalArgumentException();
-=======
-                if (fileName.endsWith(".hwp")) {
-                    return new HwpParser();
->>>>>>> 0ab5e59af0fcc1dd27fd8a1fd530399b86c43cc9
+
                 }
                 return new HwpParser();
             }

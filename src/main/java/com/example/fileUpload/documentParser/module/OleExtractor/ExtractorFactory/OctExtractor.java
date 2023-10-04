@@ -30,8 +30,6 @@ public class OctExtractor extends OleExtractor {
 
     private FileOutputStream fs = null;
 
-    //private String fileName = null;
-
     private void doExtract() throws Exception {
         poifsFileSystem = new POIFSFileSystem(packagePart.getInputStream());
         directoryNode = poifsFileSystem.getRoot();
