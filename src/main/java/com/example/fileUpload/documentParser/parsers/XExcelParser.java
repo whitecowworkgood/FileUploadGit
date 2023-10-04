@@ -28,9 +28,20 @@ public class XExcelParser extends OleExtractor {
         try{
             callOfficeHandler(fileDto);
 
+<<<<<<< HEAD
         }catch (Exception e){
             catchException(e);
 
+=======
+            for (PackagePart pPart : xlsx.getAllEmbeddedParts()) {
+                xOfficeEntryHandler.parser(pPart, fileDto.getOriginFileName(), fileDto.getFileOlePath());
+            }
+
+        }catch (IOException e){
+            ExceptionUtils.getStackTrace(e);
+        } catch (XmlException e) {
+            throw new RuntimeException(e);
+>>>>>>> 0ab5e59af0fcc1dd27fd8a1fd530399b86c43cc9
         } finally {
             closeResources();
         }
