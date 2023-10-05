@@ -4,7 +4,7 @@ import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Options;
 import org.apache.ibatis.annotations.Select;
 
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public interface FileEncryptMapperAnno {
 
@@ -19,6 +19,6 @@ public interface FileEncryptMapperAnno {
             "VALUES (#{publicKey}, #{privateKey})"
             + "</script>")
     @Options(useGeneratedKeys = true, keyProperty = "id")
-    void insertRSAKeys(HashMap<String, String> stringKeypair);
+    void insertRSAKeys(ConcurrentHashMap<String, String> stringKeypair);
 
 }

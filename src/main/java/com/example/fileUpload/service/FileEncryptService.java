@@ -16,7 +16,7 @@ public interface FileEncryptService {
 
     void encryptFile(FileDto fileDto) throws IOException;
 
-    boolean decryptFile();
+    void decryptFile(String privateKey);
 
     void getMacAddress() throws SocketException, UnknownHostException;
 

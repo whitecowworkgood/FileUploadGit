@@ -10,8 +10,8 @@ import java.util.function.Consumer;
 public class ExternalFileMap {
 
     @Getter
-    private static Map<String, String> fileNameMap = new ConcurrentHashMap<>();
-    private static Map<String, Integer> fileNameCountMap = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, String> fileNameMap = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, Integer> fileNameCountMap = new ConcurrentHashMap<>();
 
     /**
      * 추출할 OLE파일들의 이름을 가져와 UUID로 랜덤이름을 생성하고, MAP에 넣어서 관리합니다.

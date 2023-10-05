@@ -6,6 +6,8 @@ import org.apache.ibatis.session.SqlSession;
 import org.springframework.stereotype.Repository;
 
 import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
 @RequiredArgsConstructor
@@ -16,7 +18,7 @@ public class EncryptDao {
         return sqlSession.getMapper(FileEncryptMapperAnno.class).findPrivateKey(argPublicKey);
     }
 
-    public void saveRSAKey(HashMap<String, String> stringKeypair){
+    public void saveRSAKey(ConcurrentHashMap<String, String> stringKeypair){
         sqlSession.getMapper(FileEncryptMapperAnno.class).insertRSAKeys(stringKeypair);
     }
 }

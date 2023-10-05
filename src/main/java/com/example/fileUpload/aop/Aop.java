@@ -124,8 +124,8 @@ public class Aop {
         fileEncryptService.storedRSAKeyPair();
     }
 
-    @After("execution(* com.example.fileUpload.service.FileEncryptService.encryptFile(..))")
+   /* @After("execution(* com.example.fileUpload.service.FileEncryptService.encryptFile(..))")
     public void test(){
         System.out.println("암호화 완료");
-    }
+    }*/
 }
