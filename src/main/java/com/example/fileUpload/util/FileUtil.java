@@ -75,25 +75,11 @@ public class FileUtil {
         }
     }
 
-    /**
-     * 파일의 확장자를 가져옵니다.
-     *
-     * @param originalFileName 파일이름을 가져옵니다.
-     * @return 확장자를 반환합니다.
-     * */
-    public static String getFileExtension(String originalFileName) {
-        if (originalFileName != null && originalFileName.contains(".")) {
-            return "." + StringUtils.getFilenameExtension(originalFileName);
-        } else {
-            return ""; // 확장자가 없을 경우 빈 문자열 반환
-        }
-    }
-
     public static String removePath(String filePath){
         int lastSlashIndex = filePath.lastIndexOf('/');
         if (lastSlashIndex != -1 && lastSlashIndex < filePath.length() - 1) {
             String fileName = filePath.substring(lastSlashIndex + 1);
-            //System.out.println("추출된 파일명: " + fileName);
+
             return fileName;
         }
         return null;
@@ -106,24 +92,6 @@ public class FileUtil {
         }
         return fileName;
     }
-    /**
-     * compObj에서 이름을 가져올때, 끝의 null을 삭제합니다.
-     *
-     * @param input 파일이름을 가져옵니다.
-     * */
-    public static String removeNullCharacters(String input) {
-        StringBuilder output = new StringBuilder();
-
-        for (int i = 0; i < input.length(); i++) {
-            char c = input.charAt(i);
-            if (c != '\u0000') {
-                output.append(c);
-            }
-        }
-
-        return output.toString();
-    }
-
     /**
      * 폴더를 삭제합니다.
      *

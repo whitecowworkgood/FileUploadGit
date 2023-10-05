@@ -1,7 +1,5 @@
 package com.example.fileUpload.documentParser.module;
 
-import com.example.fileUpload.util.FileUtil;
-import jdk.swing.interop.SwingInterOpUtils;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -109,7 +107,7 @@ public class EmbeddedFileExtractor {
 
         String fileFormat=null;
         String fileTypeString=null;
-        String fileType=null;
+        String fileType="other";
 
         try{
             compObjStream = new DocumentInputStream(compObj);
@@ -127,7 +125,7 @@ public class EmbeddedFileExtractor {
             byte[] fileNameData = new byte[fileNameSize];
             compObjStream.readFully(fileNameData);
 
-            fileFormat = FileUtil.removeNullCharacters(new String(fileNameData, Charset.forName("euc-kr")));
+            fileFormat = new String(fileNameData, Charset.forName("euc-kr")).trim();
 
             byte[] skipSizeBytes = new byte[4];
             compObjStream.readFully(skipSizeBytes);
@@ -154,29 +152,32 @@ public class EmbeddedFileExtractor {
 
             fileTypeString = new String(fileTypeData, Charset.forName("euc-kr"));
 
-            System.out.println(fileTypeString);
-            System.out.println(fileFormat);
-
 
             if (fileTypeString.startsWith("Excel.Sheet.12") || fileFormat.equals("Microsoft Excel Worksheet")) {
                 fileType=".xlsx";
-            } else if (fileTypeString.startsWith("Word.Document.12") || fileFormat.equals("Microsoft Word Document")) {
+            }
+            if (fileTypeString.startsWith("Word.Document.12") || fileFormat.equals("Microsoft Word Document")) {
                 fileType = ".docx";
-            }else if (fileTypeString.startsWith("PowerPoint.Show.12") || fileFormat.equals("Microsoft PowerPoint Presentation")) {
+            }
+            if (fileTypeString.startsWith("PowerPoint.Show.12") || fileFormat.equals("Microsoft PowerPoint Presentation")) {
                 fileType=".pptx";
-            }else if (fileTypeString.startsWith("PowerPoint.OpenDocumentPresentation.12")) {
+            }
+            if (fileTypeString.startsWith("PowerPoint.OpenDocumentPresentation.12")) {
                 fileType=".odp";
-            }else if (fileTypeString.startsWith("Excel.OpenDocumentSpreadsheet.12")) {
+            }
+            if (fileTypeString.startsWith("Excel.OpenDocumentSpreadsheet.12")) {
                 fileType=".ods";
-            }else if (fileTypeString.startsWith("Word.OpenDocumentText.12")) {
+            }
+            if (fileTypeString.startsWith("Word.OpenDocumentText.12")) {
                 fileType=".odt";
-            }else if(fileTypeString.startsWith("PBrush")){
+            }
+            if(fileTypeString.startsWith("PBrush")){
                 fileType=".bmp";
-            } else if(fileTypeString.startsWith("Excel.SheetMacroEnabled.12") || fileFormat.startsWith("Microsoft Excel Macro-Enabled")){
+            }
+            if(fileTypeString.startsWith("Excel.SheetMacroEnabled.12") || fileFormat.startsWith("Microsoft Excel Macro-Enabled")){
                 fileType=".csv";
             }
-            System.out.println(fileType);
-            System.out.println();
+
         }catch (IOException e){
             ExceptionUtils.getStackTrace(e);
         }finally {

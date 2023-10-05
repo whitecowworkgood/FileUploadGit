@@ -6,11 +6,13 @@ import com.example.fileUpload.model.OleDto;
 import com.example.fileUpload.model.FileVO;
 import com.example.fileUpload.repository.FileDao;
 import com.example.fileUpload.repository.OleDao;
+import com.example.fileUpload.service.FileEncryptService;
 import com.example.fileUpload.service.FileUploadService;
 import com.example.fileUpload.util.ExternalFileMap;
 import com.example.fileUpload.util.FileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -32,10 +34,10 @@ public class FileUploadServiceImpl implements FileUploadService {
     private final FileDao fileDao; //mybatis
     private final OleDao oleDao; //mybatis
     private final FileProcessor fileProcessor;
+    private final FileEncryptService fileEncryptService;
 
     @Value("${Save-Directory}")
     private String dir;
-    //추후 프로젝트 경로나, c:\\경로에 폴더가 있는지 확인 후, 없으면 폴더 생성 후 파일 전송하기
 
     @Override
     @Transactional
@@ -47,8 +49,10 @@ public class FileUploadServiceImpl implements FileUploadService {
                 if (FileUtil.isPathValidForStorage(dir, fileDto.getFileSavePath())) {
 
                     if (FileUtil.validateUploadedFileMimeType(fileDto)) {
+                        //System.out.println(dir+File.separator+"temp"+File.separator+fileDto.getUUIDFileName());
 
                         fileDto.getFileData().transferTo(new File(fileDto.getFileSavePath()));
+
 
                         boolean fileResult = fileDao.saveFile(fileDto);
 
@@ -63,7 +67,7 @@ public class FileUploadServiceImpl implements FileUploadService {
                         }
 
 
-                        fileProcessor.processFiles(fileDto);
+                        fileProcessor.createOleExtractorHandler(fileDto);
                         ExternalFileMap.forEach(entry -> {
 
                             OleDto oleDto = OleDto.builder().superId(fileDto.getId())
@@ -77,6 +81,9 @@ public class FileUploadServiceImpl implements FileUploadService {
 
                         });
                         ExternalFileMap.resetMap();
+
+                        fileEncryptService.encryptFile(fileDto);
+
                         return fileResult;
                         //return true;
                     }
@@ -119,21 +126,18 @@ public class FileUploadServiceImpl implements FileUploadService {
             return false;
         }
 
-        String fileName = fileVO.getUUIDFileName();
-        String savePath = fileVO.getFileOlePath();
-        String fullPath = dir+File.separator + fileName;
 
-        if (!FileUtil.isPathValidForStorage(dir, fullPath)) {
+        if (!FileUtil.isPathValidForStorage(dir, dir+File.separator + fileVO.getUUIDFileName())) {
             return false;
         }
 
-        File file = new File(fullPath);
+        File file = new File(dir+File.separator + fileVO.getUUIDFileName());
 
         if (!(file.exists() && file.delete())) {
-            log.warn(fileName + " 파일 삭제 오류 발생 또는 파일이 없음, DB에서 정보 삭제");
+            log.warn(fileVO.getUUIDFileName() + " 파일 삭제 오류 발생 또는 파일이 없음, DB에서 정보 삭제");
             //return true;
         }
-        File folder = new File(savePath);
+        File folder = new File(fileVO.getFileOlePath());
 
         boolean fileResult = fileDao.deleteById(fileVO.getId());
 

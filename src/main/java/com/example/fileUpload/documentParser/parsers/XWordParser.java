@@ -1,64 +1,55 @@
 package com.example.fileUpload.documentParser.parsers;
 
-import com.example.fileUpload.documentParser.module.XOfficeEntryHandler;
-import com.example.fileUpload.documentParser.parsers.abstracts.FileParser;
+import com.example.fileUpload.documentParser.module.OleExtractor.OleExtractorFactory;
+import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
 import com.example.fileUpload.model.FileDto;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
-import org.apache.tika.exception.TikaException;
-import org.apache.tika.metadata.Metadata;
-import org.apache.tika.parser.ParseContext;
-import org.apache.tika.parser.microsoft.EMFParser;
-import org.apache.tika.sax.BodyContentHandler;
 import org.apache.xmlbeans.XmlException;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
 
 import java.io.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Arrays;
+
+import static com.example.fileUpload.documentParser.module.OleExtractor.OleExtractorFactory.choiceExtractor;
 
 @NoArgsConstructor
 @Slf4j
-public class XWordParser extends FileParser {
+public class XWordParser extends OleExtractor {
+    FileInputStream fs = null;
+    XWPFDocument docx = null;
+    //XOfficeEntryHandler xOfficeEntryHandler = new XOfficeEntryHandler();
 
     @Override
-    public void parse(FileDto fileDto) throws IOException, OpenXML4JException {
-
-        FileInputStream fs = null;
-        XWPFDocument docx = null;
-        XOfficeEntryHandler xOfficeEntryHandler = new XOfficeEntryHandler();
-        String concatenated ="";
+    public void extractOleFromDocumentFile(FileDto fileDto) throws IOException, OpenXML4JException {
 
         try{
-            fs = new FileInputStream(fileDto.getFileSavePath());
-            docx = new XWPFDocument(OPCPackage.open(fs));
+            callOfficeHandler(fileDto);
 
+        }catch (Exception e){
+            catchException(e);
 
-            for (PackagePart pPart : docx.getAllEmbeddedParts()) {
-                xOfficeEntryHandler.parser(pPart, fileDto.getOriginFileName(), fileDto.getFileOlePath());
-            }
-
-        }catch (IOException e){
-            ExceptionUtils.getStackTrace(e);
-        } catch (XmlException e) {
-            throw new RuntimeException(e);
         } finally {
-            IOUtils.closeQuietly(fs);
-            IOUtils.closeQuietly(docx);
+            closeResources();
         }
+    }
+
+    @Override
+    protected void callOfficeHandler(FileDto fileDto) throws Exception {
+        fs = new FileInputStream(fileDto.getFileSavePath());
+        docx = new XWPFDocument(OPCPackage.open(fs));
+
+        for (PackagePart pPart : docx.getAllEmbeddedParts())
+            new OleExtractorFactory().createMordernOleExtractor(pPart, fileDto);
+    }
+
+    @Override
+    protected void closeResources() {
+        IOUtils.closeQuietly(fs);
+        IOUtils.closeQuietly(docx);
     }
 }

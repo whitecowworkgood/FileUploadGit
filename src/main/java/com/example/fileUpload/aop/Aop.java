@@ -1,19 +1,31 @@
 package com.example.fileUpload.aop;
 
+import com.example.fileUpload.service.FileEncryptService;
+import com.example.fileUpload.service.serviceImpl.FileEncryptServiceImpl;
+import jdk.swing.interop.SwingInterOpUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
+import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 
 @Component
@@ -23,6 +35,10 @@ import java.nio.file.Paths;
 public class Aop {
     @Value("${Save-Directory}")
     String dir;
+
+    private final FileEncryptService fileEncryptService;
+
+    private boolean kekGenerated = false; // 초기에는 false로 설정
 
     /**
      *
@@ -76,7 +92,7 @@ public class Aop {
      * 서비스 클래스(컴포넌트) 수행 전에, 다운로드 폴더가 있는지 확인 후, 없으면 생성
      * @throws Throwable
      */
-    @Before("execution(* com.example.fileUpload.service.*.*(..))")
+    @Before("execution(* com.example.fileUpload.controller.*.*(..))")
     public void downloadFolderCheck() throws Throwable{
         Path folder = Paths.get(dir);
 
@@ -92,4 +108,24 @@ public class Aop {
             }
         }
     }
+
+    @Before("execution(* com.example.fileUpload.*.*(..))")
+    public void generateKEK() throws NoSuchAlgorithmException, SocketException, UnknownHostException {
+        if (!kekGenerated) {
+            fileEncryptService.getMacAddress();
+            fileEncryptService.generateKEK();
+            kekGenerated = true;
+        }
+
+    }
+
+    @Before("execution(* com.example.fileUpload.service.FileUploadService.fileUpload(..))")
+    public void RSA() throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        fileEncryptService.storedRSAKeyPair();
+    }
+
+   /* @After("execution(* com.example.fileUpload.service.FileEncryptService.encryptFile(..))")
+    public void test(){
+        System.out.println("암호화 완료");
+    }*/
 }

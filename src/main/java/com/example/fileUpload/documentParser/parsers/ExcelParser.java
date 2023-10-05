@@ -1,7 +1,8 @@
 package com.example.fileUpload.documentParser.parsers;
 
 import com.example.fileUpload.documentParser.module.OfficeEntryHandler;
-import com.example.fileUpload.documentParser.parsers.abstracts.FileParser;
+
+import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
 import com.example.fileUpload.model.FileDto;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;
@@ -12,31 +13,45 @@ import org.apache.poi.poifs.filesystem.DirectoryNode;
 
 
 import java.io.*;
+import java.util.Arrays;
 
 
 @NoArgsConstructor
-public class ExcelParser extends FileParser {
+public class ExcelParser extends OleExtractor {
+
+    FileInputStream fs = null;
+    HSSFWorkbook hssfWorkbook=null;
+    OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
 
     @Override
-    public void parse(FileDto fileDto) throws IOException {
-        FileInputStream fs = null;
-        HSSFWorkbook hssfWorkbook=null;
-
-        OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
+    public void extractOleFromDocumentFile(FileDto fileDto) throws IOException {
 
         try{
-            fs = new FileInputStream(fileDto.getFileSavePath());
-            hssfWorkbook= new HSSFWorkbook(fs);
+            callOfficeHandler(fileDto);
 
-            for (HSSFObjectData hssfObjectData : hssfWorkbook.getAllEmbeddedObjects()) {
+        }catch (Exception e){
+            catchException(e);
 
-                officeEntryHandler.parser((DirectoryNode) hssfObjectData.getDirectory(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
-            }
-        }catch (IOException e){
-            ExceptionUtils.getStackTrace(e);
         }finally{
-            IOUtils.closeQuietly(fs);
-            IOUtils.closeQuietly(hssfWorkbook);
+            closeResources();
         }
+    }
+
+    @Override
+    protected void callOfficeHandler(FileDto fileDto) throws Exception {
+        fs = new FileInputStream(fileDto.getFileSavePath());
+
+        hssfWorkbook= new HSSFWorkbook(fs);
+
+        for (HSSFObjectData hssfObjectData : hssfWorkbook.getAllEmbeddedObjects())
+            officeEntryHandler.parser((DirectoryNode) hssfObjectData.getDirectory(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
+
+
+    }
+
+    @Override
+    protected void closeResources() {
+        IOUtils.closeQuietly(fs);
+        IOUtils.closeQuietly(hssfWorkbook);
     }
 }
