@@ -1,18 +1,18 @@
 package com.example.fileUpload.aop;
 
+import com.example.fileUpload.repository.EncryptDao;
 import com.example.fileUpload.service.FileEncryptService;
 import com.example.fileUpload.service.serviceImpl.FileEncryptServiceImpl;
+import com.example.fileUpload.util.Encrypt.RSA;
 import jdk.swing.interop.SwingInterOpUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
-import org.aspectj.lang.annotation.After;
-import org.aspectj.lang.annotation.Around;
-import org.aspectj.lang.annotation.Aspect;
-import org.aspectj.lang.annotation.Before;
+import org.aspectj.lang.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -28,6 +28,8 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 
+
+
 @Component
 @Slf4j
 @Aspect
@@ -36,7 +38,7 @@ public class Aop {
     @Value("${Save-Directory}")
     String dir;
 
-    private final FileEncryptService fileEncryptService;
+
 
     private boolean kekGenerated = false; // 초기에는 false로 설정
 
@@ -108,24 +110,4 @@ public class Aop {
             }
         }
     }
-
-    @Before("execution(* com.example.fileUpload.*.*(..))")
-    public void generateKEK() throws NoSuchAlgorithmException, SocketException, UnknownHostException {
-        if (!kekGenerated) {
-            fileEncryptService.getMacAddress();
-            fileEncryptService.generateKEK();
-            kekGenerated = true;
-        }
-
-    }
-
-    @Before("execution(* com.example.fileUpload.service.FileUploadService.fileUpload(..))")
-    public void RSA() throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        fileEncryptService.storedRSAKeyPair();
-    }
-
-   /* @After("execution(* com.example.fileUpload.service.FileEncryptService.encryptFile(..))")
-    public void test(){
-        System.out.println("암호화 완료");
-    }*/
 }

@@ -49,18 +49,17 @@ public class FileDownloadController {
     @ResponseBody
     public void downloadFile(@PathVariable("id") Long id) throws IOException {
 
-        ReadFileKEK();
-        moveFileToTemp();
+       fileEncryptService.decryptFile(id);
         //System.out.println(kek);
-        fileEncryptService.decryptFile(encryptDao.findPrivateKey(kek));
-        kek=null;
+        //fileEncryptService.decryptFile(encryptDao.findPrivateKey(kek));
+        //kek=null;
 
     }
 
     @SneakyThrows
     private void checkBytesReadSize(){
         if (bytesRead > 0) {
-            kek = fileEncryptService.decryptKEK(buffer);
+            //kek = fileEncryptService.decryptKEK(buffer);
 
             //fileEncryptService.decryptFile(encryptDao.findPrivateKey(kek));
             //encryptDao.findPrivateKey(kek);

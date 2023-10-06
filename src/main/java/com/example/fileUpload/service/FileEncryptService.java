@@ -11,10 +11,14 @@ import java.net.UnknownHostException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.concurrent.ConcurrentHashMap;
 
 public interface FileEncryptService {
-
-    void encryptFile(FileDto fileDto) throws IOException;
+    void createRSAKeyPair() throws NoSuchAlgorithmException;
+    void storedRSAKeyPair();
+    void encryptFile(FileDto fileDto) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException;
+    void decryptFile(Long id);
+   /* void encryptFile(FileDto fileDto) throws IOException;
 
     void decryptFile(String privateKey);
 
@@ -23,9 +27,9 @@ public interface FileEncryptService {
     void generateKEK() throws NoSuchAlgorithmException;
     void createRSAKeyPair() throws NoSuchAlgorithmException;
 
-    void storedRSAKeyPair() throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException;
+    void storedRSAKeyPair();
 
     void encryptKEK() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException;
 
-    String decryptKEK(byte[] encryptedBytes) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException;
+    String decryptKEK(byte[] encryptedBytes) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException;*/
 }

@@ -11,6 +11,7 @@ import com.example.fileUpload.service.FileUploadService;
 import com.example.fileUpload.util.ExternalFileMap;
 import com.example.fileUpload.util.FileUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -39,6 +40,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     @Value("${Save-Directory}")
     private String dir;
 
+    @SneakyThrows
     @Override
     @Transactional
     public synchronized boolean fileUpload(FileDto fileDto) {

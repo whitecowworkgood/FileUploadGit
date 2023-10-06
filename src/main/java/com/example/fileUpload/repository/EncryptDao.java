@@ -5,8 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.stereotype.Repository;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Enumeration;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Repository
@@ -18,7 +17,7 @@ public class EncryptDao {
         return sqlSession.getMapper(FileEncryptMapperAnno.class).findPrivateKey(argPublicKey);
     }
 
-    public void saveRSAKey(ConcurrentHashMap<String, String> stringKeypair){
-        sqlSession.getMapper(FileEncryptMapperAnno.class).insertRSAKeys(stringKeypair);
+    public long saveRSAKey(ConcurrentHashMap<String, String> stringKeypair){
+        return sqlSession.getMapper(FileEncryptMapperAnno.class).insertRSAKeys(stringKeypair);
     }
 }
