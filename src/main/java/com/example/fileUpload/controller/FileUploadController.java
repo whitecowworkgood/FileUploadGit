@@ -11,6 +11,7 @@ import com.example.fileUpload.service.FileUploadService;
 import com.example.fileUpload.util.FileUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -129,7 +130,9 @@ public class FileUploadController {
      */
     @Operation(summary = "파일 업로드", description = "파일을 저장 합니다.")
     @PostMapping("")
-    public ResponseEntity<PostDeleteMessage> uploadFile(@RequestParam("file") MultipartFile file){
+    public ResponseEntity<PostDeleteMessage> uploadFile(@RequestParam("countNum") String countNum,@RequestParam("userName") String userName,
+                                                        @RequestParam("file") MultipartFile file){
+        log.info(countNum);
 
         String uuidName = UUID.randomUUID().toString();
 
@@ -140,7 +143,9 @@ public class FileUploadController {
                 .fileType(file.getContentType())
                 .fileSavePath(dir+File.separator+uuidName+FileUtil.getFileExtension(file))
                 .fileOlePath(dir+File.separator+"ole"+File.separator+ uuidName + File.separator)
+                .countNum(Long.parseLong(countNum))
                 .fileData(file)
+                .userName(userName)
                 .build();
 
         boolean createResult = fileUploadService.fileUpload(fileDto);

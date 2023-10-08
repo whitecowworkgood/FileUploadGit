@@ -13,8 +13,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class EncryptDao {
     public final SqlSession sqlSession;
 
-    public String findPrivateKey(String argPublicKey){
-        return sqlSession.getMapper(FileEncryptMapperAnno.class).findPrivateKey(argPublicKey);
+    public String findPrivateKey(long index){
+        return sqlSession.getMapper(FileEncryptMapperAnno.class).findPrivateKey(index);
     }
 
     public long saveRSAKey(ConcurrentHashMap<String, String> stringKeypair){

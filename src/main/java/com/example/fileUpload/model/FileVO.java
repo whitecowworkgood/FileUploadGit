@@ -15,4 +15,6 @@ public class FileVO {
     private Long fileSize;
     private String fileType;
     private String originalFileName;
+    private Long countNum;
+    private String userName;
 }

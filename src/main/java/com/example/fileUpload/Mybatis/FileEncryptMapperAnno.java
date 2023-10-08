@@ -9,9 +9,9 @@ import java.util.concurrent.ConcurrentHashMap;
 public interface FileEncryptMapperAnno {
 
     @Select("<script>"
-            + "SELECT private_key FROM rsa_keys WHERE public_key = #{argPublicKey}"
+            + "SELECT private_key FROM rsa_keys WHERE id = #{id}"
             + "</script>")
-    String findPrivateKey(String argPublicKey);
+    String findPrivateKey(long index);
 
 
     @Insert("<script>"+

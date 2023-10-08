@@ -1,6 +1,6 @@
 -- --------------------------------------------------------
 -- 호스트:                          127.0.0.1
--- 서버 버전:                        10.3.38-MariaDB-0ubuntu0.20.04.1 - Ubuntu 20.04
+-- 서버 버전:                        10.6.12-MariaDB-0ubuntu0.22.04.1 - Ubuntu 22.04
 -- 서버 OS:                        debian-linux-gnu
 -- HeidiSQL 버전:                  12.5.0.6677
 -- --------------------------------------------------------
@@ -16,7 +16,7 @@
 
 
 -- file_store 데이터베이스 구조 내보내기
-CREATE DATABASE IF NOT EXISTS `file_store` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */;
+CREATE DATABASE IF NOT EXISTS `file_store` /*!40100 DEFAULT CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci */;
 USE `file_store`;
 
 -- 테이블 file_store.file_entity 구조 내보내기
@@ -28,8 +28,10 @@ CREATE TABLE IF NOT EXISTS `file_entity` (
   `file_size` bigint(20) NOT NULL,
   `file_type` varchar(1020) NOT NULL,
   `origin_file_name` varchar(1020) NOT NULL,
+  `count_num` bigint(10) NOT NULL DEFAULT 5,
+  `user_name` varchar(50) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
@@ -40,7 +42,7 @@ CREATE TABLE IF NOT EXISTS `ole_entry` (
   `original_file_name` varchar(1020) NOT NULL,
   `super_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=81 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=141 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
@@ -50,7 +52,7 @@ CREATE TABLE IF NOT EXISTS `rsa_keys` (
   `public_key` text NOT NULL,
   `private_key` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 

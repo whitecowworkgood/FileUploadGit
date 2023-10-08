@@ -1,33 +1,13 @@
 package com.example.fileUpload.aop;
 
-import com.example.fileUpload.repository.EncryptDao;
-import com.example.fileUpload.service.FileEncryptService;
-import com.example.fileUpload.service.serviceImpl.FileEncryptServiceImpl;
-import com.example.fileUpload.util.Encrypt.RSA;
-import jdk.swing.interop.SwingInterOpUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.io.IOException;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-
-
+import static com.example.fileUpload.util.DirectoryChecker.callGenerateFolderMethods;
 
 
 @Component
@@ -36,8 +16,7 @@ import java.security.NoSuchAlgorithmException;
 @RequiredArgsConstructor
 public class Aop {
     @Value("${Save-Directory}")
-    String dir;
-
+    private String dir;
 
 
     private boolean kekGenerated = false; // 초기에는 false로 설정
@@ -89,25 +68,9 @@ public class Aop {
         }
     }
 
-    /***
-     *
-     * 서비스 클래스(컴포넌트) 수행 전에, 다운로드 폴더가 있는지 확인 후, 없으면 생성
-     * @throws Throwable
-     */
-    @Before("execution(* com.example.fileUpload.controller.*.*(..))")
-    public void downloadFolderCheck() throws Throwable{
-        Path folder = Paths.get(dir);
+    @Before("execution(* com.example.fileUpload.*.*.*(..))")
+    public void downloadFolderCheck() {
 
-        // 폴더 존재 여부 확인
-        if (!Files.exists(folder) || !Files.isDirectory(folder)) {
-            try {
-                Files.createDirectory(folder);
-                System.out.println("Folder created: " + dir);
-            } catch (IOException e) {
-                // 폴더 생성 실패에 대한 예외 처리
-                log.error(ExceptionUtils.getStackTrace(e));
-                throw e;
-            }
-        }
+        callGenerateFolderMethods(dir);
     }
 }

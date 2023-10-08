@@ -71,7 +71,15 @@ public class FileUtil {
         if (originalFileName != null && originalFileName.contains(".")) {
             return "."+StringUtils.getFilenameExtension(originalFileName);
         } else {
-            return ""; // 확장자가 없을 경우 빈 문자열 반환
+            return ".bin"; // 확장자가 없을 경우 빈 문자열 반환
+        }
+    }
+    public static String getFileExtension(String fileName) {
+
+        if (fileName != null && fileName.contains(".")) {
+            return "."+StringUtils.getFilenameExtension(fileName);
+        } else {
+            return ".bin"; // 확장자가 없을 경우 빈 문자열 반환
         }
     }
 

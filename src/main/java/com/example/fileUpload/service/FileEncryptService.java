@@ -18,18 +18,5 @@ public interface FileEncryptService {
     void storedRSAKeyPair();
     void encryptFile(FileDto fileDto) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException;
     void decryptFile(Long id);
-   /* void encryptFile(FileDto fileDto) throws IOException;
 
-    void decryptFile(String privateKey);
-
-    void getMacAddress() throws SocketException, UnknownHostException;
-
-    void generateKEK() throws NoSuchAlgorithmException;
-    void createRSAKeyPair() throws NoSuchAlgorithmException;
-
-    void storedRSAKeyPair();
-
-    void encryptKEK() throws NoSuchAlgorithmException, NoSuchPaddingException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException;
-
-    String decryptKEK(byte[] encryptedBytes) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException;*/
 }
