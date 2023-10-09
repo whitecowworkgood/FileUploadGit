@@ -29,4 +29,16 @@ public class FileDao {
     public boolean deleteById(Long id){
         return sqlSession.getMapper(FileEntryMapperAnno.class).deleteFileEntry(id);
     }
+
+    public List<FileVO> beforeAcceptFiles(){
+        return sqlSession.getMapper(FileEntryMapperAnno.class).adminSelectView();
+    }
+
+    public void acceptFile(Long id){
+        sqlSession.getMapper(FileEntryMapperAnno.class).updateIsActive(id);
+    }
+
+    public List<FileVO> acceptedFiles(String userName){
+        return sqlSession.getMapper(FileEntryMapperAnno.class).acceptedFiles(userName);
+    }
 }

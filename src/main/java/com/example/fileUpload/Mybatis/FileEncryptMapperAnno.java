@@ -19,6 +19,6 @@ public interface FileEncryptMapperAnno {
             "VALUES (#{publicKey}, #{privateKey})"
             + "</script>")
     @Options(useGeneratedKeys = true, keyProperty = "id")
-    long insertRSAKeys(ConcurrentHashMap<String, String> stringKeypair);
+    void insertRSAKeys(ConcurrentHashMap<String, String> stringKeypair);
 
 }

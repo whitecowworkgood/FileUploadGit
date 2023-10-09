@@ -39,7 +39,6 @@ import static com.example.fileUpload.util.DirectoryChecker.generateUserFolder;
 public class FileEncryptServiceImpl implements FileEncryptService {
 
     private static final int ENCRYPTION_BUFFER_SIZE = 1024;
-    private static final int DECRYPTION_BUFFER_SIZE = 1040;
     private static final int AES_SIZE = 32;
     private static final int IV_SIZE = 16;
 
@@ -114,15 +113,17 @@ public class FileEncryptServiceImpl implements FileEncryptService {
             byte[] buffer = new byte[ENCRYPTION_BUFFER_SIZE];
 
             int bytesRead;
+
             while ((bytesRead = inputFileStream.read(buffer)) != -1) {
+                byte[] encryptedBytes;
+                if (bytesRead == ENCRYPTION_BUFFER_SIZE) {
+                    encryptedBytes = this.cipher.update(buffer, 0, bytesRead);
+                    log.info(String.valueOf(encryptedBytes.length));
 
-                //byte[] encryptedBytes =cipher.doFinal(buffer);
-
-                byte[] encryptedBytes = this.cipher.doFinal(buffer, 0, bytesRead);
-
+                } else {
+                    encryptedBytes = this.cipher.doFinal(buffer, 0, bytesRead);
+                }
                 encryptedFileStream.write(encryptedBytes);
-                //log.info(String.valueOf(cipher.doFinal(buffer).length));
-                //log.info(String.valueOf(this.cipher.doFinal(buffer, 0, bytesRead).length));
             }
             encryptedFileStream.write(ByteBuffer.allocate(4).putInt(Math.toIntExact(latestInsertedId)).array());
             encryptedFileStream.write(encryptOptions(ivSpec.getIV()));
@@ -130,6 +131,7 @@ public class FileEncryptServiceImpl implements FileEncryptService {
 
         } catch (IllegalBlockSizeException | IOException | BadPaddingException e) {
             ExceptionUtils.getStackTrace(e);
+
         }finally{
             IOUtils.closeQuietly(inputFileStream);
             IOUtils.closeQuietly(encryptedFileStream);
@@ -187,7 +189,7 @@ public class FileEncryptServiceImpl implements FileEncryptService {
 
             randomAccessFile.seek(0);
 
-            byte[] decryptedBuffer = new byte[DECRYPTION_BUFFER_SIZE];
+            byte[] decryptedBuffer = new byte[ENCRYPTION_BUFFER_SIZE];
 
             // 복호화할 데이터를 읽어옵니다.
             int totalBytesRead = 0;
@@ -195,18 +197,22 @@ public class FileEncryptServiceImpl implements FileEncryptService {
             while (totalBytesRead < position) {
                 int bytesRead;
 
-                if (totalBytesRead + DECRYPTION_BUFFER_SIZE <= position) {
-
-                    bytesRead = randomAccessFile.read(decryptedBuffer, 0, DECRYPTION_BUFFER_SIZE);
-
+                if (totalBytesRead + ENCRYPTION_BUFFER_SIZE <= position) {
+                    bytesRead = randomAccessFile.read(decryptedBuffer, 0, ENCRYPTION_BUFFER_SIZE);
                 } else {
-
                     bytesRead = randomAccessFile.read(decryptedBuffer, 0, (int) (position - totalBytesRead));
                 }
 
-                byte[] decryptedBytes = cipher.doFinal(decryptedBuffer, 0, bytesRead);
-                encryptedFileStream.write(decryptedBytes);
+                byte[] decryptedBytes;
+                if (totalBytesRead + bytesRead == position) {
+                    // 마지막 블록인 경우 cipher.doFinal()을 사용하여 패딩을 적용
+                    decryptedBytes = cipher.doFinal(decryptedBuffer, 0, bytesRead);
+                } else {
+                    // 그 외의 경우 cipher.update()를 사용하여 블록을 처리
+                    decryptedBytes = cipher.update(decryptedBuffer, 0, bytesRead);
+                }
 
+                encryptedFileStream.write(decryptedBytes);
                 totalBytesRead += bytesRead;
             }
 

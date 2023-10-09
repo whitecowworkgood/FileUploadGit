@@ -30,8 +30,9 @@ CREATE TABLE IF NOT EXISTS `file_entity` (
   `origin_file_name` varchar(1020) NOT NULL,
   `count_num` bigint(10) NOT NULL DEFAULT 5,
   `user_name` varchar(50) NOT NULL,
+  `is_active` tinyint(1) NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=15 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
@@ -42,7 +43,7 @@ CREATE TABLE IF NOT EXISTS `ole_entry` (
   `original_file_name` varchar(1020) NOT NULL,
   `super_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=141 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
@@ -52,7 +53,7 @@ CREATE TABLE IF NOT EXISTS `rsa_keys` (
   `public_key` text NOT NULL,
   `private_key` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=29 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=48 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
