@@ -1,21 +1,16 @@
 package com.example.fileUpload.documentParser.module.OleExtractor.ExtractorFactory;
 
 import com.example.fileUpload.documentParser.module.OleExtractor.abstracts.OleExtractor;
-import com.example.fileUpload.model.FileDto;
+import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.util.FileType;
 import com.example.fileUpload.util.OleEntry;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.poifs.filesystem.*;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-
-import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
-import static com.example.fileUpload.util.FileUtil.removeFileExtension;
 
 
 public class OctExtractor extends OleExtractor {

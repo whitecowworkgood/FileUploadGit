@@ -1,7 +1,8 @@
 package com.example.fileUpload.Mybatis;
 
-import com.example.fileUpload.model.FileDto;
-import com.example.fileUpload.model.FileVO;
+import com.example.fileUpload.model.File.FileDto;
+import com.example.fileUpload.model.File.FileVO;
+import com.example.fileUpload.model.File.UserFileVO;
 import org.apache.ibatis.annotations.*;
 
 import java.util.List;
@@ -50,10 +51,14 @@ public interface FileEntryMapperAnno {
     @Update("UPDATE file_entity SET is_active = 1 WHERE id = #{id}")
     void updateIsActive(Long id);
 
-    @Select("SELECT id, uuidfile_name, file_ole_path," +
-            "file_save_path, file_size, origin_file_name, file_type, count_num, user_name FROM file_entity"+
+    @Select("SELECT file_size, origin_file_name, count_num FROM file_entity"+
             " where is_active = '1' AND count_num > 0 AND user_name = #{userName}")
 
-    List<FileVO> acceptedFiles(String userName);
+    List<UserFileVO> acceptedFiles(String userName);
+
+
+    @Select("SELECT uuidfile_name FROM file_entity"+
+            " where user_name = #{userName} AND origin_file_name = #{fileName}")
+    String selectOriginalFileName(String userName, String fileName);
 
 }

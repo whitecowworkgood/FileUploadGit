@@ -2,14 +2,10 @@ package com.example.fileUpload.documentParser;
 
 import com.example.fileUpload.documentParser.parsers.*;
 import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
-import com.example.fileUpload.model.FileDto;
-import com.example.fileUpload.util.MimeType;
-import jdk.swing.interop.SwingInterOpUtils;
+import com.example.fileUpload.model.File.FileDto;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-
-import static com.example.fileUpload.util.MimeType.PPT;
 
 @NoArgsConstructor
 @Slf4j

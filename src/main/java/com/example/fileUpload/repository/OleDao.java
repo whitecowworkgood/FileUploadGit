@@ -1,7 +1,8 @@
 package com.example.fileUpload.repository;
 
 import com.example.fileUpload.Mybatis.OleEntryMapperAnno;
-import com.example.fileUpload.model.OleDto;
+import com.example.fileUpload.model.Ole.OleDto;
+import com.example.fileUpload.model.Ole.OleVO;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.stereotype.Repository;
@@ -14,13 +15,13 @@ public class OleDao {
 
     private final SqlSession sqlSession;
 
-    public List<OleDto> selectById(Long id){
+    public List<OleVO> selectById(Long id){
         return sqlSession.getMapper(OleEntryMapperAnno.class).selectById(id);
     }
 
-    public List<OleDto> printAll(){
+   /* public List<OleDto> printAll(){
         return sqlSession.getMapper(OleEntryMapperAnno.class).findAllEntry();
-    }
+    }*/
 
     public Boolean deleteById(Long id){
         return sqlSession.getMapper(OleEntryMapperAnno.class).deleteOleEntry(id);

@@ -1,11 +1,10 @@
 package com.example.fileUpload.documentParser.parsers;
 
 import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
-import com.example.fileUpload.model.FileDto;
+import com.example.fileUpload.model.File.FileDto;
 import org.apache.commons.compress.archivers.zip.ZipArchiveEntry;
 import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.tika.Tika;
 
 import java.io.FileInputStream;

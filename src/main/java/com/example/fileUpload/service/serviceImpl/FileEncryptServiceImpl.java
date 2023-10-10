@@ -1,11 +1,10 @@
 package com.example.fileUpload.service.serviceImpl;
 
-import com.example.fileUpload.model.FileDto;
+import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.repository.EncryptDao;
 import com.example.fileUpload.repository.FileDao;
 import com.example.fileUpload.service.FileEncryptService;
 import com.example.fileUpload.util.Encrypt.RSA;
-import com.example.fileUpload.util.FileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -26,7 +25,6 @@ import java.nio.file.StandardCopyOption;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -118,7 +116,6 @@ public class FileEncryptServiceImpl implements FileEncryptService {
                 byte[] encryptedBytes;
                 if (bytesRead == ENCRYPTION_BUFFER_SIZE) {
                     encryptedBytes = this.cipher.update(buffer, 0, bytesRead);
-                    log.info(String.valueOf(encryptedBytes.length));
 
                 } else {
                     encryptedBytes = this.cipher.doFinal(buffer, 0, bytesRead);
@@ -154,7 +151,7 @@ public class FileEncryptServiceImpl implements FileEncryptService {
 
             randomAccessFile = new RandomAccessFile(fileDao.printFileOne(id).getFileSavePath(), "r");
             encryptedFileStream = new FileOutputStream(downloadFileUserPath+File.separator+
-                    fileDao.printFileOne(id).getOriginalFileName());
+                    fileDao.printFileOne(id).getUUIDFileName());
 
             long fileSize = randomAccessFile.length();
 

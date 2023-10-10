@@ -2,17 +2,15 @@ package com.example.fileUpload.documentParser.parsers;
 
 import com.example.fileUpload.documentParser.module.OfficeEntryHandler;
 import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
-import com.example.fileUpload.model.FileDto;
+import com.example.fileUpload.model.File.FileDto;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.hslf.usermodel.HSLFObjectData;
 import org.apache.poi.hslf.usermodel.HSLFSlideShow;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 
 

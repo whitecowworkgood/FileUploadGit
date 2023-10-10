@@ -1,6 +1,6 @@
 package com.example.fileUpload.service;
 
-import com.example.fileUpload.model.FileVO;
+import com.example.fileUpload.model.File.FileVO;
 
 import java.util.List;
 

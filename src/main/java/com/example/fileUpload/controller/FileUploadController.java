@@ -1,17 +1,14 @@
 package com.example.fileUpload.controller;
 
 
-import com.example.fileUpload.model.OleDto;
 import com.example.fileUpload.message.PostDeleteMessage;
-import com.example.fileUpload.model.FileDto;
+import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.message.GetMessage;
-import com.example.fileUpload.model.FileVO;
-import com.example.fileUpload.service.FileEncryptService;
+import com.example.fileUpload.model.File.FileVO;
 import com.example.fileUpload.service.FileUploadService;
 import com.example.fileUpload.util.FileUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -88,7 +85,7 @@ public class FileUploadController {
      * @param id 조회할 파일의 ID입니다.
      * @return ResponseEntity<GetMessage> 선택한 파일의 OLE 정보를 반환합니다.
      */
-    @Operation(summary = "선택 파일 OLE 파일 조회", description = "파일 id를 통해 파일에 대한 OLE 정보를 출력 한다.")
+    /*@Operation(summary = "선택 파일 OLE 파일 조회", description = "파일 id를 통해 파일에 대한 OLE 정보를 출력 한다.")
     @GetMapping("/file/{id}/ole")
     @ResponseBody
     public ResponseEntity<GetMessage> printOle(@PathVariable("id") Long id) {
@@ -100,7 +97,7 @@ public class FileUploadController {
             getMessage.setData(oleDtoList);
         }
         return ResponseEntity.status(HttpStatus.OK).body(getMessage);
-    }
+    }*/
 
     /**
      * 파일을 삭제합니다.
@@ -130,9 +127,8 @@ public class FileUploadController {
      */
     @Operation(summary = "파일 업로드", description = "파일을 저장 합니다.")
     @PostMapping("")
-    public ResponseEntity<PostDeleteMessage> uploadFile(@RequestParam("countNum") String countNum,@RequestParam("userName") String userName,
+    public ResponseEntity<PostDeleteMessage> uploadFile(@RequestParam("countNum") Long countNum, @RequestParam("userName") String userName,
                                                         @RequestParam("file") MultipartFile file){
-        log.info(countNum);
 
         String uuidName = UUID.randomUUID().toString();
 
@@ -143,7 +139,7 @@ public class FileUploadController {
                 .fileType(file.getContentType())
                 .fileSavePath(dir+File.separator+uuidName+FileUtil.getFileExtension(file))
                 .fileOlePath(dir+File.separator+"ole"+File.separator+ uuidName + File.separator)
-                .countNum(Long.parseLong(countNum))
+                .countNum(countNum)
                 .fileData(file)
                 .userName(userName)
                 .build();

@@ -1,6 +1,6 @@
 package com.example.fileUpload.service.serviceImpl;
 
-import com.example.fileUpload.model.FileVO;
+import com.example.fileUpload.model.File.FileVO;
 import com.example.fileUpload.repository.FileDao;
 import com.example.fileUpload.service.AdminService;
 import lombok.RequiredArgsConstructor;

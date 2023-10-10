@@ -1,7 +1,6 @@
 package com.example.fileUpload.documentParser.parsers.abstracts;
 
-import com.example.fileUpload.model.FileDto;
-import org.apache.commons.io.IOUtils;
+import com.example.fileUpload.model.File.FileDto;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.xmlbeans.XmlException;
 

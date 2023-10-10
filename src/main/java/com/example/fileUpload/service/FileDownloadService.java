@@ -1,13 +1,13 @@
 package com.example.fileUpload.service;
 
-import com.example.fileUpload.model.FileVO;
+import com.example.fileUpload.model.File.UserFileVO;
 
 import java.util.List;
 
 public interface FileDownloadService {
 
-    void downloadFile();
+    String downloadFile(String userName, String fileName);
 
-    List<FileVO> showAcceptedFiles(String userName);
+    List<UserFileVO> showAcceptedFiles(String userName);
 
 }

@@ -1,7 +1,7 @@
 package com.example.fileUpload.documentParser.module.OleExtractor.ExtractorFactory;
 
 import com.example.fileUpload.documentParser.module.OleExtractor.abstracts.OleExtractor;
-import com.example.fileUpload.model.FileDto;
+import com.example.fileUpload.model.File.FileDto;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.hslf.usermodel.HSLFSlideShow;

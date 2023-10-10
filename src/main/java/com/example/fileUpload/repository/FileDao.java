@@ -1,8 +1,9 @@
 package com.example.fileUpload.repository;
 
 import com.example.fileUpload.Mybatis.FileEntryMapperAnno;
-import com.example.fileUpload.model.FileDto;
-import com.example.fileUpload.model.FileVO;
+import com.example.fileUpload.model.File.FileDto;
+import com.example.fileUpload.model.File.FileVO;
+import com.example.fileUpload.model.File.UserFileVO;
 import lombok.RequiredArgsConstructor;
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.stereotype.Repository;
@@ -38,7 +39,11 @@ public class FileDao {
         sqlSession.getMapper(FileEntryMapperAnno.class).updateIsActive(id);
     }
 
-    public List<FileVO> acceptedFiles(String userName){
+    public List<UserFileVO> acceptedFiles(String userName){
         return sqlSession.getMapper(FileEntryMapperAnno.class).acceptedFiles(userName);
+    }
+
+    public String selectOriginalFileName(String userName, String FileName){
+        return sqlSession.getMapper(FileEntryMapperAnno.class).selectOriginalFileName(userName, FileName);
     }
 }

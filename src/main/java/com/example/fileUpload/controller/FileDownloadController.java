@@ -2,16 +2,14 @@ package com.example.fileUpload.controller;
 
 
 import com.example.fileUpload.message.GetMessage;
-import com.example.fileUpload.model.FileVO;
+import com.example.fileUpload.model.File.UserFileVO;
 import com.example.fileUpload.repository.EncryptDao;
 import com.example.fileUpload.service.FileDownloadService;
-import com.example.fileUpload.service.FileEncryptService;
 import com.example.fileUpload.service.FileUploadService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.io.IOUtils;
@@ -23,17 +21,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
-import java.util.Base64;
 import java.util.List;
 
 @Controller
@@ -55,13 +43,13 @@ public class FileDownloadController {
     @ResponseBody
     public ResponseEntity<GetMessage> showFiles(@PathVariable("userName") String userName) throws IOException {
 
-        List<FileVO> fileVOS = fileDownloadService.showAcceptedFiles(userName);
+        List<UserFileVO> userFileVOS = fileDownloadService.showAcceptedFiles(userName);
         GetMessage getMessage = new GetMessage();
 
-        if(!fileVOS.isEmpty()){
+        if(!userFileVOS.isEmpty()){
             getMessage.setMessage("List");
             //getMessage.setHttpStatus(200);
-            getMessage.setData(fileVOS);
+            getMessage.setData(userFileVOS);
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(getMessage);
@@ -72,6 +60,8 @@ public class FileDownloadController {
     public void downloadFile(@PathVariable("userName") String userName, @PathVariable("fileName") String fileName,
                              HttpServletResponse response) {
 
+        ;
+
         //나중에 서비스로 구현하기 - 허가 유무와, 카운트 갯수로 다운로드 가능 여부
 
         OutputStream os = null;
@@ -79,7 +69,7 @@ public class FileDownloadController {
         FileInputStream fis = null;
 
         try{
-            File f = new File(dir+File.separator+"download"+File.separator+userName+File.separator, fileName);
+            File f = new File(fileDownloadService.downloadFile(userName, fileName));
             // file 다운로드 설정
             response.setContentType("application/download");
             response.setContentLength((int)f.length());

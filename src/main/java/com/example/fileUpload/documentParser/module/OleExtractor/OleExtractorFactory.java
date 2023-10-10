@@ -2,11 +2,9 @@ package com.example.fileUpload.documentParser.module.OleExtractor;
 
 import com.example.fileUpload.documentParser.module.OleExtractor.ExtractorFactory.*;
 import com.example.fileUpload.documentParser.module.OleExtractor.abstracts.OleExtractor;
-import com.example.fileUpload.model.FileDto;
-import com.example.fileUpload.util.FileType;
+import com.example.fileUpload.model.File.FileDto;
 import lombok.NoArgsConstructor;
 import org.apache.poi.openxml4j.opc.PackagePart;
-import org.apache.poi.poifs.filesystem.DirectoryNode;
 
 @NoArgsConstructor
 public class OleExtractorFactory {

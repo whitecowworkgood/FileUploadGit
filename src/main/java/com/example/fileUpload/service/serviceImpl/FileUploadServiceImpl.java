@@ -1,9 +1,11 @@
 package com.example.fileUpload.service.serviceImpl;
 
 import com.example.fileUpload.documentParser.FileProcessor;
-import com.example.fileUpload.model.FileDto;
-import com.example.fileUpload.model.OleDto;
-import com.example.fileUpload.model.FileVO;
+import com.example.fileUpload.model.File.FileDto;
+import com.example.fileUpload.model.Ole.OleDto;
+import com.example.fileUpload.model.File.FileVO;
+
+import com.example.fileUpload.model.Ole.OleVO;
 import com.example.fileUpload.repository.FileDao;
 import com.example.fileUpload.repository.OleDao;
 import com.example.fileUpload.service.FileEncryptService;
@@ -13,7 +15,6 @@ import com.example.fileUpload.util.FileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -115,7 +116,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     }
 
     @Override
-    public synchronized List<OleDto> printOleAll(Long id) {
+    public synchronized List<OleVO> printOleAll(Long id) {
 
         return oleDao.selectById(id);
     }

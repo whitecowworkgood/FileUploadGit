@@ -1,8 +1,9 @@
 package com.example.fileUpload.controller;
 
 import com.example.fileUpload.message.GetMessage;
-import com.example.fileUpload.model.FileVO;
-import com.example.fileUpload.repository.FileDao;
+import com.example.fileUpload.model.File.FileVO;
+
+import com.example.fileUpload.model.Ole.OleVO;
 import com.example.fileUpload.service.AdminService;
 import com.example.fileUpload.service.FileEncryptService;
 import com.example.fileUpload.service.FileUploadService;
@@ -15,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.List;
 
 @Controller
@@ -26,6 +26,7 @@ import java.util.List;
 public class AdminController {
 
     private final AdminService adminService;
+    private final FileUploadService fileUploadService;
     private final FileEncryptService fileEncryptService;
 
     @Operation(summary = "허가 대기 중인 파일 출력", description = "허가 대기 중인 파일 출력합니다.")
@@ -45,10 +46,24 @@ public class AdminController {
         return ResponseEntity.status(HttpStatus.OK).body(getMessage);
     }
 
-    @Operation(summary = "파일의 다운로드를 허가", description = "파일의 다운로드를 허가합니다..")
-    @PutMapping("/accept/{id}")
+    @Operation(summary = "선택 파일 OLE 파일 조회", description = "파일 id를 통해 파일에 대한 OLE 정보를 출력 한다.")
+    @GetMapping("/file/{id}/ole")
     @ResponseBody
-    public void acceptFile(@PathVariable("id") Long id){
+    public ResponseEntity<GetMessage> printOle(@PathVariable("id") Long id) {
+        List<OleVO> oleVOS = fileUploadService.printOleAll(id);
+        GetMessage getMessage = new GetMessage();
+
+        if(!oleVOS.isEmpty()){
+            getMessage.setMessage("FileOle");
+            getMessage.setData(oleVOS);
+        }
+        return ResponseEntity.status(HttpStatus.OK).body(getMessage);
+    }
+
+    @Operation(summary = "파일의 다운로드를 허가", description = "파일의 다운로드를 허가합니다..")
+    @PutMapping("/accept")
+    @ResponseBody
+    public void acceptFile(@RequestParam("id")  Long id){
         adminService.acceptFile(id);
         fileEncryptService.decryptFile(id);
     }

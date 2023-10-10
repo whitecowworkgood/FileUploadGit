@@ -1,6 +1,6 @@
 package com.example.fileUpload.service.serviceImpl;
 
-import com.example.fileUpload.model.FileVO;
+import com.example.fileUpload.model.File.UserFileVO;
 import com.example.fileUpload.repository.FileDao;
 import com.example.fileUpload.service.FileDownloadService;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
 import java.util.List;
 
 @Service
@@ -23,12 +24,16 @@ public class FileDownloadServiceImpl implements FileDownloadService {
     private String dir;
 
     @Override
-    public void downloadFile(){
+    public String downloadFile(String userName, String fileName){
 
+        String downloadPath = dir+ File.separator+"download"+File.separator+userName+File.separator;
+
+
+        return downloadPath+fileDao.selectOriginalFileName(userName, fileName);
     }
 
     @Override
-    public List<FileVO> showAcceptedFiles(String userName) {
+    public List<UserFileVO> showAcceptedFiles(String userName) {
         return fileDao.acceptedFiles(userName);
     }
 }

@@ -1,7 +1,7 @@
 package com.example.fileUpload.documentParser;
 
 import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
-import com.example.fileUpload.model.FileDto;
+import com.example.fileUpload.model.File.FileDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
