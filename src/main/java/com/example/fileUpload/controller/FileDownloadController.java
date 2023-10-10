@@ -2,6 +2,8 @@ package com.example.fileUpload.controller;
 
 
 import com.example.fileUpload.message.GetMessage;
+import com.example.fileUpload.model.File.FileDto;
+import com.example.fileUpload.model.File.FileVO;
 import com.example.fileUpload.model.File.UserFileVO;
 import com.example.fileUpload.repository.EncryptDao;
 import com.example.fileUpload.service.FileDownloadService;
@@ -12,9 +14,12 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.catalina.User;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -30,18 +35,13 @@ import java.util.List;
 @RequestMapping("/api/download")
 @Tag(name = "FileDownload", description = "파일 다운로드 API 구성")
 public class FileDownloadController {
-    @Value("${Save-Directory}")
-    private String dir;
 
-    private final FileUploadService fileUploadService;
     private final FileDownloadService fileDownloadService;
-
-    private final EncryptDao encryptDao;
 
     @Operation(summary = "허가받은 파일 출력", description = "관리자로 부터 다운로드 허가 받은 파일을 출력합니다.")
     @GetMapping("/files/{userName}")
     @ResponseBody
-    public ResponseEntity<GetMessage> showFiles(@PathVariable("userName") String userName) throws IOException {
+    public ResponseEntity<GetMessage> showFiles(@PathVariable("userName") String userName) {
 
         List<UserFileVO> userFileVOS = fileDownloadService.showAcceptedFiles(userName);
         GetMessage getMessage = new GetMessage();
@@ -54,39 +54,29 @@ public class FileDownloadController {
 
         return ResponseEntity.status(HttpStatus.OK).body(getMessage);
     }
+
     @Operation(summary = "선택 파일 다운로드", description = "파일 id를 통해 파일을 다운로드 합니다.")
-    @GetMapping("/file/{userName}/{fileName}")
+    @GetMapping("/file/{userName}/{id}")
     @ResponseBody
-    public void downloadFile(@PathVariable("userName") String userName, @PathVariable("fileName") String fileName,
-                             HttpServletResponse response) {
+    public ResponseEntity<Resource> downloadFile(@PathVariable("userName") String userName, @PathVariable("id") Long id) {
 
-        ;
+        fileDownloadService.setParameter(userName, id);
 
-        //나중에 서비스로 구현하기 - 허가 유무와, 카운트 갯수로 다운로드 가능 여부
+        String fileName = fileDownloadService.getFileName();
 
-        OutputStream os = null;
-        // 파일 입력 객체 생성
-        FileInputStream fis = null;
+        UserFileVO userFileVO = fileDownloadService.getUserFileVO(id);
 
-        try{
-            File f = new File(fileDownloadService.downloadFile(userName, fileName));
-            // file 다운로드 설정
-            response.setContentType("application/download");
-            response.setContentLength((int)f.length());
-            response.setHeader("Content-disposition", "attachment;filename=\"" + fileName + "\"");
+        if(userFileVO != null){
 
-            os = response.getOutputStream();
-            // 파일 입력 객체 생성
-            fis = new FileInputStream(f);
-            FileCopyUtils.copy(fis, os);
+            //count -- 쿼리문 구현하기
+            fileDownloadService.decreaseCountNum(id);
 
-        }catch(IOException e){
-            ExceptionUtils.getStackTrace(e);
-
-        }finally{
-            IOUtils.closeQuietly(fis);
-            IOUtils.closeQuietly(os);
+            return ResponseEntity.ok()
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                    .body(fileDownloadService.downloadFile(id));
         }
+
+        return ResponseEntity.status(HttpStatus.OK).build();
 
     }
 

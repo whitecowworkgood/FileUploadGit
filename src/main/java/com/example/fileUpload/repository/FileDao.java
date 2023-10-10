@@ -43,7 +43,15 @@ public class FileDao {
         return sqlSession.getMapper(FileEntryMapperAnno.class).acceptedFiles(userName);
     }
 
-    public String selectOriginalFileName(String userName, String FileName){
-        return sqlSession.getMapper(FileEntryMapperAnno.class).selectOriginalFileName(userName, FileName);
+    public String selectUUIDFileNameByOriginalFileName(String userName, String FileName){
+        return sqlSession.getMapper(FileEntryMapperAnno.class).selectUUIDFileNameByOriginalFileName(userName, FileName);
+    }
+
+    public UserFileVO acceptedFilesById(Long id){
+        return sqlSession.getMapper(FileEntryMapperAnno.class).acceptedFileById(id);
+    }
+
+    public void decreaseCountNum(Long id){
+        sqlSession.getMapper(FileEntryMapperAnno.class).updateCountNum(id);
     }
 }

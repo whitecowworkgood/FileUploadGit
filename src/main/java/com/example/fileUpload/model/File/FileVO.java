@@ -1,5 +1,6 @@
 package com.example.fileUpload.model.File;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,13 +9,18 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class FileVO {
+    @JsonIgnore
     private Long id;
     private String UUIDFileName;
+    @JsonIgnore
     private String fileOlePath;
+    @JsonIgnore
     private String fileSavePath;
     private Long fileSize;
     private String fileType;
     private String originalFileName;
     private Long countNum;
     private String userName;
+    private String comment;
+    private String timeStamp;
 }

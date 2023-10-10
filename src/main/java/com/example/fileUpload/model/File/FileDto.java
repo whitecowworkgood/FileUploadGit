@@ -21,6 +21,7 @@ public class FileDto {
     private MultipartFile fileData;
     private Long countNum;
     private String userName;
+    private String comment;
     //private String tempPath;
 
 }
