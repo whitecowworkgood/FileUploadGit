@@ -2,9 +2,6 @@ package com.example.fileUpload.util;
 
 public enum FileType {
 
-/*    PDF("pdf"),
-    PNG("png"),
-    JPG("jpg"),*/
     DOCX(".docx"),
     PPTX(".pptx"),
     XLSX(".xlsx"),

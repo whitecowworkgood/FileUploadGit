@@ -34,7 +34,7 @@ public class AdminController {
     @ResponseBody
     public ResponseEntity<GetMessage> downloadFile(){
 
-        List<FileVO> fileVOS = adminService.printBeforeAcceptFiles();
+        List<FileVO> fileVOS = this.adminService.printBeforeAcceptFiles();
         GetMessage getMessage = new GetMessage();
 
         if(!fileVOS.isEmpty()){
@@ -50,7 +50,7 @@ public class AdminController {
     @GetMapping("/file/{id}/ole")
     @ResponseBody
     public ResponseEntity<GetMessage> printOle(@PathVariable("id") Long id) {
-        List<OleVO> oleVOS = fileUploadService.printOleAll(id);
+        List<OleVO> oleVOS = this.fileUploadService.printOleAll(id);
         GetMessage getMessage = new GetMessage();
 
         if(!oleVOS.isEmpty()){
@@ -64,8 +64,8 @@ public class AdminController {
     @PutMapping("/accept")
     @ResponseBody
     public void acceptFile(@RequestParam("id")  Long id){
-        adminService.acceptFile(id);
-        fileEncryptService.decryptFile(id);
+        this.adminService.acceptFile(id);
+        this.fileEncryptService.decryptFile(id);
     }
 
 }

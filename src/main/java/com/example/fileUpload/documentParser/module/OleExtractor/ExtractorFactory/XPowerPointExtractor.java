@@ -17,9 +17,9 @@ public class XPowerPointExtractor extends OleExtractor {
     //private final String oleSavePath;
     private final PackagePart packagePart;
 
-    FileOutputStream outputStream = null;
-    OPCPackage docPackage = null;
-    XSLFSlideShow slideShow = null;
+    private FileOutputStream outputStream = null;
+    private OPCPackage docPackage = null;
+    private XSLFSlideShow slideShow = null;
 
     private void doExtract(){
 
@@ -36,22 +36,22 @@ public class XPowerPointExtractor extends OleExtractor {
     }
 
     private void writeXPowerPoint() throws Exception {
-        docPackage = OPCPackage.open(packagePart.getInputStream());
-        slideShow = new XSLFSlideShow(docPackage);
+        this.docPackage = OPCPackage.open(this.packagePart.getInputStream());
+        this.slideShow = new XSLFSlideShow(this.docPackage);
 
-        String uuid = addUniqueFileNameMapping(removePath(String.valueOf(packagePart.getPartName())));
+        String uuid = addUniqueFileNameMapping(removePath(String.valueOf(this.packagePart.getPartName())));
 
-        stringBuffer.append(oleSavePath).append(uuid);
+        super.stringBuffer.append(this.oleSavePath).append(uuid);
 
-        outputStream = new FileOutputStream(stringBuffer.toString());
-        slideShow.write(outputStream);
+        this.outputStream = new FileOutputStream(super.stringBuffer.toString());
+        this.slideShow.write(this.outputStream);
     }
     @Override
     protected void closeResources() {
-        stringBuffer.delete(0, stringBuffer.length());
-        IOUtils.closeQuietly(docPackage);
-        IOUtils.closeQuietly(slideShow);
-        IOUtils.closeQuietly(outputStream);
+        super.stringBuffer.delete(0, super.stringBuffer.length());
+        IOUtils.closeQuietly(this.docPackage);
+        IOUtils.closeQuietly(this.slideShow);
+        IOUtils.closeQuietly(this.outputStream);
     }
 
     public XPowerPointExtractor(PackagePart pPart, FileDto fileDto) {

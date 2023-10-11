@@ -32,28 +32,37 @@ public class FileDownloadServiceImpl implements FileDownloadService {
     private Resource fileResource = null;
 
     private Long id = null;
+
+    private String fileName = null;
     private String userName = null;
 
 
     @Value("${Save-Directory}")
-    private String dir;
+    private String baseDir;
 
     @Override
     public void setParameter(String userName, Long id){
-        this.id = id;
         this.userName = userName;
+        this.id = id;
     }
 
+    @Override
     public String getFileName(){
 
-        return fileDao.printFileOne(this.id).getOriginalFileName();
-        //return fileDao.selectUUIDFileNameByOriginalFileName();
+        try{
+            fileName = this.fileDao.printFileOne(this.id).getOriginalFileName();
+
+        }catch(NullPointerException e){
+            ExceptionUtils.getStackTrace(e);
+            fileName = "";
+        }
+        return fileName;
     }
 
     @Override
     public Resource downloadFile(Long id){
 
-        String downloadPath = this.dir+ File.separator+"download"+File.separator+this.userName+File.separator;
+        String downloadPath = this.baseDir+ File.separator+"download"+File.separator+this.userName+File.separator;
         this.fileStorageLocation = Path.of(downloadPath+fileDao.printFileOne(this.id).getUUIDFileName());
 
         try {
@@ -69,16 +78,16 @@ public class FileDownloadServiceImpl implements FileDownloadService {
 
     @Override
     public List<UserFileVO> showAcceptedFiles(String userName) {
-        return fileDao.acceptedFiles(userName);
+        return this.fileDao.acceptedFiles(userName);
     }
 
     @Override
     public UserFileVO getUserFileVO(Long id){
-        return fileDao.acceptedFilesById(id);
+        return this.fileDao.acceptedFilesById(id);
     }
 
     @Override
     public void decreaseCountNum(Long id) {
-        fileDao.decreaseCountNum(id);
+        this.fileDao.decreaseCountNum(id);
     }
 }

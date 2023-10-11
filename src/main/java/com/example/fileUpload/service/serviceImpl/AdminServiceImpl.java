@@ -21,11 +21,11 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public synchronized List<FileVO> printBeforeAcceptFiles() {
 
-        return fileDao.beforeAcceptFiles();
+        return this.fileDao.beforeAcceptFiles();
     }
 
     @Override
     public synchronized void acceptFile(Long id) {
-        fileDao.acceptFile(id);
+        this.fileDao.acceptFile(id);
     }
 }

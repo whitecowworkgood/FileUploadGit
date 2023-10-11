@@ -43,7 +43,7 @@ public class FileDownloadController {
     @ResponseBody
     public ResponseEntity<GetMessage> showFiles(@PathVariable("userName") String userName) {
 
-        List<UserFileVO> userFileVOS = fileDownloadService.showAcceptedFiles(userName);
+        List<UserFileVO> userFileVOS = this.fileDownloadService.showAcceptedFiles(userName);
         GetMessage getMessage = new GetMessage();
 
         if(!userFileVOS.isEmpty()){
@@ -66,7 +66,7 @@ public class FileDownloadController {
 
         UserFileVO userFileVO = fileDownloadService.getUserFileVO(id);
 
-        if(userFileVO != null){
+        if(userFileVO != null && !(fileName.isEmpty())){
 
             //count -- 쿼리문 구현하기
             fileDownloadService.decreaseCountNum(id);

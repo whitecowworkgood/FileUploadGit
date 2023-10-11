@@ -17,8 +17,8 @@ public class WordExtractor extends OleExtractor {
     //private final String oleSavePath;
     private final PackagePart packagePart;
 
-    FileOutputStream outputStream = null;
-    HWPFDocument document = null;
+    private FileOutputStream outputStream = null;
+    private HWPFDocument document = null;
 
     private void doExtract(){
 
@@ -35,20 +35,20 @@ public class WordExtractor extends OleExtractor {
     }
 
     protected void writeDocument() throws IOException {
-        document = new HWPFDocument(packagePart.getInputStream());
-        String uuid = addUniqueFileNameMapping(removePath(String.valueOf(packagePart.getPartName())));
+        this.document = new HWPFDocument(this.packagePart.getInputStream());
+        String uuid = addUniqueFileNameMapping(removePath(String.valueOf(this.packagePart.getPartName())));
 
-        stringBuffer.append(oleSavePath).append(uuid);
+        super.stringBuffer.append(this.oleSavePath).append(uuid);
 
-        outputStream = new FileOutputStream(stringBuffer.toString());
-        document.write(outputStream);
+        this.outputStream = new FileOutputStream(super.stringBuffer.toString());
+        this.document.write(this.outputStream);
     }
 
     @Override
     protected void closeResources() {
-        stringBuffer.delete(0, stringBuffer.length());
-        IOUtils.closeQuietly(document);
-        IOUtils.closeQuietly(outputStream);
+        super.stringBuffer.delete(0, super.stringBuffer.length());
+        IOUtils.closeQuietly(this.document);
+        IOUtils.closeQuietly(this.outputStream);
     }
 
     public WordExtractor(PackagePart pPart, FileDto fileDto) {

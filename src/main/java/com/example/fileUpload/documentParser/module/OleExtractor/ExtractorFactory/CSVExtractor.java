@@ -22,10 +22,10 @@ public class CSVExtractor extends OleExtractor {
     //private final String oleSavePath;
     private final PackagePart packagePart;
 
-    OPCPackage docPackage = null;
-    Workbook workbook = null;
-    BufferedWriter csvWriter = null;
-    Sheet sheet = null;
+    private OPCPackage docPackage = null;
+    private Workbook workbook = null;
+    private BufferedWriter csvWriter = null;
+    private Sheet sheet = null;
 
     private void doExtract(){
 
@@ -42,26 +42,26 @@ public class CSVExtractor extends OleExtractor {
     }
 
     private void openCSV() throws Exception {
-        docPackage = OPCPackage.open(packagePart.getInputStream());
-        workbook = new XSSFWorkbook(docPackage);
+        this.docPackage = OPCPackage.open(this.packagePart.getInputStream());
+        this.workbook = new XSSFWorkbook(this.docPackage);
 
         // 시트 선택 (시트 인덱스 또는 이름 사용 가능)
-        sheet = workbook.getSheetAt(0); // 첫 번째 시트 선택 (인덱스 0부터 시작)
+        this.sheet = this.workbook.getSheetAt(0); // 첫 번째 시트 선택 (인덱스 0부터 시작)
 
         // CSV 파일 경로 및 파일명 설정
-        stringBuffer.append(sheet.getSheetName()).append(".csv");
-        String uuid = addUniqueFileNameMapping(stringBuffer.toString());
-        stringBuffer.delete(0, stringBuffer.length());
+        super.stringBuffer.append(this.sheet.getSheetName()).append(".csv");
+        String uuid = addUniqueFileNameMapping(super.stringBuffer.toString());
+        super.stringBuffer.delete(0, super.stringBuffer.length());
 
-        stringBuffer.append(oleSavePath).append(uuid);
+        super.stringBuffer.append(this.oleSavePath).append(uuid);
 
-        csvWriter = new BufferedWriter(new FileWriter(stringBuffer.toString(), Charset.forName("EUC-KR")));
+        this.csvWriter = new BufferedWriter(new FileWriter(super.stringBuffer.toString(), Charset.forName("EUC-KR")));
 
         writeCSVFile();
     }
     private void writeCSVFile() throws IOException {
         // 각 행을 반복하여 CSV로 쓰기
-        for (Row row : sheet) {
+        for (Row row : this.sheet) {
             for (Cell cell : row) {
                 String cellValue = switch (cell.getCellType()) {
                     case STRING -> cell.getStringCellValue();
@@ -71,23 +71,23 @@ public class CSVExtractor extends OleExtractor {
                     default -> "";
                 };
                 // CSV 파일에 쓰기
-                csvWriter.write(cellValue);
+                this.csvWriter.write(cellValue);
 
                 // 다음 셀에 데이터가 없으면 줄바꿈
                 if (cell.getColumnIndex() < row.getLastCellNum() - 1) {
-                    csvWriter.write(",");
+                    this.csvWriter.write(",");
                 } else {
-                    csvWriter.newLine();
+                    this.csvWriter.newLine();
                 }
             }
         }
     }
     @Override
     protected void closeResources() {
-        stringBuffer.delete(0, stringBuffer.length());
-        IOUtils.closeQuietly(docPackage);
-        IOUtils.closeQuietly(workbook);
-        IOUtils.closeQuietly(csvWriter);
+        super.stringBuffer.delete(0, super.stringBuffer.length());
+        IOUtils.closeQuietly(this.docPackage);
+        IOUtils.closeQuietly(this.workbook);
+        IOUtils.closeQuietly(this.csvWriter);
     }
 
     public CSVExtractor(PackagePart pPart, FileDto fileDto) {

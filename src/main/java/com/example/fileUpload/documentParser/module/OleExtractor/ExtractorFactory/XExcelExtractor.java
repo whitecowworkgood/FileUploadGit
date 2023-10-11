@@ -16,11 +16,10 @@ import static com.example.fileUpload.util.FileUtil.removePath;
 
 public class XExcelExtractor extends OleExtractor {
 
-    //private final String oleSavePath;
     private final PackagePart packagePart;
-    FileOutputStream outputStream = null;
-    OPCPackage docPackage = null;
-    XSSFWorkbook embeddedWorkbook = null;
+    private FileOutputStream outputStream = null;
+    private OPCPackage docPackage = null;
+    private XSSFWorkbook embeddedWorkbook = null;
 
     private void doExtract(){
 
@@ -37,26 +36,26 @@ public class XExcelExtractor extends OleExtractor {
     }
 
     protected void writeXExcel() throws Exception {
-        docPackage = OPCPackage.open(packagePart.getInputStream());
-        embeddedWorkbook = new XSSFWorkbook(docPackage);
+        this.docPackage = OPCPackage.open(this.packagePart.getInputStream());
+        this.embeddedWorkbook = new XSSFWorkbook(this.docPackage);
 
-        CTBookView[] cb = embeddedWorkbook.getCTWorkbook().getBookViews().getWorkbookViewArray();
+        CTBookView[] cb = this.embeddedWorkbook.getCTWorkbook().getBookViews().getWorkbookViewArray();
 
         cb[0].setVisibility(STVisibility.VISIBLE);
-        embeddedWorkbook.getCTWorkbook().getBookViews().setWorkbookViewArray(cb);
+        this.embeddedWorkbook.getCTWorkbook().getBookViews().setWorkbookViewArray(cb);
 
-        String uuid = addUniqueFileNameMapping(removePath(String.valueOf(packagePart.getPartName())));
+        String uuid = addUniqueFileNameMapping(removePath(String.valueOf(this.packagePart.getPartName())));
 
-        stringBuffer.append(oleSavePath).append(uuid);
-        outputStream = new FileOutputStream(stringBuffer.toString());
-        embeddedWorkbook.write(outputStream);
+        super.stringBuffer.append(this.oleSavePath).append(uuid);
+        this.outputStream = new FileOutputStream(super.stringBuffer.toString());
+        this.embeddedWorkbook.write(this.outputStream);
     }
     @Override
     protected void closeResources() {
-        stringBuffer.delete(0, stringBuffer.length());
-        IOUtils.closeQuietly(embeddedWorkbook);
-        IOUtils.closeQuietly(outputStream);
-        IOUtils.closeQuietly(docPackage);
+        super.stringBuffer.delete(0, super.stringBuffer.length());
+        IOUtils.closeQuietly(this.embeddedWorkbook);
+        IOUtils.closeQuietly(this.outputStream);
+        IOUtils.closeQuietly(this.docPackage);
     }
 
     public XExcelExtractor(PackagePart pPart, FileDto fileDto) {

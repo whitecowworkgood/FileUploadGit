@@ -19,9 +19,9 @@ import java.util.Iterator;
 @Slf4j
 @NoArgsConstructor
 public class WordParser extends OleExtractor {
-    FileInputStream fs = null;
-    HWPFDocumentCore hwpfDocument =null;
-    OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
+    private FileInputStream fs = null;
+    private HWPFDocumentCore hwpfDocument =null;
+    private final OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
 
     @Override
     public void extractOleFromDocumentFile(FileDto fileDto) throws IOException {
@@ -42,23 +42,23 @@ public class WordParser extends OleExtractor {
 
     @Override
     protected void callOfficeHandler(FileDto fileDto) throws IOException {
-        fs = new FileInputStream(fileDto.getFileSavePath());
+        this.fs = new FileInputStream(fileDto.getFileSavePath());
 
-        hwpfDocument = new HWPFDocument(fs);
+        this.hwpfDocument = new HWPFDocument(this.fs);
 
-        if (hwpfDocument.getDirectory().hasEntry(OleEntry.OBJECTPOOL.getValue())) {
-            DirectoryNode objectPools = (DirectoryNode) hwpfDocument.getDirectory().getEntry(OleEntry.OBJECTPOOL.getValue());
+        if (this.hwpfDocument.getDirectory().hasEntry(OleEntry.OBJECTPOOL.getValue())) {
+            DirectoryNode objectPools = (DirectoryNode) this.hwpfDocument.getDirectory().getEntry(OleEntry.OBJECTPOOL.getValue());
 
             for (Iterator<Entry> it = objectPools.getEntries(); it.hasNext(); ) {
 
-                officeEntryHandler.parser((DirectoryNode)it.next(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
+                this.officeEntryHandler.parser((DirectoryNode)it.next(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
             }
         }
     }
 
     @Override
     protected void closeResources() {
-        IOUtils.closeQuietly(fs);
-        IOUtils.closeQuietly(hwpfDocument);
+        IOUtils.closeQuietly(this.fs);
+        IOUtils.closeQuietly(this.hwpfDocument);
     }
 }

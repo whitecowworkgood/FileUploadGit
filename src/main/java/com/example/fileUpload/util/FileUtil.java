@@ -55,7 +55,7 @@ public class FileUtil {
             return normalizedSavePath.startsWith(normalizedDefaultPath);
         } catch (IOException e) {
 
-            log.error(ExceptionUtils.getStackTrace(e));
+            ExceptionUtils.getStackTrace(e);
             return false;
         }
     }

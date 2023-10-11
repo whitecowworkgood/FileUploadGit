@@ -36,14 +36,14 @@ public class RSA {
             keyPairGenerator.initialize(2048, secureRandom);
             KeyPair keyPair = keyPairGenerator.genKeyPair();
 
-            publicKey = keyPair.getPublic();
-            privateKey = keyPair.getPrivate();
+            this.publicKey = keyPair.getPublic();
+            this.privateKey = keyPair.getPrivate();
 
-            stringPublicKey = Base64.getEncoder().encodeToString(publicKey.getEncoded());
-            stringPrivateKey = Base64.getEncoder().encodeToString(privateKey.getEncoded());
+            this.stringPublicKey = Base64.getEncoder().encodeToString(this.publicKey.getEncoded());
+            this.stringPrivateKey = Base64.getEncoder().encodeToString(this.privateKey.getEncoded());
 
-            stringKeypair.put("publicKey", stringPublicKey);
-            stringKeypair.put("privateKey", stringPrivateKey);
+            this.stringKeypair.put("publicKey", this.stringPublicKey);
+            this.stringKeypair.put("privateKey", this.stringPrivateKey);
 
 
         }catch(NoSuchAlgorithmException e){
@@ -51,7 +51,7 @@ public class RSA {
 
         }
 
-        return stringKeypair;
+        return this.stringKeypair;
     }
 
     public PrivateKey getPrivateKey(byte[] data) {
@@ -61,7 +61,7 @@ public class RSA {
             value = (value << 8) | (data[i] & 0xFF);
         }
         try{
-            byte[] privateKeyBytes = Base64.getDecoder().decode(encryptDao.findPrivateKey(value));
+            byte[] privateKeyBytes = Base64.getDecoder().decode(this.encryptDao.findPrivateKey(value));
 
             PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
             KeyFactory keyFactory = KeyFactory.getInstance("RSA");
@@ -76,12 +76,11 @@ public class RSA {
 
 
     public void freeResource(){
-        log.info("자원 초기화 진행");
-        stringKeypair = null;
-        publicKey = null;
-        privateKey = null;
-        stringPublicKey = null;
-        stringPrivateKey = null;
+        this.stringKeypair = null;
+        this.publicKey = null;
+        this.privateKey = null;
+        this.stringPublicKey = null;
+        this.stringPrivateKey = null;
     }
 
 

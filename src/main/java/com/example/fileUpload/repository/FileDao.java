@@ -22,6 +22,9 @@ public class FileDao {
     public FileVO printFileOne(Long id){
         return sqlSession.getMapper(FileEntryMapperAnno.class).selectById(id);
     }
+    public String printFileInfo(Long id, String userName){
+        return sqlSession.getMapper(FileEntryMapperAnno.class).selectByIdName(id, userName);
+    }
 
     public boolean saveFile(FileDto fileDto){
         return sqlSession.getMapper(FileEntryMapperAnno.class).insertFileEntity(fileDto);

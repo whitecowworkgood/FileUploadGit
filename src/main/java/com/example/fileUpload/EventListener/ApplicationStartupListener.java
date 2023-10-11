@@ -21,8 +21,6 @@ import java.nio.file.Paths;
 @Slf4j
 public class ApplicationStartupListener implements ApplicationListener<ApplicationReadyEvent> {
 
-
-
     private final FileEncryptService fileEncryptService;
 
     @SneakyThrows

@@ -16,9 +16,8 @@ import java.io.*;
 @NoArgsConstructor
 @Slf4j
 public class XWordParser extends OleExtractor {
-    FileInputStream fs = null;
-    XWPFDocument docx = null;
-    //XOfficeEntryHandler xOfficeEntryHandler = new XOfficeEntryHandler();
+    private FileInputStream fs = null;
+    private XWPFDocument docx = null;
 
     @Override
     public void extractOleFromDocumentFile(FileDto fileDto) throws IOException, OpenXML4JException {
@@ -36,16 +35,16 @@ public class XWordParser extends OleExtractor {
 
     @Override
     protected void callOfficeHandler(FileDto fileDto) throws Exception {
-        fs = new FileInputStream(fileDto.getFileSavePath());
-        docx = new XWPFDocument(OPCPackage.open(fs));
+        this.fs = new FileInputStream(fileDto.getFileSavePath());
+        this.docx = new XWPFDocument(OPCPackage.open(this.fs));
 
-        for (PackagePart pPart : docx.getAllEmbeddedParts())
+        for (PackagePart pPart : this.docx.getAllEmbeddedParts())
             new OleExtractorFactory().createMordernOleExtractor(pPart, fileDto);
     }
 
     @Override
     protected void closeResources() {
-        IOUtils.closeQuietly(fs);
-        IOUtils.closeQuietly(docx);
+        IOUtils.closeQuietly(this.fs);
+        IOUtils.closeQuietly(this.docx);
     }
 }

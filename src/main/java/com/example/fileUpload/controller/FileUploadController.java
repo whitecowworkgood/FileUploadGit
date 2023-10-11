@@ -30,7 +30,7 @@ import java.util.UUID;
 public class FileUploadController {
 
     @Value("${Save-Directory}")
-    private String dir;
+    private String baseDir;
     private final FileUploadService fileUploadService;
 
     /**
@@ -123,8 +123,8 @@ public class FileUploadController {
                 .originFileName(file.getOriginalFilename())
                 .fileSize(file.getSize())
                 .fileType(file.getContentType())
-                .fileSavePath(dir+File.separator+uuidName+FileUtil.getFileExtension(file))
-                .fileOlePath(dir+File.separator+"ole"+File.separator+ uuidName + File.separator)
+                .fileSavePath(this.baseDir+File.separator+uuidName+FileUtil.getFileExtension(file))
+                .fileOlePath(this.baseDir+File.separator+"ole"+File.separator+ uuidName + File.separator)
                 .countNum(countNum)
                 .fileData(file)
                 .userName(userName)
@@ -152,7 +152,7 @@ public class FileUploadController {
     @DeleteMapping("")
     public ResponseEntity<PostDeleteMessage> DeleteFile(@RequestParam("id") Long id){
 
-        boolean deleteResult = fileUploadService.deleteOne(id);
+        boolean deleteResult = this.fileUploadService.deleteOne(id);
         PostDeleteMessage postDeleteMessage = new PostDeleteMessage();
 
         if(deleteResult){

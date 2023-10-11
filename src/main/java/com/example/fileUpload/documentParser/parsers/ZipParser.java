@@ -11,10 +11,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 
 public class ZipParser extends OleExtractor {
-    FileInputStream fs = null;
-    ZipArchiveInputStream zais = null;
-    ZipArchiveEntry entry = null;
-    Tika tika = new Tika();
+    private FileInputStream fs = null;
+    private ZipArchiveInputStream zais = null;
+    private ZipArchiveEntry entry = null;
+    private final Tika tika = new Tika();
 
     @Override
     public void extractOleFromDocumentFile(FileDto fileDto) throws Exception {
@@ -30,9 +30,10 @@ public class ZipParser extends OleExtractor {
         }
     }
     private void showZipDocument(FileDto fileDto) throws IOException {
-        fs = new FileInputStream(fileDto.getFileSavePath());
-        zais = new ZipArchiveInputStream(fs, "EUC-KR", true);
-        while((entry = zais.getNextZipEntry()) != null) {
+        this.fs = new FileInputStream(fileDto.getFileSavePath());
+        this.zais = new ZipArchiveInputStream(this.fs, "EUC-KR", true);
+        while((this.entry = this.zais.getNextZipEntry()) != null) {
+
             System.out.println(tika.detect(entry.getName()));
             System.out.print(entry.getTime() + "  ");
             System.out.print(entry.getName() + "  ");
@@ -48,7 +49,7 @@ public class ZipParser extends OleExtractor {
 
     @Override
     protected void closeResources() {
-        IOUtils.closeQuietly(fs);
-        IOUtils.closeQuietly(zais);
+        IOUtils.closeQuietly(this.fs);
+        IOUtils.closeQuietly(this.zais);
     }
 }

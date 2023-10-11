@@ -28,7 +28,7 @@ public class FileProcessor {
         }
     }
     private void createOleExtractor(FileDto fileDto) throws Exception {
-        OleExtractor oleExtractor = fileParserFactory.createParser(fileDto);
+        OleExtractor oleExtractor = this.fileParserFactory.createParser(fileDto);
         oleExtractor.extractOleFromDocumentFile(fileDto);
     }
     private void catchIllegal(IllegalArgumentException i){

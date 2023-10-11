@@ -15,7 +15,7 @@ import java.nio.file.Paths;
 public class DirectoryChecker {
 
     @Value("${Save-Directory}")
-    private String dir;
+    private String baseDir;
 
     public static void callGenerateFolderMethods(String dir){
         DirectoryChecker directoryChecker = new DirectoryChecker(dir);
@@ -26,11 +26,11 @@ public class DirectoryChecker {
     }
 
     public DirectoryChecker(String dir) {
-        this.dir = dir;
+        this.baseDir = dir;
     }
 
     private void generateTempFolders(){
-        Path folder = Paths.get(dir+ File.separator+"temp");
+        Path folder = Paths.get(this.baseDir+ File.separator+"temp");
 
         // 폴더 존재 여부 확인
         if (!Files.exists(folder) || !Files.isDirectory(folder)) {
@@ -46,7 +46,7 @@ public class DirectoryChecker {
     }
 
     private void generateDownloadFolders(){
-        Path folder = Paths.get(dir+ File.separator+"download");
+        Path folder = Paths.get(this.baseDir+ File.separator+"download");
 
         // 폴더 존재 여부 확인
         if (!Files.exists(folder) || !Files.isDirectory(folder)) {
@@ -62,7 +62,7 @@ public class DirectoryChecker {
     }
 
     private void generateOLEFolders(){
-        Path folder = Paths.get(dir+ File.separator+"ole");
+        Path folder = Paths.get(this.baseDir+ File.separator+"ole");
 
         // 폴더 존재 여부 확인
         if (!Files.exists(folder) || !Files.isDirectory(folder)) {

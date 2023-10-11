@@ -15,8 +15,8 @@ import java.io.IOException;
 
 @NoArgsConstructor
 public class XExcelParser extends OleExtractor {
-    FileInputStream fs = null;
-    XSSFWorkbook xlsx = null;
+    private FileInputStream fs = null;
+    private XSSFWorkbook xlsx = null;
 
     @Override
     public void extractOleFromDocumentFile(FileDto fileDto) throws IOException, OpenXML4JException {
@@ -35,17 +35,17 @@ public class XExcelParser extends OleExtractor {
 
     @Override
     protected void callOfficeHandler(FileDto fileDto) throws Exception {
-        fs = new FileInputStream(fileDto.getFileSavePath());
-        xlsx = new XSSFWorkbook(OPCPackage.open(fs));
+        this.fs = new FileInputStream(fileDto.getFileSavePath());
+        this.xlsx = new XSSFWorkbook(OPCPackage.open(this.fs));
 
-        for (PackagePart pPart : xlsx.getAllEmbeddedParts())
+        for (PackagePart pPart : this.xlsx.getAllEmbeddedParts())
             new OleExtractorFactory().createMordernOleExtractor(pPart, fileDto);
 
     }
 
     @Override
     protected void closeResources() {
-        IOUtils.closeQuietly(fs);
-        IOUtils.closeQuietly(xlsx);
+        IOUtils.closeQuietly(this.fs);
+        IOUtils.closeQuietly(this.xlsx);
     }
 }

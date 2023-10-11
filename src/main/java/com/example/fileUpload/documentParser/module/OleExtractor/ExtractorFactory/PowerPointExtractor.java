@@ -15,10 +15,9 @@ import static com.example.fileUpload.util.FileUtil.removePath;
 
 public class PowerPointExtractor extends OleExtractor {
 
-    //private final String oleSavePath;
     private final PackagePart packagePart;
-    FileOutputStream outputStream = null;
-    HSLFSlideShow slideShow = null;
+    private FileOutputStream outputStream = null;
+    private HSLFSlideShow slideShow = null;
 
     private void doExtract() {
 

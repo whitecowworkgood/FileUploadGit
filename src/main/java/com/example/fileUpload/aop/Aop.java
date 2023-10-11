@@ -16,10 +16,8 @@ import static com.example.fileUpload.util.DirectoryChecker.callGenerateFolderMet
 @RequiredArgsConstructor
 public class Aop {
     @Value("${Save-Directory}")
-    private String dir;
+    private String baseDir;
 
-
-    private boolean kekGenerated = false; // 초기에는 false로 설정
 
     /**
      *
@@ -71,6 +69,6 @@ public class Aop {
     @Before("execution(* com.example.fileUpload.*.*.*(..))")
     public void downloadFolderCheck() {
 
-        callGenerateFolderMethods(dir);
+        callGenerateFolderMethods(baseDir);
     }
 }

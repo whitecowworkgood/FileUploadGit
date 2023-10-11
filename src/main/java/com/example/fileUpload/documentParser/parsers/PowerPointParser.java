@@ -16,10 +16,10 @@ import java.util.List;
 
 @NoArgsConstructor
 public class PowerPointParser extends OleExtractor {
-    FileInputStream fs =null;
-    POIFSFileSystem poifs =null;
-    HSLFSlideShow hslfSlideShow =null;
-    OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
+    private FileInputStream fs =null;
+    private POIFSFileSystem poifs =null;
+    private HSLFSlideShow hslfSlideShow =null;
+    private final OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
 
     @Override
     public void extractOleFromDocumentFile(FileDto fileDto) throws IOException {
@@ -39,25 +39,25 @@ public class PowerPointParser extends OleExtractor {
     @Override
     protected void callOfficeHandler(FileDto fileDto) throws IOException {
 
-        fs = new FileInputStream(fileDto.getFileSavePath());
-        hslfSlideShow = new HSLFSlideShow(fs);
+        this.fs = new FileInputStream(fileDto.getFileSavePath());
+        this.hslfSlideShow = new HSLFSlideShow(this.fs);
 
-        List<HSLFObjectData> objects = List.of(hslfSlideShow.getEmbeddedObjects());
+        List<HSLFObjectData> objects = List.of(this.hslfSlideShow.getEmbeddedObjects());
         for (HSLFObjectData object : objects) {
 
-            IOUtils.closeQuietly(poifs);
+            IOUtils.closeQuietly(this.poifs);
 
-            poifs = new POIFSFileSystem(object.getInputStream());
+            this.poifs = new POIFSFileSystem(object.getInputStream());
 
-            officeEntryHandler.parser(poifs.getRoot(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
+            this.officeEntryHandler.parser(this.poifs.getRoot(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
 
         }
     }
 
     @Override
     protected void closeResources() {
-        IOUtils.closeQuietly(fs);
-        IOUtils.closeQuietly(poifs);
-        IOUtils.closeQuietly(hslfSlideShow);
+        IOUtils.closeQuietly(this.fs);
+        IOUtils.closeQuietly(this.poifs);
+        IOUtils.closeQuietly(this.hslfSlideShow);
     }
 }

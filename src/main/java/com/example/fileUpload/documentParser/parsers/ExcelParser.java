@@ -17,9 +17,9 @@ import java.io.*;
 @NoArgsConstructor
 public class ExcelParser extends OleExtractor {
 
-    FileInputStream fs = null;
-    HSSFWorkbook hssfWorkbook=null;
-    OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
+    private FileInputStream fs = null;
+    private HSSFWorkbook hssfWorkbook=null;
+    private final OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
 
     @Override
     public void extractOleFromDocumentFile(FileDto fileDto) throws IOException {
@@ -37,19 +37,19 @@ public class ExcelParser extends OleExtractor {
 
     @Override
     protected void callOfficeHandler(FileDto fileDto) throws Exception {
-        fs = new FileInputStream(fileDto.getFileSavePath());
+        this.fs = new FileInputStream(fileDto.getFileSavePath());
 
-        hssfWorkbook= new HSSFWorkbook(fs);
+        this.hssfWorkbook= new HSSFWorkbook(this.fs);
 
-        for (HSSFObjectData hssfObjectData : hssfWorkbook.getAllEmbeddedObjects())
-            officeEntryHandler.parser((DirectoryNode) hssfObjectData.getDirectory(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
+        for (HSSFObjectData hssfObjectData : this.hssfWorkbook.getAllEmbeddedObjects())
+            this.officeEntryHandler.parser((DirectoryNode) hssfObjectData.getDirectory(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
 
 
     }
 
     @Override
     protected void closeResources() {
-        IOUtils.closeQuietly(fs);
-        IOUtils.closeQuietly(hssfWorkbook);
+        IOUtils.closeQuietly(this.fs);
+        IOUtils.closeQuietly(this.hssfWorkbook);
     }
 }

@@ -17,8 +17,8 @@ public class ExcelExtractor extends OleExtractor {
     //private final String oleSavePath;
     private final PackagePart packagePart;
 
-    FileOutputStream outputStream = null;
-    HSSFWorkbook embeddedWorkbook = null;
+    private FileOutputStream outputStream = null;
+    private HSSFWorkbook embeddedWorkbook = null;
 
     public void doExtract() {
 
@@ -35,22 +35,22 @@ public class ExcelExtractor extends OleExtractor {
     }
 
     private void writeExcelFile() throws IOException {
-        embeddedWorkbook = new HSSFWorkbook(packagePart.getInputStream());
-        embeddedWorkbook.setHidden(false);
+        this.embeddedWorkbook = new HSSFWorkbook(this.packagePart.getInputStream());
+        this.embeddedWorkbook.setHidden(false);
 
-        String uuid = addUniqueFileNameMapping(removePath(String.valueOf(packagePart.getPartName())));
+        String uuid = addUniqueFileNameMapping(removePath(String.valueOf(this.packagePart.getPartName())));
 
-        stringBuffer.append(oleSavePath).append(uuid);
+        super.stringBuffer.append(this.oleSavePath).append(uuid);
 
-        outputStream = new FileOutputStream(stringBuffer.toString());
-        embeddedWorkbook.write(outputStream);
+        this.outputStream = new FileOutputStream(super.stringBuffer.toString());
+        this.embeddedWorkbook.write(this.outputStream);
     }
 
     @Override
     protected void closeResources() {
-        stringBuffer.delete(0, stringBuffer.length());
-        IOUtils.closeQuietly(embeddedWorkbook);
-        IOUtils.closeQuietly(outputStream);
+        super.stringBuffer.delete(0, super.stringBuffer.length());
+        IOUtils.closeQuietly(this.embeddedWorkbook);
+        IOUtils.closeQuietly(this.outputStream);
     }
 
     public ExcelExtractor(PackagePart pPart, FileDto fileDto) {

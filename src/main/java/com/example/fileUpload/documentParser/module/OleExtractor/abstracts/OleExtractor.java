@@ -29,14 +29,14 @@ public abstract class OleExtractor {
 
 
     protected String buildPathFileName(String fileType){
-        return removeFileExtension(originalFileName) +
+        return removeFileExtension(this.originalFileName) +
                 "_OLE" +
                 fileType;
     }
 
     protected String buildOutputPath() {
-        return oleSavePath +
+        return this.oleSavePath +
                 File.separator +
-                addUniqueFileNameMapping(fileName);
+                addUniqueFileNameMapping(this.fileName);
     }
 }

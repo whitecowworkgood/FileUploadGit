@@ -12,10 +12,6 @@ public abstract class OleExtractor {
     protected void catchIOException(IOException e){
         ExceptionUtils.getStackTrace(e);
     }
-    protected void catchXmlException(XmlException e){
-        ExceptionUtils.getStackTrace(e);
-        throw new RuntimeException(e);
-    }
     protected void catchException(Exception e){
         ExceptionUtils.getStackTrace(e);
     }

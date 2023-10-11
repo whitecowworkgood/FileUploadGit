@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 public class FileVO {
-    @JsonIgnore
+
     private Long id;
     private String UUIDFileName;
     @JsonIgnore

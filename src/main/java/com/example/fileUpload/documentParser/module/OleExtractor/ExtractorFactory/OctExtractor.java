@@ -15,10 +15,7 @@ import java.io.IOException;
 
 public class OctExtractor extends OleExtractor {
 
-    //private final String  originalFileName;
-    //private final String oleSavePath;
     private final PackagePart packagePart;
-
     private POIFSFileSystem poifsFileSystem =null;
     private DirectoryNode directoryNode = null;
     private DocumentInputStream oleStream = null;
@@ -26,38 +23,38 @@ public class OctExtractor extends OleExtractor {
     private FileOutputStream fs = null;
 
     private void doExtract() throws Exception {
-        poifsFileSystem = new POIFSFileSystem(packagePart.getInputStream());
-        directoryNode = poifsFileSystem.getRoot();
+        this.poifsFileSystem = new POIFSFileSystem(this.packagePart.getInputStream());
+        this.directoryNode = this.poifsFileSystem.getRoot();
 
-        if(directoryNode.hasEntry(OleEntry.HWPINFO.getValue())){
-            fileName = buildPathFileName(FileType.HWP.getValue());
+        if(this.directoryNode.hasEntry(OleEntry.HWPINFO.getValue())){
+            this.fileName = buildPathFileName(FileType.HWP.getValue());
 
             tryFileSaveUsePOIFStream();
 
         }
-        if(directoryNode.hasEntry(Ole10Native.OLE10_NATIVE)){
+        if(this.directoryNode.hasEntry(Ole10Native.OLE10_NATIVE)){
 
-            String type =embeddedFileExtractor.parseFileType((DocumentEntry) directoryNode.getEntry(OleEntry.COMPOBJ.getValue()));
+            String type =super.embeddedFileExtractor.parseFileType((DocumentEntry) this.directoryNode.getEntry(OleEntry.COMPOBJ.getValue()));
 
             if(type.equals(FileType.BMP.getValue())){
 
-                fileName = buildPathFileName(FileType.BMP.getValue());
+                this.fileName = buildPathFileName(FileType.BMP.getValue());
 
-                oleStream = new DocumentInputStream((DocumentEntry) directoryNode.getEntry(Ole10Native.OLE10_NATIVE));
-                oleStream.skipNBytes(4);
+                this.oleStream = new DocumentInputStream((DocumentEntry) this.directoryNode.getEntry(Ole10Native.OLE10_NATIVE));
+                this.oleStream.skipNBytes(4);
 
                 tryFileSaveUseOleStream();
             }
             if(type.equals("other")){
 
-                DocumentEntry ole10Native = (DocumentEntry) directoryNode.getEntry(Ole10Native.OLE10_NATIVE);
-                embeddedFileExtractor.parseOle10NativeEntry(new DocumentInputStream(ole10Native), oleSavePath);
+                DocumentEntry ole10Native = (DocumentEntry) this.directoryNode.getEntry(Ole10Native.OLE10_NATIVE);
+                super.embeddedFileExtractor.parseOle10NativeEntry(new DocumentInputStream(ole10Native), this.oleSavePath);
             }
         }
-        if (directoryNode.hasEntry(OleEntry.ODF.getValue())) {
+        if (this.directoryNode.hasEntry(OleEntry.ODF.getValue())) {
 
-            oleStream = new DocumentInputStream((DocumentEntry) directoryNode.getEntry(OleEntry.ODF.getValue()));
-            fileName = selectODFType();
+            this.oleStream = new DocumentInputStream((DocumentEntry) this.directoryNode.getEntry(OleEntry.ODF.getValue()));
+            this.fileName = selectODFType();
 
             tryFileSaveUseOleStream();
 
@@ -67,8 +64,8 @@ public class OctExtractor extends OleExtractor {
 
     private void tryFileSaveUseOleStream(){
         try {
-            fs = new FileOutputStream(buildOutputPath());
-            fs.write(oleStream.readAllBytes());
+            this.fs = new FileOutputStream(buildOutputPath());
+            this.fs.write(this.oleStream.readAllBytes());
 
         } catch (IOException e) {
             catchIOException(e);
@@ -80,8 +77,8 @@ public class OctExtractor extends OleExtractor {
 
     private void tryFileSaveUsePOIFStream(){
         try {
-            fs = new FileOutputStream(buildOutputPath());
-            poifsFileSystem.writeFilesystem(fs);
+            this.fs = new FileOutputStream(buildOutputPath());
+            this.poifsFileSystem.writeFilesystem(this.fs);
 
         }catch (IOException e) {
             catchIOException(e);
@@ -92,17 +89,17 @@ public class OctExtractor extends OleExtractor {
         }
     }
     private String selectODFType() throws FileNotFoundException {
-        if(directoryNode.hasEntry(OleEntry.COMPOBJ.getValue())){
-            return buildPathFileName((embeddedFileExtractor.parseFileType((DocumentEntry) directoryNode.getEntry(OleEntry.COMPOBJ.getValue()))));
+        if(this.directoryNode.hasEntry(OleEntry.COMPOBJ.getValue())){
+            return buildPathFileName((super.embeddedFileExtractor.parseFileType((DocumentEntry) this.directoryNode.getEntry(OleEntry.COMPOBJ.getValue()))));
 
         }
         return buildPathFileName(FileType.ODT.getValue());
     }
     @Override
     protected void closeResources() {
-        IOUtils.closeQuietly(poifsFileSystem);
-        IOUtils.closeQuietly(oleStream);
-        IOUtils.closeQuietly(fs);
+        IOUtils.closeQuietly(this.poifsFileSystem);
+        IOUtils.closeQuietly(this.oleStream);
+        IOUtils.closeQuietly(this.fs);
     }
 
     public OctExtractor(PackagePart pPart, FileDto fileDto) throws Exception {

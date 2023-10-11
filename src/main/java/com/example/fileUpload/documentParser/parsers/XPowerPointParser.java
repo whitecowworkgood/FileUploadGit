@@ -17,8 +17,8 @@ import java.io.IOException;
 @NoArgsConstructor
 public class XPowerPointParser extends OleExtractor {
 
-    FileInputStream fs = null;
-    XMLSlideShow pptx = null;
+    private FileInputStream fs = null;
+    private XMLSlideShow pptx = null;
 
     @Override
     public void extractOleFromDocumentFile(FileDto fileDto) throws OpenXML4JException, IOException, XmlException {
@@ -37,17 +37,17 @@ public class XPowerPointParser extends OleExtractor {
 
     @Override
     protected void callOfficeHandler(FileDto fileDto) throws Exception {
-        fs = new FileInputStream(fileDto.getFileSavePath());
-        pptx = new XMLSlideShow(OPCPackage.open(fs));
+        this.fs = new FileInputStream(fileDto.getFileSavePath());
+        this.pptx = new XMLSlideShow(OPCPackage.open(this.fs));
 
-        for (PackagePart pPart : pptx.getAllEmbeddedParts())
+        for (PackagePart pPart : this.pptx.getAllEmbeddedParts())
             new OleExtractorFactory().createMordernOleExtractor(pPart, fileDto);
 
     }
 
     @Override
     protected void closeResources() {
-        IOUtils.closeQuietly(fs);
-        IOUtils.closeQuietly(pptx);
+        IOUtils.closeQuietly(this.fs);
+        IOUtils.closeQuietly(this.pptx);
     }
 }

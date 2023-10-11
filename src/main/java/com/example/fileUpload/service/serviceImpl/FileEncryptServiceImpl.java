@@ -47,7 +47,7 @@ public class FileEncryptServiceImpl implements FileEncryptService {
     private static final int READ_RSA_INDEX_SIZE = 4;
 
     @Value("${Save-Directory}")
-    private String dir;
+    private String baseDir;
 
     private final RSA rsa;
     private final EncryptDao encryptDao;
@@ -71,28 +71,23 @@ public class FileEncryptServiceImpl implements FileEncryptService {
     @Override
     public void createRSAKeyPair() {
 
-        stringKeypair = rsa.createRSAKeyPair();
+        this.stringKeypair = this.rsa.createRSAKeyPair();
 
         storedRSAKeyPair();
 
-        rsa.freeResource();
+        this.rsa.freeResource();
     }
 
     @Override
     public void storedRSAKeyPair(){
-        encryptDao.saveRSAKey(stringKeypair);
+        this.encryptDao.saveRSAKey(this.stringKeypair);
 
-        //Integer.parseInt(stringKeypair.getString("id"));
+        int targetNum = this.stringKeypair.toString().indexOf("id=")+3;
 
-        int targetNum = stringKeypair.toString().indexOf("id=")+3;
+        this.latestInsertedId = NumberUtils.toLong(this.stringKeypair.toString().substring(targetNum, this.stringKeypair.toString().length()-1));
 
-
-        latestInsertedId = NumberUtils.toLong(stringKeypair.toString().substring(targetNum, stringKeypair.toString().length()-1));
-
-        /*System.out.println(latestInsertedId);*/
-        this.publicKey = stringKeypair.get("publicKey");
-        stringKeypair = null;
-
+        this.publicKey = this.stringKeypair.get("publicKey");
+        this.stringKeypair = null;
 
     }
 
@@ -105,38 +100,44 @@ public class FileEncryptServiceImpl implements FileEncryptService {
         this.cipher.init(Cipher.ENCRYPT_MODE, fileEncryptKey, ivSpec);
 
         try{
-            inputFileStream = new FileInputStream(fileDto.getFileSavePath());
-            encryptedFileStream = new FileOutputStream(dir+File.separator+"temp"+File.separator+fileDto.getUUIDFileName());
+            this.inputFileStream = new FileInputStream(fileDto.getFileSavePath());
+            this.encryptedFileStream = new FileOutputStream(this.baseDir+File.separator+"temp"+File.separator+fileDto.getUUIDFileName());
 
             byte[] buffer = new byte[ENCRYPTION_BUFFER_SIZE];
 
             int bytesRead;
 
-            while ((bytesRead = inputFileStream.read(buffer)) != -1) {
-                byte[] encryptedBytes;
-                if (bytesRead == ENCRYPTION_BUFFER_SIZE) {
-                    encryptedBytes = this.cipher.update(buffer, 0, bytesRead);
+            while ((bytesRead = this.inputFileStream.read(buffer)) != -1) {
 
-                } else {
-                    encryptedBytes = this.cipher.doFinal(buffer, 0, bytesRead);
+                byte[] encryptedBytes = this.cipher.update(buffer, 0, bytesRead);
+
+                if(encryptedBytes != null){
+                    this.encryptedFileStream.write(encryptedBytes);
                 }
-                encryptedFileStream.write(encryptedBytes);
+
             }
-            encryptedFileStream.write(ByteBuffer.allocate(4).putInt(Math.toIntExact(latestInsertedId)).array());
-            encryptedFileStream.write(encryptOptions(ivSpec.getIV()));
-            encryptedFileStream.write(encryptOptions(fileEncryptKey.getEncoded()));
+
+            byte[] outBytes = this.cipher.doFinal();
+
+            if(outBytes != null){
+                this.encryptedFileStream.write(outBytes);
+            }
+
+            this.encryptedFileStream.write(ByteBuffer.allocate(4).putInt(Math.toIntExact(this.latestInsertedId)).array());
+            this.encryptedFileStream.write(encryptOptions(this.ivSpec.getIV()));
+            this.encryptedFileStream.write(encryptOptions(this.fileEncryptKey.getEncoded()));
 
         } catch (IllegalBlockSizeException | IOException | BadPaddingException e) {
             ExceptionUtils.getStackTrace(e);
 
         }finally{
-            IOUtils.closeQuietly(inputFileStream);
-            IOUtils.closeQuietly(encryptedFileStream);
-            fileEncryptKey=null;
-            ivSpec=null;
+            IOUtils.closeQuietly(this.inputFileStream);
+            IOUtils.closeQuietly(this.encryptedFileStream);
+            this.fileEncryptKey=null;
+            this.ivSpec=null;
 
             Files.deleteIfExists(Path.of(fileDto.getFileSavePath()));
-            Files.move(Path.of(dir+File.separator+"temp"+File.separator+fileDto.getUUIDFileName()), Path.of(fileDto.getFileSavePath()), StandardCopyOption.REPLACE_EXISTING);
+            Files.move(Path.of(this.baseDir+File.separator+"temp"+File.separator+fileDto.getUUIDFileName()), Path.of(fileDto.getFileSavePath()), StandardCopyOption.REPLACE_EXISTING);
         }
     }
 
@@ -144,28 +145,28 @@ public class FileEncryptServiceImpl implements FileEncryptService {
     public void decryptFile(Long id) {
         try{
 
-            String downloadFileUserPath =dir+File.separator+"download"+
-                    File.separator+fileDao.printFileOne(id).getUserName();
+            String downloadFileUserPath =this.baseDir+File.separator+"download"+
+                    File.separator+this.fileDao.printFileOne(id).getUserName();
 
             generateUserFolder(downloadFileUserPath);
 
-            randomAccessFile = new RandomAccessFile(fileDao.printFileOne(id).getFileSavePath(), "r");
-            encryptedFileStream = new FileOutputStream(downloadFileUserPath+File.separator+
-                    fileDao.printFileOne(id).getUUIDFileName());
+            this.randomAccessFile = new RandomAccessFile(this.fileDao.printFileOne(id).getFileSavePath(), "r");
+            this.encryptedFileStream = new FileOutputStream(downloadFileUserPath+File.separator+
+                    this.fileDao.printFileOne(id).getUUIDFileName());
 
-            long fileSize = randomAccessFile.length();
+            long fileSize = this.randomAccessFile.length();
 
             // 하위 516바이트를 읽기 시작할 위치를 계산합니다.
             long position = fileSize - READ_OPTION_SIZE;
 
             // 파일 포인터를 설정하여 하위 516바이트의 위치로 이동합니다.
-            randomAccessFile.seek(position);
+            this.randomAccessFile.seek(position);
 
             // 516바이트를 읽어올 배열을 생성합니다.
             byte[] optionsBuffer = new byte[READ_OPTION_SIZE];
 
             // 파일에서 데이터를 읽어옵니다.
-            randomAccessFile.read(optionsBuffer);
+            this.randomAccessFile.read(optionsBuffer);
 
 
             // 4바이트, 256바이트, 256바이트로 분리합니다.
@@ -177,14 +178,14 @@ public class FileEncryptServiceImpl implements FileEncryptService {
             System.arraycopy(optionsBuffer, 4, ivSpecByte, 0, 256);
             System.arraycopy(optionsBuffer, 260, AESKeyByte, 0, 256);
 
-            this.privateKey = rsa.getPrivateKey(RSAIndex);
+            this.privateKey = this.rsa.getPrivateKey(RSAIndex);
             this.ivSpec = new IvParameterSpec(decryptOptions(ivSpecByte));
             this.fileEncryptKey = new SecretKeySpec(decryptOptions(AESKeyByte), "AES");
 
             this.cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
             this.cipher.init(Cipher.DECRYPT_MODE, fileEncryptKey, ivSpec);
 
-            randomAccessFile.seek(0);
+            this.randomAccessFile.seek(0);
 
             byte[] decryptedBuffer = new byte[ENCRYPTION_BUFFER_SIZE];
 
@@ -194,23 +195,24 @@ public class FileEncryptServiceImpl implements FileEncryptService {
             while (totalBytesRead < position) {
                 int bytesRead;
 
-                if (totalBytesRead + ENCRYPTION_BUFFER_SIZE <= position) {
-                    bytesRead = randomAccessFile.read(decryptedBuffer, 0, ENCRYPTION_BUFFER_SIZE);
+                if (position - totalBytesRead >= ENCRYPTION_BUFFER_SIZE) {
+                    bytesRead = this.randomAccessFile.read(decryptedBuffer, 0, ENCRYPTION_BUFFER_SIZE);
                 } else {
-                    bytesRead = randomAccessFile.read(decryptedBuffer, 0, (int) (position - totalBytesRead));
+                    bytesRead = this.randomAccessFile.read(decryptedBuffer, 0, (int) (position - totalBytesRead));
                 }
 
-                byte[] decryptedBytes;
-                if (totalBytesRead + bytesRead == position) {
-                    // 마지막 블록인 경우 cipher.doFinal()을 사용하여 패딩을 적용
-                    decryptedBytes = cipher.doFinal(decryptedBuffer, 0, bytesRead);
-                } else {
-                    // 그 외의 경우 cipher.update()를 사용하여 블록을 처리
-                    decryptedBytes = cipher.update(decryptedBuffer, 0, bytesRead);
+                byte[] decryptedBytes = this.cipher.update(decryptedBuffer, 0, bytesRead);
+
+                if(decryptedBytes != null){
+                    this.encryptedFileStream.write(decryptedBytes);
                 }
 
-                encryptedFileStream.write(decryptedBytes);
                 totalBytesRead += bytesRead;
+            }
+
+            byte[] finalObuf = this.cipher.doFinal();
+            if (finalObuf != null) {
+                this.encryptedFileStream.write(finalObuf);
             }
 
 
@@ -219,11 +221,11 @@ public class FileEncryptServiceImpl implements FileEncryptService {
             ExceptionUtils.getStackTrace(e);
 
         } finally {
-            IOUtils.closeQuietly(inputFileStream);
-            IOUtils.closeQuietly(encryptedFileStream);
-            IOUtils.closeQuietly(randomAccessFile);
+            IOUtils.closeQuietly(this.inputFileStream);
+            IOUtils.closeQuietly(this.encryptedFileStream);
+            IOUtils.closeQuietly(this.randomAccessFile);
 
-            cipher=null;
+            this.cipher=null;
             this.privateKey = null;
             this.ivSpec = null;
             this.fileEncryptKey = null;
@@ -287,11 +289,11 @@ public class FileEncryptServiceImpl implements FileEncryptService {
         SecureRandom secureRandom = SecureRandom.getInstanceStrong();
         byte[] keyData = new byte[AES_SIZE]; // 256비트 키
         secureRandom.nextBytes(keyData);
-        fileEncryptKey = new SecretKeySpec(keyData, "AES");
+        this.fileEncryptKey = new SecretKeySpec(keyData, "AES");
 
         byte[] ivBytes = new byte[IV_SIZE];
         secureRandom.nextBytes(ivBytes);
-        ivSpec = new IvParameterSpec(ivBytes);
+        this.ivSpec = new IvParameterSpec(ivBytes);
 
     }
 }
