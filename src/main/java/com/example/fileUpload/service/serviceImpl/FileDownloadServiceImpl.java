@@ -50,7 +50,7 @@ public class FileDownloadServiceImpl implements FileDownloadService {
     public String getFileName(){
 
         try{
-            fileName = this.fileDao.printFileOne(this.id).getOriginalFileName();
+            fileName = this.fileDao.printFileInfo(this.id, this.userName).getOriginalFileName();
 
         }catch(NullPointerException e){
             ExceptionUtils.getStackTrace(e);
@@ -63,13 +63,15 @@ public class FileDownloadServiceImpl implements FileDownloadService {
     public Resource downloadFile(Long id){
 
         String downloadPath = this.baseDir+ File.separator+"download"+File.separator+this.userName+File.separator;
-        this.fileStorageLocation = Path.of(downloadPath+fileDao.printFileOne(this.id).getUUIDFileName());
 
         try {
+
+            this.fileStorageLocation = Path.of(downloadPath+fileDao.printFileInfo(this.id, this.userName).getUUIDFileName());
             this.fileResource = new UrlResource(this.fileStorageLocation.toUri());
 
-        } catch (MalformedURLException e) {
+        } catch (MalformedURLException | NullPointerException e) {
             ExceptionUtils.getStackTrace(e);
+
         }
 
         return this.fileResource;

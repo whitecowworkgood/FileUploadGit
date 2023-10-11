@@ -22,7 +22,7 @@ public class FileDao {
     public FileVO printFileOne(Long id){
         return sqlSession.getMapper(FileEntryMapperAnno.class).selectById(id);
     }
-    public String printFileInfo(Long id, String userName){
+    public FileVO printFileInfo(Long id, String userName){
         return sqlSession.getMapper(FileEntryMapperAnno.class).selectByIdName(id, userName);
     }
 

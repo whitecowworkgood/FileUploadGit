@@ -17,8 +17,8 @@ public class FileVO {
     @JsonIgnore
     private String fileSavePath;
     private Long fileSize;
-    private String fileType;
     private String originalFileName;
+    private String fileType;
     private Long countNum;
     private String userName;
     private String comment;

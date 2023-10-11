@@ -65,15 +65,17 @@ public class FileDownloadController {
         String fileName = fileDownloadService.getFileName();
 
         UserFileVO userFileVO = fileDownloadService.getUserFileVO(id);
+        Resource resource = fileDownloadService.downloadFile(id);
 
-        if(userFileVO != null && !(fileName.isEmpty())){
+        if(userFileVO != null && !(fileName.isEmpty()) && resource.isFile()){
+
 
             //count -- 쿼리문 구현하기
             fileDownloadService.decreaseCountNum(id);
 
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
-                    .body(fileDownloadService.downloadFile(id));
+                    .body(resource);
         }
 
         return ResponseEntity.status(HttpStatus.OK).build();

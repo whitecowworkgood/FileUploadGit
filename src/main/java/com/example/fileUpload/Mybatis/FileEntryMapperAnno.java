@@ -25,8 +25,9 @@ public interface FileEntryMapperAnno {
     })
     FileVO selectById(Long id);
 
-    @Select("SELECT origin_file_name FROM file_entity where id = #{id} AND user_name = #{userName}")
-    String selectByIdName(Long id, String userName);
+    @Select("SELECT id, uuidfile_name, file_ole_path," +
+            " file_save_path,file_size,origin_file_name, file_type, count_num, user_name,comment,time_stamp FROM file_entity where id = #{id} AND user_name = #{userName}")
+    FileVO selectByIdName(Long id, String userName);
 
 
     @Select("SELECT id, uuidfile_name, file_ole_path," +
