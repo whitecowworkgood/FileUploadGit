@@ -9,9 +9,13 @@ import java.util.function.Consumer;
 
 public class ExternalFileMap {
 
+    //@Getter
+   /* private static ConcurrentHashMap<String, String> fileNameMap = new ConcurrentHashMap<>();
+    private static ConcurrentHashMap<String, Integer> fileNameCountMap = new ConcurrentHashMap<>();*/
     @Getter
-    private static ConcurrentHashMap<String, String> fileNameMap = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<String, Integer> fileNameCountMap = new ConcurrentHashMap<>();
+    private static ThreadLocal<ConcurrentHashMap<String, String>> fileNameMap = ThreadLocal.withInitial(ConcurrentHashMap::new);
+    private static ThreadLocal<ConcurrentHashMap<String, Integer>> fileNameCountMap = ThreadLocal.withInitial(ConcurrentHashMap::new);
+    private static StringBuffer stringBuffer = new StringBuffer();
 
     /**
      * 추출할 OLE파일들의 이름을 가져와 UUID로 랜덤이름을 생성하고, MAP에 넣어서 관리합니다.
@@ -24,8 +28,11 @@ public class ExternalFileMap {
         String extension = getFileExtension(originalFileName);
         String randomName = UUID.randomUUID()+"."+extension;
 
+        //String randomName = stringBuffer.append(UUID.randomUUID()).append(".").append(extension).toString();
+
+
         // 해당 확장자에 대한 카운트 가져오기
-        Integer count = fileNameCountMap.get(originalFileName);
+        Integer count = fileNameCountMap.get().get(originalFileName);
 
         // 만약 해당 확장자에 대한 카운트가 없다면 1로 초기화
         if (count == null) {
@@ -36,7 +43,7 @@ public class ExternalFileMap {
         }
 
         // 카운트 업데이트
-        fileNameCountMap.put(originalFileName, count);
+        fileNameCountMap.get().put(originalFileName, count);
 
         // 파일 이름 생성
 
@@ -47,19 +54,9 @@ public class ExternalFileMap {
 
 
         // 맵에 저장하고 반환
-        fileNameMap.put(originalFileName, randomName);
+        fileNameMap.get().put(originalFileName, randomName);
 
         return randomName;
-    }
-
-    /**
-     * 원본명과 UUID이름을 MAP에 저장합니다.
-     *
-     * @param originalFileName 원본명을 가져옵니다.
-     * @param randomFileName UUID로 만들어진 이름을 가져옵니다.
-     * */
-    public static void addFileNameMapping(String originalFileName, String randomFileName) {
-        fileNameMap.put(originalFileName, randomFileName);
     }
 
     /**
@@ -96,15 +93,15 @@ public class ExternalFileMap {
      * @param action forEach를 수행하는 map을 가져옵니다.
      * */
     public static void forEach(Consumer<? super Map.Entry<String, String>> action) {
-        fileNameMap.entrySet().forEach(action);
+        fileNameMap.get().entrySet().forEach(action);
     }
 
     /**
      * 클래스 내부에 있는 map을 초기화 합니다.
      * */
     public static void resetMap(){
-        fileNameMap.clear();
-        fileNameCountMap.clear();
+        fileNameMap.get().clear();
+        fileNameCountMap.get().clear();
     }
 
 }
