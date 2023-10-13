@@ -28,13 +28,15 @@ import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static com.example.fileUpload.util.DirectoryChecker.generateUserFolder;
+import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
 @Transactional
 public class FileEncryptServiceImpl implements FileEncryptService {
+
+    private final StringBuffer stringBuffer = new StringBuffer();
 
     private static final int ENCRYPTION_BUFFER_SIZE = 1024;
     private static final int AES_SIZE = 32;
@@ -45,6 +47,7 @@ public class FileEncryptServiceImpl implements FileEncryptService {
     private static final int READ_ENCRYPT_IV_SIZE = 256;
     private static final int READ_ENCRYPT_KEY_SIZE = 256;
     private static final int READ_RSA_INDEX_SIZE = 4;
+
 
     @Value("${Save-Directory}")
     private String baseDir;
@@ -100,8 +103,10 @@ public class FileEncryptServiceImpl implements FileEncryptService {
         this.cipher.init(Cipher.ENCRYPT_MODE, fileEncryptKey, ivSpec);
 
         try{
+            this.stringBuffer.append(this.baseDir).append(File.separator).append("temp").append(File.separator).append(fileDto.getUUIDFileName());
+
             this.inputFileStream = new FileInputStream(fileDto.getFileSavePath());
-            this.encryptedFileStream = new FileOutputStream(this.baseDir+File.separator+"temp"+File.separator+fileDto.getUUIDFileName());
+            this.encryptedFileStream = new FileOutputStream(stringBuffer.toString());
 
             byte[] buffer = new byte[ENCRYPTION_BUFFER_SIZE];
 
@@ -137,7 +142,9 @@ public class FileEncryptServiceImpl implements FileEncryptService {
             this.ivSpec=null;
 
             Files.deleteIfExists(Path.of(fileDto.getFileSavePath()));
-            Files.move(Path.of(this.baseDir+File.separator+"temp"+File.separator+fileDto.getUUIDFileName()), Path.of(fileDto.getFileSavePath()), StandardCopyOption.REPLACE_EXISTING);
+            Files.move(Path.of(stringBuffer.toString()), Path.of(fileDto.getFileSavePath()), StandardCopyOption.REPLACE_EXISTING);
+
+            stringBuffer.delete(0, stringBuffer.length());
         }
     }
 
@@ -145,14 +152,23 @@ public class FileEncryptServiceImpl implements FileEncryptService {
     public void decryptFile(Long id) {
         try{
 
-            String downloadFileUserPath =this.baseDir+File.separator+"download"+
-                    File.separator+this.fileDao.printFileOne(id).getUserName();
+            String baseDownloadPath = new StringBuffer().append(this.baseDir).append(File.separator)
+                    .append("download").append(File.separator).toString();
 
-            generateUserFolder(downloadFileUserPath);
+
+            String downloadFileUserPath = stringBuffer.append(baseDownloadPath)
+                        .append(this.fileDao.printFileOne(id).getUserName()).toString();
+            stringBuffer.delete(0, stringBuffer.length());
+
+            generateFolder(downloadFileUserPath);
+
 
             this.randomAccessFile = new RandomAccessFile(this.fileDao.printFileOne(id).getFileSavePath(), "r");
-            this.encryptedFileStream = new FileOutputStream(downloadFileUserPath+File.separator+
-                    this.fileDao.printFileOne(id).getUUIDFileName());
+            this.encryptedFileStream = new FileOutputStream(stringBuffer.append(downloadFileUserPath)
+                                                                        .append(File.separator)
+                                                                        .append(this.fileDao.printFileOne(id).getUUIDFileName())
+                                                                        .toString()
+            );
 
             long fileSize = this.randomAccessFile.length();
 
@@ -229,6 +245,7 @@ public class FileEncryptServiceImpl implements FileEncryptService {
             this.privateKey = null;
             this.ivSpec = null;
             this.fileEncryptKey = null;
+            stringBuffer.delete(0, stringBuffer.length());
 
         }
 
@@ -294,6 +311,38 @@ public class FileEncryptServiceImpl implements FileEncryptService {
         byte[] ivBytes = new byte[IV_SIZE];
         secureRandom.nextBytes(ivBytes);
         this.ivSpec = new IvParameterSpec(ivBytes);
+
+    }
+
+    @Override
+    public void normalFileDownload(Long id) {
+
+        String baseDownloadPath = this.stringBuffer.append(this.baseDir).append(File.separator)
+                .append("download").append(File.separator).append(this.fileDao.printFileOne(id).getUserName()).toString();
+
+        this.stringBuffer.delete(0, this.stringBuffer.length());
+
+        generateFolder(baseDownloadPath);
+
+
+        String srcPath = stringBuffer.append(this.baseDir)
+                .append(File.separator)
+                .append(this.fileDao.printFileOne(id).getUUIDFileName()).toString();
+        this.stringBuffer.delete(0, this.stringBuffer.length());
+
+        String destPath = this.stringBuffer.append(baseDownloadPath)
+                .append(File.separator)
+                .append(this.fileDao.printFileOne(id).getUUIDFileName())
+                .toString();
+        this.stringBuffer.delete(0, this.stringBuffer.length());
+
+        try{
+            Files.copy(Path.of(srcPath), Path.of(destPath));
+
+        }catch (IOException e){
+            ExceptionUtils.getStackTrace(e);
+
+        }
 
     }
 }

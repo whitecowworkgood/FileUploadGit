@@ -27,6 +27,8 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
+import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
+
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -37,6 +39,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     private final OleDao oleDao; //mybatis
     private final FileProcessor fileProcessor;
     private final FileEncryptService fileEncryptService;
+    private final StringBuffer stringBuffer = new StringBuffer();
 
     @Value("${Save-Directory}")
     private String baseDir;
@@ -45,6 +48,52 @@ public class FileUploadServiceImpl implements FileUploadService {
     @Override
     @Transactional
     public synchronized boolean fileUpload(FileDto fileDto) {
+
+        if (fileDto.getFileData().isEmpty() || !FileUtil.isPathValidForStorage(this.baseDir, fileDto.getFileSavePath())) {
+            return false;
+        }
+
+        try {
+            if (!FileUtil.validateUploadedFileMimeType(fileDto)) {
+                return false;
+            }
+
+            fileDto.getFileData().transferTo(new File(fileDto.getFileSavePath()));
+
+            boolean fileResult = this.fileDao.saveFile(fileDto);
+
+            generateFolder(fileDto.getFileOlePath());
+
+            this.fileProcessor.createOleExtractorHandler(fileDto);
+
+            ExternalFileMap.forEach(entry -> {
+                OleDto oleDto = OleDto.builder()
+                        .superId(fileDto.getId())
+                        .originalFileName(entry.getKey())
+                        .UUIDFileName(entry.getValue())
+                        .build();
+                this.oleDao.insertOle(oleDto);
+            });
+
+            ExternalFileMap.resetMap();
+
+            if (fileDto.isEncrypt()) {
+                this.fileEncryptService.encryptFile(fileDto);
+            }
+
+            return fileResult;
+        } catch (IOException | RuntimeException e) {
+            ExceptionUtils.getStackTrace(e);
+
+            stringBuffer.append(this.baseDir).append(File.separator).append(fileDto.getUUIDFileName());
+            Files.delete(Path.of(stringBuffer.toString()));
+
+            stringBuffer.delete(0, stringBuffer.length());
+            return false;
+        }
+    }
+
+    /*public synchronized boolean fileUpload(FileDto fileDto) {
 
         try {
             if (!fileDto.getFileData().isEmpty()) {
@@ -85,7 +134,10 @@ public class FileUploadServiceImpl implements FileUploadService {
                         });
                         ExternalFileMap.resetMap();
 
-                        this.fileEncryptService.encryptFile(fileDto);
+                        if(fileDto.isEncrypt()){
+                            this.fileEncryptService.encryptFile(fileDto);
+
+                        }
 
                         return fileResult;
                         //return true;
@@ -93,14 +145,15 @@ public class FileUploadServiceImpl implements FileUploadService {
                 }
             }
         } catch (RuntimeException e) {
-            log.error(ExceptionUtils.getStackTrace(e));
+            ExceptionUtils.getStackTrace(e);
+
             new File(this.baseDir+File.separator + fileDto.getUUIDFileName()).delete();
 
         } catch (IOException i) {
-            log.error(ExceptionUtils.getStackTrace(i));
+            ExceptionUtils.getStackTrace(i);
         }
         return false;
-    }
+    }*/
 
     @Override
     public synchronized List<FileVO> printFileAll() {
@@ -123,18 +176,51 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Override
     public synchronized boolean deleteOne(Long id) {
+        boolean fileResult;
+        boolean oleResult;
 
         FileVO fileVO = this.fileDao.printFileOne(id);
         if (fileVO == null) {
             return false;
         }
+        try{
+            //Path filePath = Path.of(this.baseDir, fileVO.getUUIDFileName());
+            if (!Files.exists(Path.of(fileVO.getFileSavePath())) || !FileUtil.isPathValidForStorage(this.baseDir, fileVO.getFileSavePath())) {
+                return false;
+            }
+
+            Files.delete(Path.of(fileVO.getFileSavePath()));
+            fileResult = this.fileDao.deleteById(fileVO.getId());
+
+            Files.delete(Path.of(fileVO.getFileOlePath()));
+            oleResult = this.oleDao.deleteById(fileVO.getId());
+
+            /*//File folder = new File(fileVO.getFileOlePath());
+            Files.delete(Path.of(fileVO.getFileOlePath()));
+
+            *//*FileUtil.deleteFolder(fileVO.getFileOlePath());
+            folder.delete();*//*
+
+            oleResult = this.oleDao.deleteById(fileVO.getId());*/
 
 
-        if (!FileUtil.isPathValidForStorage(this.baseDir, this.baseDir+File.separator + fileVO.getUUIDFileName())) {
+        }catch (IOException e){
+            ExceptionUtils.getStackTrace(e);
             return false;
         }
+        /*stringBuffer.append(this.baseDir).append(File.separator).append(fileVO.getUUIDFileName());
+        if (!FileUtil.isPathValidForStorage(this.baseDir, stringBuffer.toString())) {
+            return false;
+        }
+        stringBuffer.delete(0, stringBuffer.length());
 
-        File file = new File(this.baseDir+File.separator + fileVO.getUUIDFileName());
+        stringBuffer.append(this.baseDir).append(File.separator).append(fileVO.getUUIDFileName());
+
+
+        File file = new File(stringBuffer.toString());
+        //Files.exists(stringBuffer.toString(), );
+        stringBuffer.delete(0, stringBuffer.length());
+
 
         if (!(file.exists() && file.delete())) {
             log.warn(fileVO.getUUIDFileName() + " 파일 삭제 오류 발생 또는 파일이 없음, DB에서 정보 삭제");
@@ -147,7 +233,7 @@ public class FileUploadServiceImpl implements FileUploadService {
         FileUtil.deleteFolder(folder);
         folder.delete();
 
-        boolean oleResult = this.oleDao.deleteById(fileVO.getId());
+        boolean oleResult = this.oleDao.deleteById(fileVO.getId());*/
 
         return fileResult && oleResult;
     }

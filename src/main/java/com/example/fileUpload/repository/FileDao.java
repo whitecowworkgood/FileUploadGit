@@ -46,10 +46,6 @@ public class FileDao {
         return sqlSession.getMapper(FileEntryMapperAnno.class).acceptedFiles(userName);
     }
 
-    public String selectUUIDFileNameByOriginalFileName(String userName, String FileName){
-        return sqlSession.getMapper(FileEntryMapperAnno.class).selectUUIDFileNameByOriginalFileName(userName, FileName);
-    }
-
     public UserFileVO acceptedFilesById(Long id){
         return sqlSession.getMapper(FileEntryMapperAnno.class).acceptedFileById(id);
     }

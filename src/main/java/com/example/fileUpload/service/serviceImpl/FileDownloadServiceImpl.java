@@ -28,6 +28,8 @@ public class FileDownloadServiceImpl implements FileDownloadService {
 
     private final FileDao fileDao;
 
+    private final StringBuffer stringBuffer = new StringBuffer();
+
     private Path fileStorageLocation = null;
     private Resource fileResource = null;
 
@@ -65,13 +67,23 @@ public class FileDownloadServiceImpl implements FileDownloadService {
         String downloadPath = this.baseDir+ File.separator+"download"+File.separator+this.userName+File.separator;
 
         try {
+            stringBuffer.append(this.baseDir)
+                    .append(File.separator)
+                    .append("download")
+                    .append(File.separator)
+                    .append(this.userName)
+                    .append(File.separator)
+                    .append(fileDao.printFileInfo(this.id, this.userName).getUUIDFileName());
 
-            this.fileStorageLocation = Path.of(downloadPath+fileDao.printFileInfo(this.id, this.userName).getUUIDFileName());
+            this.fileStorageLocation = Path.of(stringBuffer.toString());
             this.fileResource = new UrlResource(this.fileStorageLocation.toUri());
 
         } catch (MalformedURLException | NullPointerException e) {
             ExceptionUtils.getStackTrace(e);
 
+        }
+        finally {
+            stringBuffer.delete(0, stringBuffer.length());
         }
 
         return this.fileResource;

@@ -3,14 +3,11 @@ package com.example.fileUpload.controller;
 
 import com.example.fileUpload.message.PostDeleteMessage;
 import com.example.fileUpload.model.File.FileDto;
-import com.example.fileUpload.message.GetMessage;
-import com.example.fileUpload.model.File.FileVO;
 import com.example.fileUpload.service.FileUploadService;
 import com.example.fileUpload.util.FileUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -19,7 +16,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -32,6 +28,70 @@ public class FileUploadController {
     @Value("${Save-Directory}")
     private String baseDir;
     private final FileUploadService fileUploadService;
+    private final StringBuffer stringBuffer = new StringBuffer();
+
+
+    /**
+     * 파일을 업로드합니다.
+     *
+     * @param file 업로드할 파일입니다.
+     * @return ResponseEntity<PostDeleteMessage> 파일 업로드 결과를 반환합니다.
+     */
+    @Operation(summary = "파일 업로드", description = "파일을 저장 합니다.")
+    @PostMapping("")
+    public ResponseEntity<PostDeleteMessage> uploadFile(@RequestParam("countNum") Long countNum, @RequestParam("userName") String userName,
+                                                        @RequestParam(value = "comment", required = false) String comment,
+                                                        @RequestParam("file") MultipartFile file, @RequestParam("encryption") boolean encryption){
+
+        String uuidName = UUID.randomUUID().toString();
+
+        if(comment.isEmpty()){
+            comment=userName;
+        }
+
+        String uuidFileName = stringBuffer.append(uuidName)
+                .append(FileUtil.getFileExtension(file)).toString();
+        stringBuffer.delete(0, stringBuffer.length());
+
+
+        String fileSavePath = stringBuffer.append(this.baseDir)
+                .append(File.separator)
+                .append(uuidFileName).toString();
+        stringBuffer.delete(0, stringBuffer.length());
+
+
+        String fileOlePath = stringBuffer.append(this.baseDir)
+                .append(File.separator)
+                .append("ole")
+                .append(File.separator)
+                .append(uuidName)
+                .append(File.separator).toString();
+        stringBuffer.delete(0, stringBuffer.length());
+
+
+        FileDto fileDto = FileDto.builder()
+                .UUIDFileName(uuidFileName)
+                .originFileName(file.getOriginalFilename())
+                .fileSize(file.getSize())
+                .fileType(file.getContentType())
+                .fileSavePath(fileSavePath)
+                .fileOlePath(fileOlePath)
+                .countNum(countNum)
+                .fileData(file)
+                .userName(userName)
+                .comment(comment)
+                .isEncrypt(encryption)
+                .build();
+
+        boolean createResult = fileUploadService.fileUpload(fileDto);
+        PostDeleteMessage postDeleteMessage = new PostDeleteMessage();
+
+        if(createResult){
+            postDeleteMessage.setMessage("CREATE");
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(postDeleteMessage);
+    }
 
     /**
      * 전체 파일을 조회합니다.
@@ -99,56 +159,13 @@ public class FileUploadController {
         return ResponseEntity.status(HttpStatus.OK).body(getMessage);
     }*/
 
-
-    /**
-     * 파일을 업로드합니다.
-     *
-     * @param file 업로드할 파일입니다.
-     * @return ResponseEntity<PostDeleteMessage> 파일 업로드 결과를 반환합니다.
-     */
-    @Operation(summary = "파일 업로드", description = "파일을 저장 합니다.")
-    @PostMapping("")
-    public ResponseEntity<PostDeleteMessage> uploadFile(@RequestParam("countNum") Long countNum, @RequestParam("userName") String userName,
-                                                        @RequestParam(value = "comment", required = false) String comment,
-                                                        @RequestParam("file") MultipartFile file){
-
-        String uuidName = UUID.randomUUID().toString();
-
-        if(comment.isEmpty()){
-            comment=userName;
-        }
-
-        FileDto fileDto = FileDto.builder()
-                .UUIDFileName(uuidName+FileUtil.getFileExtension(file))
-                .originFileName(file.getOriginalFilename())
-                .fileSize(file.getSize())
-                .fileType(file.getContentType())
-                .fileSavePath(this.baseDir+File.separator+uuidName+FileUtil.getFileExtension(file))
-                .fileOlePath(this.baseDir+File.separator+"ole"+File.separator+ uuidName + File.separator)
-                .countNum(countNum)
-                .fileData(file)
-                .userName(userName)
-                .comment(comment)
-                .build();
-
-        boolean createResult = fileUploadService.fileUpload(fileDto);
-        PostDeleteMessage postDeleteMessage = new PostDeleteMessage();
-
-        if(createResult){
-            postDeleteMessage.setMessage("CREATE");
-            //postDeleteMessage.setHttpStatus(201);
-        }
-
-        return ResponseEntity.status(HttpStatus.OK).body(postDeleteMessage);
-    }
-
     /**
      * 파일을 삭제합니다.
      *
      * @param id 삭제할 파일의 ID입니다.
      * @return ResponseEntity<PostDeleteMessage> 파일 삭제 결과를 반환합니다.
      */
-    @Operation(summary = "파일 삭제", description = "파일 id를 통해 파일 정보를 삭제 합니다.")
+    /*@Operation(summary = "파일 삭제", description = "파일 id를 통해 파일 정보를 삭제 합니다.")
     @DeleteMapping("")
     public ResponseEntity<PostDeleteMessage> DeleteFile(@RequestParam("id") Long id){
 
@@ -157,11 +174,9 @@ public class FileUploadController {
 
         if(deleteResult){
             postDeleteMessage.setMessage("DeleteOk");
-            //postDeleteMessage.setHttpStatus(200);
         }
         return ResponseEntity.status(HttpStatus.OK).body(postDeleteMessage);
-    }
-
+    }*/
 
     //나중에 파일업로드 여러개를 구현하는 코드 - 아직 구현계획 없음
     /*@Operation(summary = "파일 업로드", description = "여러개의 파일을 저장합니다.")

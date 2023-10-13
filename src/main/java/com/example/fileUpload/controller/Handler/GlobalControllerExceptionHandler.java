@@ -2,6 +2,7 @@ package com.example.fileUpload.controller.Handler;
 
 import com.example.fileUpload.message.GetMessage;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.boot.web.server.ErrorPage;
 import org.springframework.boot.web.server.ErrorPageRegistrar;
 import org.springframework.boot.web.server.ErrorPageRegistry;
@@ -18,7 +19,7 @@ public class GlobalControllerExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<GetMessage> handleTypeMismatchException(MethodArgumentTypeMismatchException ex) {
-        //log.warn(ex.getMessage());
+
         GetMessage getMessage = new GetMessage();
         return ResponseEntity.status(HttpStatus.OK).body(getMessage);
     }

@@ -8,8 +8,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public interface FileEncryptMapperAnno {
 
-    @Select("<script>"
-            + "SELECT private_key FROM rsa_keys WHERE id = #{id}"
+    @Select("<script>"+
+            "SELECT private_key FROM rsa_keys WHERE id = #{id}"
             + "</script>")
     String findPrivateKey(long index);
 

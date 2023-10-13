@@ -39,7 +39,6 @@ public class AdminController {
 
         if(!fileVOS.isEmpty()){
             getMessage.setMessage("List");
-            //getMessage.setHttpStatus(200);
             getMessage.setData(fileVOS);
         }
 
@@ -65,7 +64,15 @@ public class AdminController {
     @ResponseBody
     public void acceptFile(@RequestParam("id")  Long id){
         this.adminService.acceptFile(id);
-        this.fileEncryptService.decryptFile(id);
+
+        if(fileUploadService.printFileOne(id).isEncrypt()){
+            this.fileEncryptService.decryptFile(id);
+
+        }else{
+            this.fileEncryptService.normalFileDownload(id);
+        }
+
     }
+
 
 }

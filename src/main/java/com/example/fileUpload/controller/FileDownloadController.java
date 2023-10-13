@@ -2,31 +2,20 @@ package com.example.fileUpload.controller;
 
 
 import com.example.fileUpload.message.GetMessage;
-import com.example.fileUpload.model.File.FileDto;
-import com.example.fileUpload.model.File.FileVO;
 import com.example.fileUpload.model.File.UserFileVO;
-import com.example.fileUpload.repository.EncryptDao;
 import com.example.fileUpload.service.FileDownloadService;
-import com.example.fileUpload.service.FileUploadService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
-import org.apache.catalina.User;
-import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
-import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.*;
 import java.util.List;
 
 @Controller
@@ -48,7 +37,6 @@ public class FileDownloadController {
 
         if(!userFileVOS.isEmpty()){
             getMessage.setMessage("List");
-            //getMessage.setHttpStatus(200);
             getMessage.setData(userFileVOS);
         }
 
@@ -69,8 +57,6 @@ public class FileDownloadController {
 
         if(userFileVO != null && !(fileName.isEmpty()) && resource.isFile()){
 
-
-            //count -- 쿼리문 구현하기
             fileDownloadService.decreaseCountNum(id);
 
             return ResponseEntity.ok()

@@ -19,9 +19,6 @@ public class OleDao {
         return sqlSession.getMapper(OleEntryMapperAnno.class).selectById(id);
     }
 
-   /* public List<OleDto> printAll(){
-        return sqlSession.getMapper(OleEntryMapperAnno.class).findAllEntry();
-    }*/
 
     public Boolean deleteById(Long id){
         return sqlSession.getMapper(OleEntryMapperAnno.class).deleteOleEntry(id);

@@ -77,8 +77,8 @@ public class DirectoryChecker {
         }
     }
 
-    public static void generateUserFolder(String userFolder){
-        Path folder = Paths.get(userFolder);
+    public static void generateFolder(String folderPath){
+        Path folder = Paths.get(folderPath);
 
         // 폴더 존재 여부 확인
         if (!Files.exists(folder) || !Files.isDirectory(folder)) {

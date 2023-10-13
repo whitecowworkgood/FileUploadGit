@@ -22,6 +22,6 @@ public class FileDto {
     private Long countNum;
     private String userName;
     private String comment;
-    //private String tempPath;
+    private boolean isEncrypt;
 
 }

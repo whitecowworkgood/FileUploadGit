@@ -19,7 +19,7 @@ public class AdminServiceImpl implements AdminService {
     private final FileDao fileDao;
 
     @Override
-    public synchronized List<FileVO> printBeforeAcceptFiles() {
+    public List<FileVO> printBeforeAcceptFiles() {
 
         return this.fileDao.beforeAcceptFiles();
     }

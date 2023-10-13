@@ -54,7 +54,7 @@ public class RSA {
         return this.stringKeypair;
     }
 
-    public PrivateKey getPrivateKey(byte[] data) {
+    public synchronized PrivateKey getPrivateKey(byte[] data) {
         long value = 0;
         PrivateKey privateKey = null;
         for (int i = 0; i < data.length; i++) {

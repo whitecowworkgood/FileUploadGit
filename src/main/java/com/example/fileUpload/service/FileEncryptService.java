@@ -16,4 +16,6 @@ public interface FileEncryptService {
     void encryptFile(FileDto fileDto) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException;
     void decryptFile(Long id);
 
+    void normalFileDownload(Long id);
+
 }
