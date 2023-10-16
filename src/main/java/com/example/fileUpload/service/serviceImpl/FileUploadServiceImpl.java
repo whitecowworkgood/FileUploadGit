@@ -63,9 +63,6 @@ public class FileUploadServiceImpl implements FileUploadService {
             }
 
             this.fileProcessor.createOleExtractorHandler(fileDto);
-
-            processExternalFiles(fileDto);
-
             this.fileEncryptService.encryptFile(fileDto);
 
         } catch (IOException | RuntimeException e) {
@@ -81,121 +78,6 @@ public class FileUploadServiceImpl implements FileUploadService {
         }
     }
 
-
-
-/*    public synchronized void fileUpload(FileDto fileDto) {
-
-
-        try {
-
-            if (fileDto.getFileData().isEmpty() || !FileUtil.isPathValidForStorage(this.baseDir, fileDto.getFileSavePath())
-            ||!FileUtil.validateUploadedFileMimeType(fileDto)) {
-
-                throw new FileUploadException();
-            }
-
-
-            generateFolder(fileDto.getFileOlePath());
-
-            fileDto.getFileData().transferTo(new File(fileDto.getFileSavePath()));
-
-
-            if(!this.fileDao.saveFile(fileDto)){
-                throw new FileUploadException();
-            }
-
-
-
-            this.fileProcessor.createOleExtractorHandler(fileDto);
-
-            ExternalFileMap.forEach(entry -> {
-                OleDto oleDto = OleDto.builder()
-                        .superId(fileDto.getId())
-                        .originalFileName(entry.getKey())
-                        .UUIDFileName(entry.getValue())
-                        .build();
-                this.oleDao.insertOle(oleDto);
-            });
-
-            ExternalFileMap.resetMap();
-
-            if (fileDto.isEncrypt()) {
-                this.fileEncryptService.encryptFile(fileDto);
-            }
-
-
-        } catch (IOException | RuntimeException e) {
-            ExceptionUtils.getStackTrace(e);
-
-            stringBuffer.append(this.baseDir).append(File.separator).append(fileDto.getUUIDFileName());
-            Files.delete(Path.of(stringBuffer.toString()));
-
-            stringBuffer.delete(0, stringBuffer.length());
-
-        }
-    }*/
-
-    /*public synchronized boolean fileUpload(FileDto fileDto) {
-
-        try {
-            if (!fileDto.getFileData().isEmpty()) {
-
-                if (FileUtil.isPathValidForStorage(this.baseDir, fileDto.getFileSavePath())) {
-
-                    if (FileUtil.validateUploadedFileMimeType(fileDto)) {
-                        //System.out.println(dir+File.separator+"temp"+File.separator+fileDto.getUUIDFileName());
-
-                        fileDto.getFileData().transferTo(new File(fileDto.getFileSavePath()));
-
-
-                        boolean fileResult = this.fileDao.saveFile(fileDto);
-
-                        if(!Files.exists(Path.of(fileDto.getFileOlePath()))){
-                            try{
-                                //Folder.mkdir(); //폴더 생성합니다.
-                                Files.createDirectories(Path.of(fileDto.getFileOlePath()));
-                            }
-                            catch(Exception e){
-                                ExceptionUtils.getStackTrace(e);
-                            }
-                        }
-
-
-                        this.fileProcessor.createOleExtractorHandler(fileDto);
-                        ExternalFileMap.forEach(entry -> {
-
-                            OleDto oleDto = OleDto.builder().superId(fileDto.getId())
-                                    .originalFileName(entry.getKey())
-                                    .UUIDFileName(entry.getValue())
-                                    .build();
-
-
-
-                            this.oleDao.insertOle(oleDto);
-
-                        });
-                        ExternalFileMap.resetMap();
-
-                        if(fileDto.isEncrypt()){
-                            this.fileEncryptService.encryptFile(fileDto);
-
-                        }
-
-                        return fileResult;
-                        //return true;
-                    }
-                }
-            }
-        } catch (RuntimeException e) {
-            ExceptionUtils.getStackTrace(e);
-
-            new File(this.baseDir+File.separator + fileDto.getUUIDFileName()).delete();
-
-        } catch (IOException i) {
-            ExceptionUtils.getStackTrace(i);
-        }
-        return false;
-    }*/
 
     @Override
     public synchronized List<FileVO> printFileAll() {
@@ -285,18 +167,6 @@ public class FileUploadServiceImpl implements FileUploadService {
                /* || !FileUtil.validateUploadedFileMimeType(fileDto)*/) {
             throw new FileUploadException();
         }
-    }
-
-    private void processExternalFiles(FileDto fileDto) {
-        ExternalFileMap.forEach(entry -> {
-            OleDto oleDto = OleDto.builder()
-                    .superId(fileDto.getId())
-                    .originalFileName(entry.getKey())
-                    .UUIDFileName(entry.getValue())
-                    .build();
-            this.oleDao.insertOle(oleDto);
-        });
-        ExternalFileMap.resetMap();
     }
 
 
