@@ -97,7 +97,7 @@ public class FileUtil {
 
     public static String removePath(String filePath){
         String fileName = null;
-        int lastSlashIndex = filePath.lastIndexOf(File.separator);
+        int lastSlashIndex = filePath.lastIndexOf("/");
 
 
         if (lastSlashIndex != -1 && lastSlashIndex < filePath.length() - 1) {
@@ -106,6 +106,7 @@ public class FileUtil {
         }
         return fileName;
     }
+
 
     public static String removeFileExtension(String fileName) {
         int lastDotIndex = fileName.lastIndexOf('.');

@@ -9,13 +9,9 @@ import java.util.function.Consumer;
 
 public class ExternalFileMap {
 
-    //@Getter
-   /* private static ConcurrentHashMap<String, String> fileNameMap = new ConcurrentHashMap<>();
-    private static ConcurrentHashMap<String, Integer> fileNameCountMap = new ConcurrentHashMap<>();*/
     @Getter
     private static ThreadLocal<ConcurrentHashMap<String, String>> fileNameMap = ThreadLocal.withInitial(ConcurrentHashMap::new);
     private static ThreadLocal<ConcurrentHashMap<String, Integer>> fileNameCountMap = ThreadLocal.withInitial(ConcurrentHashMap::new);
-    private static StringBuffer stringBuffer = new StringBuffer();
 
     /**
      * 추출할 OLE파일들의 이름을 가져와 UUID로 랜덤이름을 생성하고, MAP에 넣어서 관리합니다.
@@ -24,36 +20,25 @@ public class ExternalFileMap {
      * @return randomName 원본명과 매치된 UUID이름을 반환합니다.
      * */
     public static String addUniqueFileNameMapping(String originalFileName) {
-        // 파일 이름에서 확장자를 추출
+
         String extension = getFileExtension(originalFileName);
         String randomName = UUID.randomUUID()+"."+extension;
 
-        //String randomName = stringBuffer.append(UUID.randomUUID()).append(".").append(extension).toString();
-
-
-        // 해당 확장자에 대한 카운트 가져오기
         Integer count = fileNameCountMap.get().get(originalFileName);
 
-        // 만약 해당 확장자에 대한 카운트가 없다면 1로 초기화
         if (count == null) {
             count = 1;
+
         } else {
-            // 같은 확장자에 대한 카운트가 이미 있으면 +1
             count++;
         }
 
-        // 카운트 업데이트
         fileNameCountMap.get().put(originalFileName, count);
-
-        // 파일 이름 생성
 
         if (count > 1) {
             originalFileName = removeFileExtension(originalFileName) +"_"+ --count + "." + extension;
         }
 
-
-
-        // 맵에 저장하고 반환
         fileNameMap.get().put(originalFileName, randomName);
 
         return randomName;

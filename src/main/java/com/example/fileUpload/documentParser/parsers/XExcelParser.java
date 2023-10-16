@@ -32,8 +32,7 @@ public class XExcelParser extends OleExtractor {
 
         }catch (Exception e){
             catchException(e);
-            System.out.println("에러");
-
+            
         } finally {
             closeResources();
         }

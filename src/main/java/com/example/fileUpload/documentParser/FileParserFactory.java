@@ -17,7 +17,8 @@ import java.util.Arrays;
 public class FileParserFactory {
 
     public OleExtractor createParser(FileDto fileDto) {
-        log.info(Arrays.toString(new Resource[]{fileDto.getFileData().getResource()}));
+
+        System.out.println(fileDto.getFileType());
 
         switch (fileDto.getFileType()) {
 

@@ -52,13 +52,13 @@ public class FileUploadServiceImpl implements FileUploadService {
         try {
             validateFileDto(fileDto);
 
-            generateFolder(fileDto.getFileOlePath());
-
             fileDto.getFileData().transferTo(new File(fileDto.getFileSavePath()));
 
             if (!this.fileDao.saveFile(fileDto)) {
                 throw new FileUploadException();
             }
+
+            generateFolder(fileDto.getFileOlePath());
 
             this.fileProcessor.createOleExtractorHandler(fileDto);
 
@@ -83,7 +83,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
 
 
-    /*public synchronized void fileUpload(FileDto fileDto) {
+/*    public synchronized void fileUpload(FileDto fileDto) {
 
 
         try {
