@@ -23,7 +23,13 @@ public class XWordParser extends OleExtractor {
     public void extractOleFromDocumentFile(FileDto fileDto) throws IOException, OpenXML4JException {
 
         try{
-            callOfficeHandler(fileDto);
+            //callOfficeHandler(fileDto);
+
+            this.fs = new FileInputStream(fileDto.getFileSavePath());
+            this.docx = new XWPFDocument(OPCPackage.open(this.fs));
+
+            for (PackagePart pPart : this.docx.getAllEmbeddedParts())
+                new OleExtractorFactory().createMordernOleExtractor(pPart, fileDto);
 
         }catch (Exception e){
             catchException(e);
@@ -33,14 +39,10 @@ public class XWordParser extends OleExtractor {
         }
     }
 
-    @Override
+/*    @Override
     protected void callOfficeHandler(FileDto fileDto) throws Exception {
-        this.fs = new FileInputStream(fileDto.getFileSavePath());
-        this.docx = new XWPFDocument(OPCPackage.open(this.fs));
 
-        for (PackagePart pPart : this.docx.getAllEmbeddedParts())
-            new OleExtractorFactory().createMordernOleExtractor(pPart, fileDto);
-    }
+    }*/
 
     @Override
     protected void closeResources() {

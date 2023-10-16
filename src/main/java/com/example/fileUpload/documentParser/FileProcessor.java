@@ -18,7 +18,8 @@ public class FileProcessor {
     public void createOleExtractorHandler(FileDto fileDto) {
 
         try {
-            createOleExtractor(fileDto);
+            OleExtractor oleExtractor = this.fileParserFactory.createParser(fileDto);
+            oleExtractor.extractOleFromDocumentFile(fileDto);
 
         } catch (IllegalArgumentException i) {
             catchIllegal(i);
@@ -27,10 +28,7 @@ public class FileProcessor {
             catchException(e);
         }
     }
-    private void createOleExtractor(FileDto fileDto) throws Exception {
-        OleExtractor oleExtractor = this.fileParserFactory.createParser(fileDto);
-        oleExtractor.extractOleFromDocumentFile(fileDto);
-    }
+
     private void catchIllegal(IllegalArgumentException i){
         ExceptionUtils.getStackTrace(i);
         throw new IllegalArgumentException("Unsupported MIME type");

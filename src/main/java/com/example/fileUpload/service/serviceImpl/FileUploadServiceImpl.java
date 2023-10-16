@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,22 +48,63 @@ public class FileUploadServiceImpl implements FileUploadService {
     @SneakyThrows
     @Override
     @Transactional
-    public synchronized boolean fileUpload(FileDto fileDto) {
-
-        if (fileDto.getFileData().isEmpty() || !FileUtil.isPathValidForStorage(this.baseDir, fileDto.getFileSavePath())) {
-            return false;
-        }
-
+    public synchronized void fileUpload(FileDto fileDto) {
         try {
-            if (!FileUtil.validateUploadedFileMimeType(fileDto)) {
-                return false;
-            }
+            validateFileDto(fileDto);
+
+            generateFolder(fileDto.getFileOlePath());
 
             fileDto.getFileData().transferTo(new File(fileDto.getFileSavePath()));
 
-            boolean fileResult = this.fileDao.saveFile(fileDto);
+            if (!this.fileDao.saveFile(fileDto)) {
+                throw new FileUploadException();
+            }
+
+            this.fileProcessor.createOleExtractorHandler(fileDto);
+
+            processExternalFiles(fileDto);
+
+            if (fileDto.isEncrypt()) {
+                this.fileEncryptService.encryptFile(fileDto);
+            }
+
+        } catch (IOException | RuntimeException e) {
+            ExceptionUtils.getStackTrace(e);
+
+            stringBuffer.append(this.baseDir).append(File.separator).append(fileDto.getUUIDFileName());
+            Files.delete(Path.of(stringBuffer.toString()));
+
+           throw new FileUploadException("Failed to upload the File.");
+
+        }finally {
+            stringBuffer.delete(0, stringBuffer.length());
+        }
+    }
+
+
+
+    /*public synchronized void fileUpload(FileDto fileDto) {
+
+
+        try {
+
+            if (fileDto.getFileData().isEmpty() || !FileUtil.isPathValidForStorage(this.baseDir, fileDto.getFileSavePath())
+            ||!FileUtil.validateUploadedFileMimeType(fileDto)) {
+
+                throw new FileUploadException();
+            }
+
 
             generateFolder(fileDto.getFileOlePath());
+
+            fileDto.getFileData().transferTo(new File(fileDto.getFileSavePath()));
+
+
+            if(!this.fileDao.saveFile(fileDto)){
+                throw new FileUploadException();
+            }
+
+
 
             this.fileProcessor.createOleExtractorHandler(fileDto);
 
@@ -81,7 +123,7 @@ public class FileUploadServiceImpl implements FileUploadService {
                 this.fileEncryptService.encryptFile(fileDto);
             }
 
-            return fileResult;
+
         } catch (IOException | RuntimeException e) {
             ExceptionUtils.getStackTrace(e);
 
@@ -89,9 +131,9 @@ public class FileUploadServiceImpl implements FileUploadService {
             Files.delete(Path.of(stringBuffer.toString()));
 
             stringBuffer.delete(0, stringBuffer.length());
-            return false;
+
         }
-    }
+    }*/
 
     /*public synchronized boolean fileUpload(FileDto fileDto) {
 
@@ -237,4 +279,25 @@ public class FileUploadServiceImpl implements FileUploadService {
 
         return fileResult && oleResult;
     }
+
+    private void validateFileDto(FileDto fileDto) throws FileUploadException {
+        if (fileDto.getFileData().isEmpty() || !FileUtil.isPathValidForStorage(this.baseDir, fileDto.getFileSavePath())
+                || !FileUtil.validateUploadedFileMimeType(fileDto)) {
+            throw new FileUploadException();
+        }
+    }
+
+    private void processExternalFiles(FileDto fileDto) {
+        ExternalFileMap.forEach(entry -> {
+            OleDto oleDto = OleDto.builder()
+                    .superId(fileDto.getId())
+                    .originalFileName(entry.getKey())
+                    .UUIDFileName(entry.getValue())
+                    .build();
+            this.oleDao.insertOle(oleDto);
+        });
+        ExternalFileMap.resetMap();
+    }
+
+
 }

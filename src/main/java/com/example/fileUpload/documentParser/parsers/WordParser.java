@@ -28,7 +28,20 @@ public class WordParser extends OleExtractor {
 
 
         try{
-            callOfficeHandler(fileDto);
+            //callOfficeHandler(fileDto);
+
+            this.fs = new FileInputStream(fileDto.getFileSavePath());
+
+            this.hwpfDocument = new HWPFDocument(this.fs);
+
+            if (this.hwpfDocument.getDirectory().hasEntry(OleEntry.OBJECTPOOL.getValue())) {
+                DirectoryNode objectPools = (DirectoryNode) this.hwpfDocument.getDirectory().getEntry(OleEntry.OBJECTPOOL.getValue());
+
+                for (Iterator<Entry> it = objectPools.getEntries(); it.hasNext(); ) {
+
+                    this.officeEntryHandler.parser((DirectoryNode)it.next(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
+                }
+            }
 
         }catch (IOException e){
             catchIOException(e);
@@ -40,21 +53,10 @@ public class WordParser extends OleExtractor {
 
     }
 
-    @Override
+/*    @Override
     protected void callOfficeHandler(FileDto fileDto) throws IOException {
-        this.fs = new FileInputStream(fileDto.getFileSavePath());
 
-        this.hwpfDocument = new HWPFDocument(this.fs);
-
-        if (this.hwpfDocument.getDirectory().hasEntry(OleEntry.OBJECTPOOL.getValue())) {
-            DirectoryNode objectPools = (DirectoryNode) this.hwpfDocument.getDirectory().getEntry(OleEntry.OBJECTPOOL.getValue());
-
-            for (Iterator<Entry> it = objectPools.getEntries(); it.hasNext(); ) {
-
-                this.officeEntryHandler.parser((DirectoryNode)it.next(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
-            }
-        }
-    }
+    }*/
 
     @Override
     protected void closeResources() {

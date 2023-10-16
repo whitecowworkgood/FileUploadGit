@@ -5,7 +5,11 @@ import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
 import com.example.fileUpload.model.File.FileDto;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
+
+import java.io.IOException;
+import java.util.Arrays;
 
 @NoArgsConstructor
 @Slf4j
@@ -13,6 +17,7 @@ import org.springframework.stereotype.Component;
 public class FileParserFactory {
 
     public OleExtractor createParser(FileDto fileDto) {
+        log.info(Arrays.toString(new Resource[]{fileDto.getFileData().getResource()}));
 
         switch (fileDto.getFileType()) {
 

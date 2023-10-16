@@ -25,7 +25,7 @@ public class DirectoryChecker {
         directoryChecker.generateTempFolders();
     }
 
-    public DirectoryChecker(String dir) {
+    private DirectoryChecker(String dir) {
         this.baseDir = dir;
     }
 

@@ -23,25 +23,27 @@ public class XExcelParser extends OleExtractor {
 
 
         try{
-            callOfficeHandler(fileDto);
+           //callOfficeHandler(fileDto);
+            this.fs = new FileInputStream(fileDto.getFileSavePath());
+            this.xlsx = new XSSFWorkbook(OPCPackage.open(this.fs));
+
+            for (PackagePart pPart : this.xlsx.getAllEmbeddedParts())
+                new OleExtractorFactory().createMordernOleExtractor(pPart, fileDto);
 
         }catch (Exception e){
             catchException(e);
+            System.out.println("에러");
 
         } finally {
             closeResources();
         }
     }
 
-    @Override
-    protected void callOfficeHandler(FileDto fileDto) throws Exception {
-        this.fs = new FileInputStream(fileDto.getFileSavePath());
-        this.xlsx = new XSSFWorkbook(OPCPackage.open(this.fs));
+    //@Override
+/*    protected void callOfficeHandler(FileDto fileDto) throws Exception {
 
-        for (PackagePart pPart : this.xlsx.getAllEmbeddedParts())
-            new OleExtractorFactory().createMordernOleExtractor(pPart, fileDto);
 
-    }
+    }*/
 
     @Override
     protected void closeResources() {

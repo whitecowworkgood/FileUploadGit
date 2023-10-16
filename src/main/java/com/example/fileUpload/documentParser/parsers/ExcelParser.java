@@ -25,7 +25,13 @@ public class ExcelParser extends OleExtractor {
     public void extractOleFromDocumentFile(FileDto fileDto) throws IOException {
 
         try{
-            callOfficeHandler(fileDto);
+            //callOfficeHandler(fileDto);
+            this.fs = new FileInputStream(fileDto.getFileSavePath());
+
+            this.hssfWorkbook= new HSSFWorkbook(this.fs);
+
+            for (HSSFObjectData hssfObjectData : this.hssfWorkbook.getAllEmbeddedObjects())
+                this.officeEntryHandler.parser((DirectoryNode) hssfObjectData.getDirectory(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
 
         }catch (Exception e){
             catchException(e);
@@ -35,17 +41,12 @@ public class ExcelParser extends OleExtractor {
         }
     }
 
-    @Override
+/*    @Override
     protected void callOfficeHandler(FileDto fileDto) throws Exception {
-        this.fs = new FileInputStream(fileDto.getFileSavePath());
-
-        this.hssfWorkbook= new HSSFWorkbook(this.fs);
-
-        for (HSSFObjectData hssfObjectData : this.hssfWorkbook.getAllEmbeddedObjects())
-            this.officeEntryHandler.parser((DirectoryNode) hssfObjectData.getDirectory(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
 
 
-    }
+
+    }*/
 
     @Override
     protected void closeResources() {

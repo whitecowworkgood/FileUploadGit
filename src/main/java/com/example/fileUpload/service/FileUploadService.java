@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface FileUploadService {
 
-    boolean  fileUpload(FileDto fileDto);
+    void  fileUpload(FileDto fileDto);
 
     List<FileVO> printFileAll();
 

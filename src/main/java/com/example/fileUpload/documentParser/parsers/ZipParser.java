@@ -14,13 +14,16 @@ public class ZipParser extends OleExtractor {
     private FileInputStream fs = null;
     private ZipArchiveInputStream zais = null;
     private ZipArchiveEntry entry = null;
-    private final Tika tika = new Tika();
+    private Tika tika = new Tika();
 
     @Override
     public void extractOleFromDocumentFile(FileDto fileDto) throws Exception {
 
         try {
-            showZipDocument(fileDto);
+            this.fs = new FileInputStream(fileDto.getFileSavePath());
+            this.zais = new ZipArchiveInputStream(this.fs, "EUC-KR", true);
+
+            showZipDocument();
 
         } catch (IOException e) {
             catchIOException(e);
@@ -29,9 +32,8 @@ public class ZipParser extends OleExtractor {
             closeResources();
         }
     }
-    private void showZipDocument(FileDto fileDto) throws IOException {
-        this.fs = new FileInputStream(fileDto.getFileSavePath());
-        this.zais = new ZipArchiveInputStream(this.fs, "EUC-KR", true);
+    private void showZipDocument() throws IOException {
+
         while((this.entry = this.zais.getNextZipEntry()) != null) {
 
             System.out.println(tika.detect(entry.getName()));
@@ -51,5 +53,7 @@ public class ZipParser extends OleExtractor {
     protected void closeResources() {
         IOUtils.closeQuietly(this.fs);
         IOUtils.closeQuietly(this.zais);
+        entry = null;
+        tika = null;
     }
 }

@@ -15,7 +15,7 @@ public abstract class OleExtractor {
     protected void catchException(Exception e){
         ExceptionUtils.getStackTrace(e);
     }
-    protected void callOfficeHandler(FileDto fileDto) throws Exception{};
+   // protected void callOfficeHandler(FileDto fileDto) throws Exception{};
 
     protected abstract void closeResources();
 }

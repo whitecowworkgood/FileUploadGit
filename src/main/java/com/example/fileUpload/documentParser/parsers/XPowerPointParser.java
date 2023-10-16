@@ -25,7 +25,12 @@ public class XPowerPointParser extends OleExtractor {
 
 
         try{
-            callOfficeHandler(fileDto);
+           // callOfficeHandler(fileDto);
+            this.fs = new FileInputStream(fileDto.getFileSavePath());
+            this.pptx = new XMLSlideShow(OPCPackage.open(this.fs));
+
+            for (PackagePart pPart : this.pptx.getAllEmbeddedParts())
+                new OleExtractorFactory().createMordernOleExtractor(pPart, fileDto);
 
         }catch (Exception e){
             catchException(e);
@@ -35,15 +40,11 @@ public class XPowerPointParser extends OleExtractor {
         }
     }
 
-    @Override
+/*    @Override
     protected void callOfficeHandler(FileDto fileDto) throws Exception {
-        this.fs = new FileInputStream(fileDto.getFileSavePath());
-        this.pptx = new XMLSlideShow(OPCPackage.open(this.fs));
 
-        for (PackagePart pPart : this.pptx.getAllEmbeddedParts())
-            new OleExtractorFactory().createMordernOleExtractor(pPart, fileDto);
 
-    }
+    }*/
 
     @Override
     protected void closeResources() {

@@ -8,6 +8,7 @@ public class PostDeleteMessage {
     private String message;
 
     public PostDeleteMessage() {
-        this.message = "UNPROCESSABLE_ENTITY";
+        this.message = "CREATE";
     }
+
 }
