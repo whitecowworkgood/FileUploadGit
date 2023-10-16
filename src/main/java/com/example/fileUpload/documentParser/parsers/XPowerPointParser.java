@@ -14,6 +14,8 @@ import org.apache.xmlbeans.XmlException;
 import java.io.FileInputStream;
 import java.io.IOException;
 
+import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
+
 @NoArgsConstructor
 public class XPowerPointParser extends OleExtractor {
 
@@ -29,8 +31,14 @@ public class XPowerPointParser extends OleExtractor {
             this.fs = new FileInputStream(fileDto.getFileSavePath());
             this.pptx = new XMLSlideShow(OPCPackage.open(this.fs));
 
-            for (PackagePart pPart : this.pptx.getAllEmbeddedParts())
-                new OleExtractorFactory().createMordernOleExtractor(pPart, fileDto);
+            if(!this.pptx.getAllEmbeddedParts().isEmpty()){
+                generateFolder(fileDto.getFileOlePath());
+
+                for (PackagePart pPart : this.pptx.getAllEmbeddedParts())
+                    new OleExtractorFactory().createModernOleExtractor(pPart, fileDto);
+            }
+
+
 
         }catch (Exception e){
             catchException(e);

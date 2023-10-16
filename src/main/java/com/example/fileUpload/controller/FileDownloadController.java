@@ -16,6 +16,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Controller
@@ -46,7 +50,7 @@ public class FileDownloadController {
     @Operation(summary = "선택 파일 다운로드", description = "파일 id를 통해 파일을 다운로드 합니다.")
     @GetMapping("/file/{userName}/{id}")
     @ResponseBody
-    public ResponseEntity<Resource> downloadFile(@PathVariable("userName") String userName, @PathVariable("id") Long id) {
+    public ResponseEntity<Resource> downloadFile(@PathVariable("userName") String userName, @PathVariable("id") Long id) throws IOException {
 
         fileDownloadService.setParameter(userName, id);
 
@@ -59,8 +63,12 @@ public class FileDownloadController {
 
             fileDownloadService.decreaseCountNum(id);
 
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentDispositionFormData("attachment", new String(fileName.getBytes("UTF-8"), "ISO-8859-1"));
+            headers.setContentLength(resource.contentLength());
+
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"")
+                    .headers(headers)
                     .body(resource);
         }
 

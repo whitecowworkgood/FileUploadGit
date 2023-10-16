@@ -19,7 +19,7 @@ public class PowerPointExtractor extends OleExtractor {
     private FileOutputStream outputStream = null;
     private HSLFSlideShow slideShow = null;
 
-    private void doExtract() {
+    public void doExtract() {
 
         try {
             writePowerPoint();
@@ -53,6 +53,6 @@ public class PowerPointExtractor extends OleExtractor {
     public PowerPointExtractor(PackagePart pPart, FileDto fileDto) {
         super.oleSavePath = fileDto.getFileOlePath();
         this.packagePart = pPart;
-        doExtract();
+        //doExtract();
     }
 }

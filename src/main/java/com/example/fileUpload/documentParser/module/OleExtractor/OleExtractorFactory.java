@@ -9,33 +9,33 @@ import org.apache.poi.openxml4j.opc.PackagePart;
 @NoArgsConstructor
 public class OleExtractorFactory {
 
-    public OleExtractor createMordernOleExtractor(PackagePart pPart, FileDto fileDto) throws Exception {
+    public void createModernOleExtractor(PackagePart pPart, FileDto fileDto) throws Exception {
 
         switch(pPart.getContentType()){
 
             case "application/vnd.ms-excel"->{
-                return new ExcelExtractor(pPart, fileDto);
+                new ExcelExtractor(pPart, fileDto).doExtract();
             }
             case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"->{
-                return new XExcelExtractor(pPart, fileDto);
+                new XExcelExtractor(pPart, fileDto).doExtract();
             }
             case "application/vnd.ms-excel.sheet.macroEnabled.12"->{
-                return new CSVExtractor(pPart, fileDto);
+                new CSVExtractor(pPart, fileDto).doExtract();
             }
             case "application/msword"->{
-                return new WordExtractor(pPart, fileDto);
+                new WordExtractor(pPart, fileDto).doExtract();
             }
             case "application/vnd.openxmlformats-officedocument.wordprocessingml.document"->{
-                return new XWordExtractor(pPart, fileDto);
+                new XWordExtractor(pPart, fileDto).doExtract();
             }
             case "application/vnd.ms-powerpoint"->{
-                return new PowerPointExtractor(pPart, fileDto);
+                new PowerPointExtractor(pPart, fileDto).doExtract();
             }
             case "application/vnd.openxmlformats-officedocument.presentationml.presentation"->{
-                return new XPowerPointExtractor(pPart, fileDto);
+                new XPowerPointExtractor(pPart, fileDto).doExtract();
             }
             default -> {
-                return new OctExtractor(pPart, fileDto);
+                new OctExtractor(pPart, fileDto).doExtract();
                 //return null;
             }
         }

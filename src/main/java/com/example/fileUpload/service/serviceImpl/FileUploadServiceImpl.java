@@ -16,6 +16,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.tika.Tika;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     private final OleDao oleDao; //mybatis
     private final FileProcessor fileProcessor;
     private final FileEncryptService fileEncryptService;
+
     private final StringBuffer stringBuffer = new StringBuffer();
 
     @Value("${Save-Directory}")
@@ -50,6 +52,8 @@ public class FileUploadServiceImpl implements FileUploadService {
     @Transactional
     public synchronized void fileUpload(FileDto fileDto) {
         try {
+
+            //코드의 순서와 로직을 조금 바꿔서 적절하게 재구축 해보기
             validateFileDto(fileDto);
 
             fileDto.getFileData().transferTo(new File(fileDto.getFileSavePath()));
@@ -58,15 +62,11 @@ public class FileUploadServiceImpl implements FileUploadService {
                 throw new FileUploadException();
             }
 
-            generateFolder(fileDto.getFileOlePath());
-
             this.fileProcessor.createOleExtractorHandler(fileDto);
 
             processExternalFiles(fileDto);
 
-            if (fileDto.isEncrypt()) {
-                this.fileEncryptService.encryptFile(fileDto);
-            }
+            this.fileEncryptService.encryptFile(fileDto);
 
         } catch (IOException | RuntimeException e) {
             ExceptionUtils.getStackTrace(e);
@@ -282,7 +282,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     private void validateFileDto(FileDto fileDto) throws FileUploadException {
         if (fileDto.getFileData().isEmpty() || !FileUtil.isPathValidForStorage(this.baseDir, fileDto.getFileSavePath())
-                || !FileUtil.validateUploadedFileMimeType(fileDto)) {
+               /* || !FileUtil.validateUploadedFileMimeType(fileDto)*/) {
             throw new FileUploadException();
         }
     }

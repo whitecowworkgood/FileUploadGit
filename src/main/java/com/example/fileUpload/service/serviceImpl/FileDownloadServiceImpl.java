@@ -64,8 +64,6 @@ public class FileDownloadServiceImpl implements FileDownloadService {
     @Override
     public Resource downloadFile(Long id){
 
-        String downloadPath = this.baseDir+ File.separator+"download"+File.separator+this.userName+File.separator;
-
         try {
             stringBuffer.append(this.baseDir)
                     .append(File.separator)

@@ -13,6 +13,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
 
+import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
+
 
 @NoArgsConstructor
 public class PowerPointParser extends OleExtractor {
@@ -29,16 +31,22 @@ public class PowerPointParser extends OleExtractor {
             this.fs = new FileInputStream(fileDto.getFileSavePath());
             this.hslfSlideShow = new HSLFSlideShow(this.fs);
 
-            List<HSLFObjectData> objects = List.of(this.hslfSlideShow.getEmbeddedObjects());
-            for (HSLFObjectData object : objects) {
+            if(!List.of(this.hslfSlideShow.getEmbeddedObjects()).isEmpty()){
+                generateFolder(fileDto.getFileOlePath());
 
-                IOUtils.closeQuietly(this.poifs);
+                List<HSLFObjectData> objects = List.of(this.hslfSlideShow.getEmbeddedObjects());
+                for (HSLFObjectData object : objects) {
 
-                this.poifs = new POIFSFileSystem(object.getInputStream());
+                    IOUtils.closeQuietly(this.poifs);
 
-                this.officeEntryHandler.parser(this.poifs.getRoot(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
+                    this.poifs = new POIFSFileSystem(object.getInputStream());
 
+                    this.officeEntryHandler.parser(this.poifs.getRoot(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
+
+                }
             }
+
+
 
         }catch (IOException e){
             catchIOException(e);

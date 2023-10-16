@@ -14,13 +14,12 @@ import static com.example.fileUpload.util.FileUtil.removePath;
 
 public class WordExtractor extends OleExtractor {
 
-    //private final String oleSavePath;
     private final PackagePart packagePart;
 
     private FileOutputStream outputStream = null;
     private HWPFDocument document = null;
 
-    private void doExtract(){
+    public void doExtract(){
 
         try {
             writeDocument();
@@ -54,6 +53,6 @@ public class WordExtractor extends OleExtractor {
     public WordExtractor(PackagePart pPart, FileDto fileDto) {
         super.oleSavePath = fileDto.getFileOlePath();
         this.packagePart = pPart;
-        doExtract();
+        //doExtract();
     }
 }

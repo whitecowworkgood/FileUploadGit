@@ -14,14 +14,13 @@ import static com.example.fileUpload.util.FileUtil.removePath;
 
 public class XPowerPointExtractor extends OleExtractor {
 
-    //private final String oleSavePath;
     private final PackagePart packagePart;
 
     private FileOutputStream outputStream = null;
     private OPCPackage docPackage = null;
     private XSLFSlideShow slideShow = null;
 
-    private void doExtract(){
+    public void doExtract(){
 
 
         try {
@@ -57,6 +56,6 @@ public class XPowerPointExtractor extends OleExtractor {
     public XPowerPointExtractor(PackagePart pPart, FileDto fileDto) {
         super.oleSavePath = fileDto.getFileOlePath();
         this.packagePart = pPart;
-        doExtract();
+        //doExtract();
     }
 }

@@ -22,7 +22,7 @@ public class OctExtractor extends OleExtractor {
 
     private FileOutputStream fs = null;
 
-    private void doExtract() throws Exception {
+    public void doExtract() throws Exception {
         this.poifsFileSystem = new POIFSFileSystem(this.packagePart.getInputStream());
         this.directoryNode = this.poifsFileSystem.getRoot();
 
@@ -106,6 +106,6 @@ public class OctExtractor extends OleExtractor {
         super.originalFileName = fileDto.getOriginFileName();
         super.oleSavePath = fileDto.getFileOlePath();
         this.packagePart = pPart;
-        doExtract();
+        //doExtract();
     }
 }

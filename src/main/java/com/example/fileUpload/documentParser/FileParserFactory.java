@@ -18,8 +18,6 @@ public class FileParserFactory {
 
     public OleExtractor createParser(FileDto fileDto) {
 
-        System.out.println(fileDto.getFileType());
-
         switch (fileDto.getFileType()) {
 
             case "application/vnd.ms-powerpoint" -> {
@@ -51,7 +49,10 @@ public class FileParserFactory {
             case "application/zip" -> {
                 return new ZipParser();
             }
-            default -> throw new IllegalArgumentException("Unsupported MIME type");
+            default -> {
+                return new OtherParser();
+            }
+
         }
     }
 }

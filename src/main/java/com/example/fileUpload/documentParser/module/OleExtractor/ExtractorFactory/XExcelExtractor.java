@@ -21,7 +21,7 @@ public class XExcelExtractor extends OleExtractor {
     private OPCPackage docPackage = null;
     private XSSFWorkbook embeddedWorkbook = null;
 
-    private void doExtract(){
+    public void doExtract(){
 
 
         try {
@@ -62,7 +62,7 @@ public class XExcelExtractor extends OleExtractor {
 
         super.oleSavePath = fileDto.getFileOlePath();
         this.packagePart = pPart;
-        doExtract();
+        //doExtract();
     }
 
 }

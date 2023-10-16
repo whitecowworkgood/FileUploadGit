@@ -19,7 +19,7 @@ import java.nio.charset.Charset;
 import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
 
 public class CSVExtractor extends OleExtractor {
-    //private final String oleSavePath;
+
     private final PackagePart packagePart;
 
     private OPCPackage docPackage = null;
@@ -27,7 +27,7 @@ public class CSVExtractor extends OleExtractor {
     private BufferedWriter csvWriter = null;
     private Sheet sheet = null;
 
-    private void doExtract(){
+    public void doExtract(){
 
         try {
             openCSV();
@@ -57,7 +57,7 @@ public class CSVExtractor extends OleExtractor {
 
         this.csvWriter = new BufferedWriter(new FileWriter(super.stringBuffer.toString(), Charset.forName("EUC-KR")));
 
-        writeCSVFile();
+        this.writeCSVFile();
     }
     private void writeCSVFile() throws IOException {
         // 각 행을 반복하여 CSV로 쓰기
@@ -94,6 +94,6 @@ public class CSVExtractor extends OleExtractor {
         super.oleSavePath = fileDto.getFileOlePath();
         this.packagePart = pPart;
 
-        doExtract();
+        //doExtract();
     }
 }

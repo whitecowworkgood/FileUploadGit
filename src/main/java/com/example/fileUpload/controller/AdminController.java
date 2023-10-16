@@ -1,6 +1,7 @@
 package com.example.fileUpload.controller;
 
 import com.example.fileUpload.message.GetMessage;
+import com.example.fileUpload.message.PostDeleteMessage;
 import com.example.fileUpload.model.File.FileVO;
 
 import com.example.fileUpload.model.Ole.OleVO;
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -62,16 +64,28 @@ public class AdminController {
     @Operation(summary = "파일의 다운로드를 허가", description = "파일의 다운로드를 허가합니다..")
     @PutMapping("/accept")
     @ResponseBody
-    public void acceptFile(@RequestParam("id")  Long id){
-        this.adminService.acceptFile(id);
+    public ResponseEntity<PostDeleteMessage> acceptFile(@RequestParam("id")  Long id){
 
-        if(fileUploadService.printFileOne(id).isEncrypt()){
-            this.fileEncryptService.decryptFile(id);
+       PostDeleteMessage postDeleteMessage = new PostDeleteMessage();
 
-        }else{
-            this.fileEncryptService.normalFileDownload(id);
+
+        try{
+            this.adminService.acceptFile(id);
+
+            if(fileUploadService.printFileOne(id).isEncrypt()){
+                this.fileEncryptService.decryptFile(id);
+
+            }else{
+                this.fileEncryptService.normalFileDownload(id);
+            }
+            postDeleteMessage.setMessage("Change Completed");
+
+        }catch (NullPointerException e){
+            ExceptionUtils.getStackTrace(e);
+            postDeleteMessage.setMessage("Not Found");
         }
 
+        return ResponseEntity.status(HttpStatus.OK).body(postDeleteMessage);
     }
 
 

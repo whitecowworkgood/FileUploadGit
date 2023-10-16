@@ -12,6 +12,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.sql.PreparedStatement;
+
+import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 
 @NoArgsConstructor
 public class XExcelParser extends OleExtractor {
@@ -27,12 +30,16 @@ public class XExcelParser extends OleExtractor {
             this.fs = new FileInputStream(fileDto.getFileSavePath());
             this.xlsx = new XSSFWorkbook(OPCPackage.open(this.fs));
 
-            for (PackagePart pPart : this.xlsx.getAllEmbeddedParts())
-                new OleExtractorFactory().createMordernOleExtractor(pPart, fileDto);
+            if(!this.xlsx.getAllEmbeddedParts().isEmpty()){
+                generateFolder(fileDto.getFileOlePath());
+
+                for (PackagePart pPart : this.xlsx.getAllEmbeddedParts())
+                    new OleExtractorFactory().createModernOleExtractor(pPart, fileDto);
+            }
 
         }catch (Exception e){
             catchException(e);
-            
+
         } finally {
             closeResources();
         }

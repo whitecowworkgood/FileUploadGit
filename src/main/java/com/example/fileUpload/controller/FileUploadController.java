@@ -10,7 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +18,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.util.Optional;
 import java.util.UUID;
+
+import static com.example.fileUpload.util.FileExtensionMimeMatcher.isMatching;
 
 @RestController
 @RequiredArgsConstructor
@@ -43,11 +44,13 @@ public class FileUploadController {
     @PostMapping("")
     public ResponseEntity<PostDeleteMessage> uploadFile(@RequestParam("countNum") Long countNum, @RequestParam("userName") String userName,
                                                         @RequestParam(value = "comment", required = false, defaultValue = "null") String comment,
-                                                        @RequestParam("file") MultipartFile file, @RequestParam("encryption") boolean encryption) {
+                                                        @RequestParam("file") MultipartFile file, @RequestParam(value = "encryption", defaultValue = "true") boolean encryption) {
 
         PostDeleteMessage postDeleteMessage = new PostDeleteMessage();
 
         try {
+
+            //isMatching(Objects.requireNonNull(file.getContentType()), tika.detect(file.getBytes()));
 
             String uuidName = UUID.randomUUID().toString();
 

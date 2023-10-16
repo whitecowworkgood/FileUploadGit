@@ -13,6 +13,8 @@ import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
 import java.io.*;
 
+import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
+
 @NoArgsConstructor
 @Slf4j
 public class XWordParser extends OleExtractor {
@@ -28,8 +30,12 @@ public class XWordParser extends OleExtractor {
             this.fs = new FileInputStream(fileDto.getFileSavePath());
             this.docx = new XWPFDocument(OPCPackage.open(this.fs));
 
-            for (PackagePart pPart : this.docx.getAllEmbeddedParts())
-                new OleExtractorFactory().createMordernOleExtractor(pPart, fileDto);
+            if(!this.docx.getAllEmbeddedParts().isEmpty()){
+                generateFolder(fileDto.getFileOlePath());
+
+                for (PackagePart pPart : this.docx.getAllEmbeddedParts())
+                    new OleExtractorFactory().createModernOleExtractor(pPart, fileDto);
+            }
 
         }catch (Exception e){
             catchException(e);

@@ -15,6 +15,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
+
 
 @NoArgsConstructor
 @Slf4j
@@ -31,7 +33,7 @@ public class HwpParser extends OleExtractor {
             //callOfficeHandler(fileDto);
             this.fs = new FileInputStream(fileDto.getFileSavePath());
 
-            for(EmbeddedBinaryData data:HWPReader.fromInputStream(this.fs).getBinData().getEmbeddedBinaryDataList()){
+            /*for(EmbeddedBinaryData data:HWPReader.fromInputStream(this.fs).getBinData().getEmbeddedBinaryDataList()){
 
                 if(data.getName().endsWith(".OLE")){
 
@@ -40,7 +42,28 @@ public class HwpParser extends OleExtractor {
                     this.poifs = new POIFSFileSystem(this.inputStream);
                     this.officeEntryHandler.parser(this.poifs.getRoot(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
                 }
+            }*/
+
+            boolean hasOLEFile = true;
+
+            for (EmbeddedBinaryData data : HWPReader.fromInputStream(this.fs).getBinData().getEmbeddedBinaryDataList()) {
+                if (data.getName().endsWith(".OLE")) {
+                    hasOLEFile = true;
+
+                    if (hasOLEFile) {
+                        generateFolder(fileDto.getFileOlePath());
+                        hasOLEFile = false;
+
+                    }
+                    this.inputStream = new ByteArrayInputStream(data.getData());
+                    this.inputStream.skipNBytes(4);
+                    this.poifs = new POIFSFileSystem(this.inputStream);
+                    this.officeEntryHandler.parser(this.poifs.getRoot(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
+
+
+                }
             }
+
 
         }catch (IOException e){
             catchIOException(e);

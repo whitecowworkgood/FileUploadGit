@@ -16,6 +16,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Iterator;
 
+import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
+
 @Slf4j
 @NoArgsConstructor
 public class WordParser extends OleExtractor {
@@ -35,6 +37,9 @@ public class WordParser extends OleExtractor {
             this.hwpfDocument = new HWPFDocument(this.fs);
 
             if (this.hwpfDocument.getDirectory().hasEntry(OleEntry.OBJECTPOOL.getValue())) {
+
+                generateFolder(fileDto.getFileOlePath());
+
                 DirectoryNode objectPools = (DirectoryNode) this.hwpfDocument.getDirectory().getEntry(OleEntry.OBJECTPOOL.getValue());
 
                 for (Iterator<Entry> it = objectPools.getEntries(); it.hasNext(); ) {
