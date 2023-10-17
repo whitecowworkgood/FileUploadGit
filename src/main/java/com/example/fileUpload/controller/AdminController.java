@@ -6,6 +6,7 @@ import com.example.fileUpload.model.File.FileVO;
 
 import com.example.fileUpload.model.Ole.OleVO;
 import com.example.fileUpload.service.AdminService;
+import com.example.fileUpload.service.FileDownloadService;
 import com.example.fileUpload.service.FileEncryptService;
 import com.example.fileUpload.service.FileUploadService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -30,6 +31,7 @@ public class AdminController {
     private final AdminService adminService;
     private final FileUploadService fileUploadService;
     private final FileEncryptService fileEncryptService;
+    private final FileDownloadService fileDownloadService;
 
     @Operation(summary = "허가 대기 중인 파일 출력", description = "허가 대기 중인 파일 출력합니다.")
     @GetMapping("/files")
@@ -76,7 +78,7 @@ public class AdminController {
                 this.fileEncryptService.decryptFile(id);
 
             }else{
-                this.fileEncryptService.normalFileDownload(id);
+                this.fileDownloadService.copyFile(id);
             }
             postDeleteMessage.setMessage("Change Completed");
 

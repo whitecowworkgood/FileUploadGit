@@ -25,7 +25,6 @@ public class XWordParser extends OleExtractor {
     public void extractOleFromDocumentFile(FileDto fileDto) throws IOException, OpenXML4JException {
 
         try{
-            //callOfficeHandler(fileDto);
 
             this.fs = new FileInputStream(fileDto.getFileSavePath());
             this.docx = new XWPFDocument(OPCPackage.open(this.fs));
@@ -44,11 +43,6 @@ public class XWordParser extends OleExtractor {
             closeResources();
         }
     }
-
-/*    @Override
-    protected void callOfficeHandler(FileDto fileDto) throws Exception {
-
-    }*/
 
     @Override
     protected void closeResources() {

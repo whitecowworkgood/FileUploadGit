@@ -2,7 +2,7 @@ package com.example.fileUpload.documentParser.module.OleExtractor.ExtractorFacto
 
 import com.example.fileUpload.documentParser.module.OleExtractor.abstracts.OleExtractor;
 import com.example.fileUpload.model.File.FileDto;
-import com.example.fileUpload.util.FileType;
+import com.example.fileUpload.util.Enum.FileType;
 import com.example.fileUpload.util.OleEntry;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.openxml4j.opc.PackagePart;

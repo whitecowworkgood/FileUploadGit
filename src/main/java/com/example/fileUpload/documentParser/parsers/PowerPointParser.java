@@ -27,7 +27,7 @@ public class PowerPointParser extends OleExtractor {
     public void extractOleFromDocumentFile(FileDto fileDto) throws IOException {
 
         try{
-            //callOfficeHandler(fileDto);
+
             this.fs = new FileInputStream(fileDto.getFileSavePath());
             this.hslfSlideShow = new HSLFSlideShow(this.fs);
 
@@ -56,12 +56,6 @@ public class PowerPointParser extends OleExtractor {
         }
 
     }
-
-/*    @Override
-    protected void callOfficeHandler(FileDto fileDto) throws IOException {
-
-
-    }*/
 
     @Override
     protected void closeResources() {

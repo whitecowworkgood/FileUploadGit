@@ -26,7 +26,7 @@ public class XExcelParser extends OleExtractor {
 
 
         try{
-           //callOfficeHandler(fileDto);
+
             this.fs = new FileInputStream(fileDto.getFileSavePath());
             this.xlsx = new XSSFWorkbook(OPCPackage.open(this.fs));
 
@@ -44,12 +44,6 @@ public class XExcelParser extends OleExtractor {
             closeResources();
         }
     }
-
-    //@Override
-/*    protected void callOfficeHandler(FileDto fileDto) throws Exception {
-
-
-    }*/
 
     @Override
     protected void closeResources() {

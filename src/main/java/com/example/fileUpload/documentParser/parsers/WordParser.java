@@ -30,10 +30,8 @@ public class WordParser extends OleExtractor {
 
 
         try{
-            //callOfficeHandler(fileDto);
 
             this.fs = new FileInputStream(fileDto.getFileSavePath());
-
             this.hwpfDocument = new HWPFDocument(this.fs);
 
             if (this.hwpfDocument.getDirectory().hasEntry(OleEntry.OBJECTPOOL.getValue())) {
@@ -57,11 +55,6 @@ public class WordParser extends OleExtractor {
         }
 
     }
-
-/*    @Override
-    protected void callOfficeHandler(FileDto fileDto) throws IOException {
-
-    }*/
 
     @Override
     protected void closeResources() {

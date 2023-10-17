@@ -27,7 +27,7 @@ public class XPowerPointParser extends OleExtractor {
 
 
         try{
-           // callOfficeHandler(fileDto);
+
             this.fs = new FileInputStream(fileDto.getFileSavePath());
             this.pptx = new XMLSlideShow(OPCPackage.open(this.fs));
 
@@ -47,12 +47,6 @@ public class XPowerPointParser extends OleExtractor {
             closeResources();
         }
     }
-
-/*    @Override
-    protected void callOfficeHandler(FileDto fileDto) throws Exception {
-
-
-    }*/
 
     @Override
     protected void closeResources() {

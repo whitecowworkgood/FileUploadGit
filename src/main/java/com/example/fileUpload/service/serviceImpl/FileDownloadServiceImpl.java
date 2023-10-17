@@ -15,10 +15,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
+
+import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 
 @Service
 @Slf4j
@@ -65,15 +69,15 @@ public class FileDownloadServiceImpl implements FileDownloadService {
     public Resource downloadFile(Long id){
 
         try {
-            stringBuffer.append(this.baseDir)
+            this.stringBuffer.append(this.baseDir)
                     .append(File.separator)
                     .append("download")
                     .append(File.separator)
                     .append(this.userName)
                     .append(File.separator)
-                    .append(fileDao.printFileInfo(this.id, this.userName).getUUIDFileName());
+                    .append(this.fileDao.printFileInfo(this.id, this.userName).getUUIDFileName());
 
-            this.fileStorageLocation = Path.of(stringBuffer.toString());
+            this.fileStorageLocation = Path.of(this.stringBuffer.toString());
             this.fileResource = new UrlResource(this.fileStorageLocation.toUri());
 
         } catch (MalformedURLException | NullPointerException e) {
@@ -81,7 +85,7 @@ public class FileDownloadServiceImpl implements FileDownloadService {
 
         }
         finally {
-            stringBuffer.delete(0, stringBuffer.length());
+            this.stringBuffer.delete(0, this.stringBuffer.length());
         }
 
         return this.fileResource;
@@ -101,5 +105,37 @@ public class FileDownloadServiceImpl implements FileDownloadService {
     @Override
     public void decreaseCountNum(Long id) {
         this.fileDao.decreaseCountNum(id);
+    }
+
+    @Override
+    public void copyFile(Long id) {
+
+        String baseDownloadPath = this.stringBuffer.append(this.baseDir).append(File.separator)
+                .append("download").append(File.separator).append(this.fileDao.printFileOne(id).getUserName()).toString();
+
+        this.stringBuffer.delete(0, this.stringBuffer.length());
+
+        generateFolder(baseDownloadPath);
+
+
+        String srcPath = stringBuffer.append(this.baseDir)
+                .append(File.separator)
+                .append(this.fileDao.printFileOne(id).getUUIDFileName()).toString();
+        this.stringBuffer.delete(0, this.stringBuffer.length());
+
+        String destPath = this.stringBuffer.append(baseDownloadPath)
+                .append(File.separator)
+                .append(this.fileDao.printFileOne(id).getUUIDFileName())
+                .toString();
+        this.stringBuffer.delete(0, this.stringBuffer.length());
+
+        try{
+            Files.copy(Path.of(srcPath), Path.of(destPath));
+
+        }catch (IOException e){
+            ExceptionUtils.getStackTrace(e);
+
+        }
+
     }
 }

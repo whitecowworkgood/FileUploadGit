@@ -4,6 +4,7 @@ import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.repository.EncryptDao;
 import com.example.fileUpload.repository.FileDao;
 import com.example.fileUpload.service.FileEncryptService;
+import com.example.fileUpload.util.Encrypt.AES;
 import com.example.fileUpload.util.Encrypt.RSA;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -39,9 +40,6 @@ public class FileEncryptServiceImpl implements FileEncryptService {
     private final StringBuffer stringBuffer = new StringBuffer();
 
     private static final int ENCRYPTION_BUFFER_SIZE = 1024;
-    private static final int AES_SIZE = 32;
-    private static final int IV_SIZE = 16;
-
 
     private static final int READ_OPTION_SIZE = 516;
     private static final int READ_ENCRYPT_IV_SIZE = 256;
@@ -76,7 +74,7 @@ public class FileEncryptServiceImpl implements FileEncryptService {
 
         this.stringKeypair = this.rsa.createRSAKeyPair();
 
-        storedRSAKeyPair();
+        this.storedRSAKeyPair();
 
         this.rsa.freeResource();
     }
@@ -97,7 +95,7 @@ public class FileEncryptServiceImpl implements FileEncryptService {
     @Override
     public void encryptFile(FileDto fileDto) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException, IOException {
 
-        generateAESKey();
+        setEncryptKeys();
 
         this.cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         this.cipher.init(Cipher.ENCRYPT_MODE, fileEncryptKey, ivSpec);
@@ -302,47 +300,27 @@ public class FileEncryptServiceImpl implements FileEncryptService {
     }
 
 
-    private void generateAESKey() throws NoSuchAlgorithmException {
+    /*private void generateAESKey() throws NoSuchAlgorithmException {
         SecureRandom secureRandom = SecureRandom.getInstanceStrong();
         byte[] keyData = new byte[AES_SIZE]; // 256비트 키
         secureRandom.nextBytes(keyData);
         this.fileEncryptKey = new SecretKeySpec(keyData, "AES");
 
+
+
+    }
+
+    private void generateIV() throws NoSuchAlgorithmException {
+        SecureRandom secureRandom = SecureRandom.getInstanceStrong();
         byte[] ivBytes = new byte[IV_SIZE];
         secureRandom.nextBytes(ivBytes);
         this.ivSpec = new IvParameterSpec(ivBytes);
+    }*/
 
+    private void setEncryptKeys() throws NoSuchAlgorithmException {
+        this.fileEncryptKey = new AES().generateAESKey();
+        this.ivSpec = new AES().generateIV();
     }
 
-    @Override
-    public void normalFileDownload(Long id) {
 
-        String baseDownloadPath = this.stringBuffer.append(this.baseDir).append(File.separator)
-                .append("download").append(File.separator).append(this.fileDao.printFileOne(id).getUserName()).toString();
-
-        this.stringBuffer.delete(0, this.stringBuffer.length());
-
-        generateFolder(baseDownloadPath);
-
-
-        String srcPath = stringBuffer.append(this.baseDir)
-                .append(File.separator)
-                .append(this.fileDao.printFileOne(id).getUUIDFileName()).toString();
-        this.stringBuffer.delete(0, this.stringBuffer.length());
-
-        String destPath = this.stringBuffer.append(baseDownloadPath)
-                .append(File.separator)
-                .append(this.fileDao.printFileOne(id).getUUIDFileName())
-                .toString();
-        this.stringBuffer.delete(0, this.stringBuffer.length());
-
-        try{
-            Files.copy(Path.of(srcPath), Path.of(destPath));
-
-        }catch (IOException e){
-            ExceptionUtils.getStackTrace(e);
-
-        }
-
-    }
 }

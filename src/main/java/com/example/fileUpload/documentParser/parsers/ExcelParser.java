@@ -49,12 +49,6 @@ public class ExcelParser extends OleExtractor {
         }
     }
 
-/*    @Override
-    protected void callOfficeHandler(FileDto fileDto) throws Exception {
-
-
-
-    }*/
 
     @Override
     protected void closeResources() {

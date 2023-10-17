@@ -1,6 +1,6 @@
 package com.example.fileUpload.documentParser.module;
 
-import com.example.fileUpload.util.FileType;
+import com.example.fileUpload.util.Enum.FileType;
 import com.example.fileUpload.util.OleEntry;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

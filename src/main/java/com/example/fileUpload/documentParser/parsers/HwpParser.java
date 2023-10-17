@@ -30,29 +30,16 @@ public class HwpParser extends OleExtractor {
     public void extractOleFromDocumentFile(FileDto fileDto) throws Exception {
 
         try{
-            //callOfficeHandler(fileDto);
             this.fs = new FileInputStream(fileDto.getFileSavePath());
 
-            /*for(EmbeddedBinaryData data:HWPReader.fromInputStream(this.fs).getBinData().getEmbeddedBinaryDataList()){
-
-                if(data.getName().endsWith(".OLE")){
-
-                    this.inputStream = new ByteArrayInputStream(data.getData());
-                    this.inputStream.skipNBytes(4);
-                    this.poifs = new POIFSFileSystem(this.inputStream);
-                    this.officeEntryHandler.parser(this.poifs.getRoot(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
-                }
-            }*/
-
-            boolean hasOLEFile = true;
+            boolean hasOLEFile = false;
 
             for (EmbeddedBinaryData data : HWPReader.fromInputStream(this.fs).getBinData().getEmbeddedBinaryDataList()) {
                 if (data.getName().endsWith(".OLE")) {
-                    hasOLEFile = true;
 
-                    if (hasOLEFile) {
+                    if (!hasOLEFile) {
                         generateFolder(fileDto.getFileOlePath());
-                        hasOLEFile = false;
+                        hasOLEFile = true;
 
                     }
                     this.inputStream = new ByteArrayInputStream(data.getData());
@@ -73,10 +60,6 @@ public class HwpParser extends OleExtractor {
 
     }
 
-/*    @Override
-    protected void callOfficeHandler(FileDto fileDto) throws Exception {
-
-    }*/
 
     @Override
     protected void closeResources() {
