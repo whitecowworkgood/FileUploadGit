@@ -1,11 +1,7 @@
 package com.example.fileUpload.service;
 
-import com.example.fileUpload.model.members.Member;
-
-import java.util.Optional;
+import com.example.fileUpload.model.TokenInfo;
 
 public interface MemberService {
-    boolean signup(Member member);
-    Optional<Member> getUserWithAuthorities(String username);
-    Optional<Member> getMyUserWithAuthorities();
+    TokenInfo login(String memberAccount, String password);
 }

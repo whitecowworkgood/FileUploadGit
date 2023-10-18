@@ -1,23 +1,24 @@
 package com.example.fileUpload.Mybatis;
 
-import com.example.fileUpload.model.members.Member;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Options;
+import com.example.fileUpload.model.User.MemberDto;
+import org.apache.ibatis.annotations.Many;
+import org.apache.ibatis.annotations.Result;
+import org.apache.ibatis.annotations.Results;
 import org.apache.ibatis.annotations.Select;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface MemberMapperAnno {
 
-    @Insert("INSERT INTO member (username, password, nickname, email, real_name, roles, activated) " +
-            "VALUES (#{username}, #{password}, #{nickname}, #{email}, #{realName}, #{roles}, #{activated})")
-    @Options(useGeneratedKeys = true, keyProperty = "id")
-    boolean insertMemberInfo(Member memberInfo);
+    @Select("SELECT member_account, password FROM members WHERE member_account = #{memberId}")
+    @Results({
+            @Result(property = "memberAccount", column = "member_account"),
+            @Result(property = "password", column = "password"),
+            @Result(property = "role", column = "member_account", javaType = List.class, many = @Many(select = "getRolesByMemberId"))
+    })
+    Optional<MemberDto> findByMemberAccount(String memberAccount);
 
-
-    @Select("SELECT id, username, password, nickname, email, real_name, roles, activated " +
-            "FROM member " +
-            "WHERE username = #{username}")
-    Optional<Member> findOneWithAuthoritiesByUsername(String username);
-
+    @Select("SELECT role FROM member_roles WHERE member_account = #{memberAccount}")
+    List<String> getRolesByMemberId(String memberAccount);
 }

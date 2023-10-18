@@ -148,4 +148,6 @@
     //다운로드 카운트가 전부 소비되면, 파일 삭제 기능 추가하기
 
     //https://taehoung0102.tistory.com/297 - 참고하기
+    //https://velog.io/@jun-k0/JWT-%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-JWT-%EA%B8%B0%EB%B3%B8-%EC%84%A4%EC%A0%95
+    //**https://gksdudrb922.tistory.com/217**
 

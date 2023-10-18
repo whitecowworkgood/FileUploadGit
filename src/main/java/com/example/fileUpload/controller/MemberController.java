@@ -1,36 +1,30 @@
 package com.example.fileUpload.controller;
 
-import com.example.fileUpload.model.members.Member;
+import com.example.fileUpload.model.TokenInfo;
+import com.example.fileUpload.model.User.LoginDto;
 import com.example.fileUpload.service.MemberService;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.*;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
+@Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api")
+@RequestMapping("/member")
 public class MemberController {
+
     private final MemberService memberService;
 
+    @PostMapping("/login")
+    public TokenInfo login(@RequestBody LoginDto loginDto){
+        String memberAccount = loginDto.getUserAccount();
+        String password = loginDto.getPassword();
 
-    @PostMapping("/signup")
-    public ResponseEntity<Boolean> signup(
-            @Valid @RequestBody Member member
-    ) {
-        return ResponseEntity.ok(memberService.signup(member));
-    }
+        TokenInfo tokenInfo = memberService.login(memberAccount, password);
 
-    @GetMapping("/user")
-    @PreAuthorize("hasAnyRole('USER','ADMIN')")
-    public ResponseEntity<Member> getMyUserInfo() {
-        return ResponseEntity.ok(memberService.getMyUserWithAuthorities().get());
-    }
-
-    @GetMapping("/user/{username}")
-    @PreAuthorize("hasAnyRole('ADMIN')")
-    public ResponseEntity<Member> getUserInfo(@PathVariable String username) {
-        return ResponseEntity.ok(memberService.getUserWithAuthorities(username).get());
+        return tokenInfo;
     }
 }

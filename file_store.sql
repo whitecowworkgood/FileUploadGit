@@ -39,18 +39,23 @@ CREATE TABLE IF NOT EXISTS `file_entity` (
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
--- 테이블 file_store.member 구조 내보내기
-CREATE TABLE IF NOT EXISTS `member` (
+-- 테이블 file_store.members 구조 내보내기
+CREATE TABLE IF NOT EXISTS `members` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `username` varchar(12) NOT NULL,
-  `password` varchar(1020) NOT NULL,
-  `nickname` varchar(12) NOT NULL,
-  `email` varchar(30) NOT NULL,
-  `real_name` varchar(1020) NOT NULL,
-  `roles` varchar(255) NOT NULL,
-  `activated` tinyint(1) NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `member_account` varchar(255) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `member_id` (`member_account`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 내보낼 데이터가 선택되어 있지 않습니다.
+
+-- 테이블 file_store.member_roles 구조 내보내기
+CREATE TABLE IF NOT EXISTS `member_roles` (
+  `member_account` varchar(255) NOT NULL,
+  `role` varchar(255) NOT NULL,
+  PRIMARY KEY (`member_account`,`role`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
@@ -71,7 +76,7 @@ CREATE TABLE IF NOT EXISTS `rsa_keys` (
   `public_key` text NOT NULL,
   `private_key` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=59 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=182 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
