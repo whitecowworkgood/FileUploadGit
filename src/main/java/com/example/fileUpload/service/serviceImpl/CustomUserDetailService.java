@@ -1,40 +1,50 @@
 package com.example.fileUpload.service.serviceImpl;
 
-import com.example.fileUpload.model.User.MemberDto;
-import com.example.fileUpload.repository.UserDao;
+
+import com.example.fileUpload.repository.UserRepository;
+import com.example.fileUpload.repository.Entity.User;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 
 @RequiredArgsConstructor
-@Service
+@Component("userDetailService")
 @Slf4j
 public class CustomUserDetailService implements UserDetailsService{
-
-    private final UserDao userDao;
-    private final PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String userAccount) throws UsernameNotFoundException {
+    @Transactional
+    // 로그인시에 DB에서 유저정보와 권한정보를 가져와서 해당 정보를 기반으로 userdetails.User 객체를 생성해 리턴
+    public UserDetails loadUserByUsername(final String username) {
 
-        return userDao.findByUserAccount(userAccount)
-                .map(this::createUserDetails)
-                .orElseThrow(() -> new UsernameNotFoundException("해당하는 유저를 찾을 수 없습니다."));
+        return userRepository.findOneWithAuthoritiesByUsername(username)
+                .map(user -> createUser(username, user))
+                .orElseThrow(() -> new UsernameNotFoundException(username + " -> 데이터베이스에서 찾을 수 없습니다."));
     }
 
-    private UserDetails createUserDetails(MemberDto memberDto){
+    private org.springframework.security.core.userdetails.User createUser(String username, User user) {
+        if (!user.isActivated()) {
+            throw new RuntimeException(username + " -> 활성화되어 있지 않습니다.");
+        }
 
-        return User.builder()
-                .username(memberDto.getUsername())
-                .password(passwordEncoder.encode(memberDto.getPassword()))
-                //.authorities(memberDto.getAuthorities())
-                .roles(memberDto.getRole().toArray(new String[0]))
-                .build();
+        List<GrantedAuthority> grantedAuthorities = user.getAuthorities().stream()
+                .map(authority -> new SimpleGrantedAuthority(authority.getAuthorityName()))
+                .collect(Collectors.toList());
+
+        return new org.springframework.security.core.userdetails.User(user.getUsername(),
+                user.getPassword(),
+                grantedAuthorities);
     }
+
 }

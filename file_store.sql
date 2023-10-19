@@ -19,6 +19,14 @@
 CREATE DATABASE IF NOT EXISTS `file_store` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci */;
 USE `file_store`;
 
+-- 테이블 file_store.authority 구조 내보내기
+CREATE TABLE IF NOT EXISTS `authority` (
+  `authority_name` varchar(50) NOT NULL,
+  PRIMARY KEY (`authority_name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 내보낼 데이터가 선택되어 있지 않습니다.
+
 -- 테이블 file_store.file_entity 구조 내보내기
 CREATE TABLE IF NOT EXISTS `file_entity` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -39,26 +47,6 @@ CREATE TABLE IF NOT EXISTS `file_entity` (
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
--- 테이블 file_store.members 구조 내보내기
-CREATE TABLE IF NOT EXISTS `members` (
-  `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `member_account` varchar(255) NOT NULL,
-  `password` varchar(255) NOT NULL,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `member_id` (`member_account`) USING BTREE
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- 내보낼 데이터가 선택되어 있지 않습니다.
-
--- 테이블 file_store.member_roles 구조 내보내기
-CREATE TABLE IF NOT EXISTS `member_roles` (
-  `member_account` varchar(255) NOT NULL,
-  `role` varchar(255) NOT NULL,
-  PRIMARY KEY (`member_account`,`role`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- 내보낼 데이터가 선택되어 있지 않습니다.
-
 -- 테이블 file_store.ole_entry 구조 내보내기
 CREATE TABLE IF NOT EXISTS `ole_entry` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
@@ -76,7 +64,32 @@ CREATE TABLE IF NOT EXISTS `rsa_keys` (
   `public_key` text NOT NULL,
   `private_key` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=182 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 내보낼 데이터가 선택되어 있지 않습니다.
+
+-- 테이블 file_store.users 구조 내보내기
+CREATE TABLE IF NOT EXISTS `users` (
+  `user_id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `activated` bit(1) DEFAULT NULL,
+  `nickname` varchar(50) DEFAULT NULL,
+  `password` varchar(100) DEFAULT NULL,
+  `username` varchar(50) DEFAULT NULL,
+  PRIMARY KEY (`user_id`),
+  UNIQUE KEY `UK_r43af9ap4edm43mmtq01oddj6` (`username`)
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 내보낼 데이터가 선택되어 있지 않습니다.
+
+-- 테이블 file_store.user_authority 구조 내보내기
+CREATE TABLE IF NOT EXISTS `user_authority` (
+  `user_id` bigint(20) NOT NULL,
+  `authority_name` varchar(50) NOT NULL,
+  PRIMARY KEY (`user_id`,`authority_name`),
+  KEY `FK6ktglpl5mjosa283rvken2py5` (`authority_name`),
+  CONSTRAINT `FK6ktglpl5mjosa283rvken2py5` FOREIGN KEY (`authority_name`) REFERENCES `authority` (`authority_name`),
+  CONSTRAINT `FKhi46vu7680y1hwvmnnuh4cybx` FOREIGN KEY (`user_id`) REFERENCES `users` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
