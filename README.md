@@ -151,3 +151,8 @@
     //https://velog.io/@jun-k0/JWT-%EC%8A%A4%ED%94%84%EB%A7%81%EB%B6%80%ED%8A%B8-JWT-%EA%B8%B0%EB%B3%B8-%EC%84%A4%EC%A0%95
     //**https://gksdudrb922.tistory.com/217**
 
+    //refresh 토큰 구현 및 사용자에게 반환값 검증 참고할 블로그(깃허브도 있음)
+    //https://hungseong.tistory.com/67
+    //https://velog.io/@jkijki12/Spirng-Security-Jwt-%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EC%A0%81%EC%9A%A9%ED%95%98%EA%B8%B0
+    //https://velog.io/@jkijki12/Jwt-Refresh-Token-%EC%A0%81%EC%9A%A9%EA%B8%B0
+

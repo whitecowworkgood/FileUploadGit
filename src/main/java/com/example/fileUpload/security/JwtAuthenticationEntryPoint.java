@@ -13,6 +13,11 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
-        response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+        String errorMessage = "The token has expired.";
+        String jsonResponse = "{\"error\":\"Unauthorized\",\"message\":\"" + errorMessage + "\"}";
+
+        response.setContentType("application/json");
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.getWriter().write(jsonResponse);
     }
 }
