@@ -1,6 +1,5 @@
-package com.example.fileUpload.security;
+package com.example.fileUpload.JWT;
 
-import com.example.fileUpload.util.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.config.annotation.SecurityConfigurerAdapter;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -9,13 +8,11 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @RequiredArgsConstructor
 public class JwtSecurityConfig extends SecurityConfigurerAdapter<DefaultSecurityFilterChain, HttpSecurity> {
-
     private final TokenProvider tokenProvider;
+
     @Override
     public void configure(HttpSecurity http) {
-       http.addFilterBefore(
-               new JwtFilter(tokenProvider),
-               UsernamePasswordAuthenticationFilter.class
-       );
+       JwtFilter customFilter = new JwtFilter(tokenProvider);
+       http.addFilterBefore(customFilter, UsernamePasswordAuthenticationFilter.class);
     }
 }

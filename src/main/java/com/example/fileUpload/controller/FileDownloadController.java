@@ -4,7 +4,7 @@ package com.example.fileUpload.controller;
 import com.example.fileUpload.message.GetMessage;
 import com.example.fileUpload.model.File.UserFileVO;
 import com.example.fileUpload.service.FileDownloadService;
-import com.example.fileUpload.service.serviceImpl.UserService;
+import com.example.fileUpload.service.serviceImpl.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -30,14 +30,14 @@ import java.util.concurrent.atomic.AtomicReference;
 public class FileDownloadController {
 
     private final FileDownloadService fileDownloadService;
-    private final UserService userService;
+    private final AuthService authService;
 
     @Operation(summary = "허가받은 파일 출력", description = "관리자로 부터 다운로드 허가 받은 파일을 출력합니다.")
     @GetMapping("/files")
     @ResponseBody
     public ResponseEntity<GetMessage> showFiles() {
 
-        String userName = userService.getUserNameWeb();
+        String userName = authService.getUserNameWeb();
 
         List<UserFileVO> userFileVOS = this.fileDownloadService.showAcceptedFiles(userName);
         GetMessage getMessage = new GetMessage();
@@ -55,7 +55,7 @@ public class FileDownloadController {
     @ResponseBody
     public ResponseEntity<Resource> downloadFile( @PathVariable("id") Long id) throws IOException {
 
-        String userName = userService.getUserNameWeb();
+        String userName = authService.getUserNameWeb();
 
         fileDownloadService.setParameter(userName, id);
 

@@ -1,15 +1,17 @@
-package com.example.fileUpload.model;
-
+package com.example.fileUpload.model.Token;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
-@Builder
-@Data
+@Getter
+@NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class TokenDto {
     private String grantType;
     private String accessToken;
     private String refreshToken;
+    private Long accessTokenExpiresIn;
 }

@@ -1,10 +1,9 @@
 package com.example.fileUpload;
 
-import com.example.fileUpload.security.JwtAccessDeniedHandler;
-import com.example.fileUpload.security.JwtAuthenticationEntryPoint;
-import com.example.fileUpload.security.JwtSecurityConfig;
-
-import com.example.fileUpload.util.TokenProvider;
+import com.example.fileUpload.JWT.JwtAccessDeniedHandler;
+import com.example.fileUpload.JWT.JwtAuthenticationEntryPoint;
+import com.example.fileUpload.JWT.JwtSecurityConfig;
+import com.example.fileUpload.JWT.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -14,18 +13,19 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.filter.CorsFilter;
 
-@Configuration
 @EnableWebSecurity
+@Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
-
     private final TokenProvider tokenProvider;
+    private final CorsFilter corsFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
-    private final String[] allowedUrls = {"/swagger-ui/**", "/api-docs/**","/h2-console/**", "/api/login"
-                                            ,"/api/join", "/api/reissue"};
+    private final String[] allowedUrls = {"/swagger-ui/**", "/api-docs/**","/h2-console/**", "/auth/**"};
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -33,14 +33,20 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity
+    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception{
 
-                .csrf().disable()
+        http.csrf().disable()
                 .formLogin().disable()
+                .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
+
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .accessDeniedHandler(jwtAccessDeniedHandler)
+
+                .and()
+                .headers()
+                .frameOptions()
+                .sameOrigin()
 
                 .and()
                 .sessionManagement()
@@ -53,9 +59,9 @@ public class SecurityConfig {
                                 .requestMatchers("/api/**").hasRole("USER")
                                 .anyRequest().authenticated()
                 )
-
                 .apply(new JwtSecurityConfig(tokenProvider));
 
-        return httpSecurity.build();
+        return http.build();
     }
+
 }

@@ -4,7 +4,7 @@ package com.example.fileUpload.controller;
 import com.example.fileUpload.message.PostDeleteMessage;
 import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.service.FileUploadService;
-import com.example.fileUpload.service.serviceImpl.UserService;
+import com.example.fileUpload.service.serviceImpl.AuthService;
 import com.example.fileUpload.util.FileUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -34,7 +34,7 @@ public class FileUploadController {
     @Value("${Save-Directory}")
     private String baseDir;
     private final FileUploadService fileUploadService;
-    private final UserService userService;
+    private final AuthService authService;
 
     /**
      * 파일을 업로드합니다.
@@ -47,7 +47,7 @@ public class FileUploadController {
     public ResponseEntity<PostDeleteMessage> uploadFile(@RequestParam("countNum") Long countNum,
                                                         @RequestParam(value = "comment", required = false, defaultValue = "null") String comment,
                                                         @RequestParam("file") MultipartFile file, @RequestParam(value = "encryption", defaultValue = "true") boolean encryption) {
-        String userName = userService.getUserNameWeb();
+        String userName = authService.getUserNameWeb();
         PostDeleteMessage postDeleteMessage = new PostDeleteMessage();
 
         try {

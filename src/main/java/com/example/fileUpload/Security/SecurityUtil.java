@@ -1,4 +1,4 @@
-package com.example.fileUpload.util;
+package com.example.fileUpload.Security;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.Authentication;
@@ -9,9 +9,19 @@ import java.util.Optional;
 
 @Slf4j
 public class SecurityUtil {
-    private SecurityUtil() {}
 
-    // getCurrentUsername 메소드의 역할은 Security Cont
+    private SecurityUtil(){}
+
+    public static Long getCurrentMemberId(){
+        final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || authentication.getName() == null) {
+            throw  new RuntimeException("Security Context 에 인증 정보가 없습니다.");
+        }
+
+        return Long.parseLong(authentication.getName());
+    }
+
     public static Optional<String> getCurrentUsername() {
 
         // authentication객체가 저장되는 시점은 JwtFilter의 doFilter 메소드에서

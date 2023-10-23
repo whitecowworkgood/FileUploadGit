@@ -1,5 +1,6 @@
-package com.example.fileUpload.security;
+package com.example.fileUpload.JWT;
 
+import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.security.access.AccessDeniedException;
@@ -9,16 +10,9 @@ import org.springframework.stereotype.Component;
 import java.io.IOException;
 
 @Component
-public class JwtAccessDeniedHandler implements AccessDeniedHandler {
-
+public class JwtAccessDeniedHandler  implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {
-        String errorMessage = "You do not have access.";
-        String jsonResponse = "{\"error\":\"Unauthorized\",\"message\":\"" + errorMessage + "\"}";
-
-        response.setContentType("application/json");
-        response.setStatus(HttpServletResponse.SC_OK);
-        response.getWriter().write(jsonResponse);
-
+        response.sendError(HttpServletResponse.SC_FORBIDDEN);
     }
 }

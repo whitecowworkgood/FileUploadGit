@@ -1,50 +1,39 @@
 package com.example.fileUpload.service.serviceImpl;
 
-
-import com.example.fileUpload.repository.UserRepository;
-import com.example.fileUpload.repository.Entity.User;
+import com.example.fileUpload.model.Member.Member;
+import com.example.fileUpload.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Collections;
 
-
+@Service
 @RequiredArgsConstructor
-@Component("userDetailService")
-@Slf4j
-public class CustomUserDetailService implements UserDetailsService{
-    private final UserRepository userRepository;
+public class CustomUserDetailService implements UserDetailsService {
+
+    private final MemberRepository memberRepository;
 
     @Override
     @Transactional
-    // 로그인시에 DB에서 유저정보와 권한정보를 가져와서 해당 정보를 기반으로 userdetails.User 객체를 생성해 리턴
-    public UserDetails loadUserByUsername(final String username) {
-
-        return userRepository.findOneWithAuthoritiesByUsername(username)
-                .map(user -> createUser(username, user))
-                .orElseThrow(() -> new UsernameNotFoundException(username + " -> 데이터베이스에서 찾을 수 없습니다."));
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return memberRepository.findByAccount(username)
+                .map(this::createUserDetails)
+                .orElseThrow(() -> new UsernameNotFoundException((username+" -> 데이터베이스에서 유저정보를 찾을 수 없습니다.")));
     }
+    private UserDetails createUserDetails(Member member){
+        GrantedAuthority grantedAuthority = new SimpleGrantedAuthority(member.getAuthority().toString());
 
-    private org.springframework.security.core.userdetails.User createUser(String username, User user) {
-        if (!user.isActivated()) {
-            throw new RuntimeException(username + " -> 활성화되어 있지 않습니다.");
-        }
-
-        List<GrantedAuthority> grantedAuthorities = user.getAuthorities().stream()
-                .map(authority -> new SimpleGrantedAuthority(authority.getAuthorityName()))
-                .collect(Collectors.toList());
-
-        return new org.springframework.security.core.userdetails.User(user.getUsername(),
-                user.getPassword(),
-                grantedAuthorities);
+        return new User(
+                String.valueOf(member.getAccount()),
+                member.getPassword(),
+                Collections.singleton(grantedAuthority)
+        );
     }
-
 }

@@ -1,4 +1,4 @@
-package com.example.fileUpload.model;
+package com.example.fileUpload.model.Token;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Entity
 public class RefreshToken {
+
     @Id
     @Column(name = "rt_key")
     private String key;
