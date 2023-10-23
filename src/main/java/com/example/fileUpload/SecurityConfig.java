@@ -56,7 +56,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(requests ->
                         requests.requestMatchers(allowedUrls).permitAll()
                                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                                .requestMatchers("/api/**").hasRole("USER")
+                                .requestMatchers("/api/**").hasAnyRole("USER", "ADMIN")
                                 .anyRequest().authenticated()
                 )
                 .apply(new JwtSecurityConfig(tokenProvider));

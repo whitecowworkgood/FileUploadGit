@@ -46,7 +46,7 @@ public class FileUploadController {
     @PostMapping("")
     public ResponseEntity<PostDeleteMessage> uploadFile(@RequestParam("countNum") Long countNum,
                                                         @RequestParam(value = "comment", required = false, defaultValue = "null") String comment,
-                                                        @RequestParam("file") MultipartFile file, @RequestParam(value = "encryption", defaultValue = "true") boolean encryption) {
+                                                        @RequestParam("file") MultipartFile file/*, @RequestParam(value = "encryption", defaultValue = "true") boolean encryption*/) {
         String userName = authService.getUserNameWeb();
         PostDeleteMessage postDeleteMessage = new PostDeleteMessage();
 
@@ -58,7 +58,7 @@ public class FileUploadController {
             String fileSavePath = generateFileSavePath(uuidFileName);
             String fileOlePath = generateFileOlePath(uuidName);
 
-            FileDto fileDto = createFileDto(file, uuidFileName, fileSavePath, fileOlePath, countNum, userName, comment, encryption);
+            FileDto fileDto = createFileDto(file, uuidFileName, fileSavePath, fileOlePath, countNum, userName, comment/*, encryption*/);
 
             fileUploadService.fileUpload(fileDto);
 
@@ -90,7 +90,7 @@ public class FileUploadController {
                 .append(File.separator).toString();
     }
 
-    private FileDto createFileDto(MultipartFile file, String uuidFileName, String fileSavePath, String fileOlePath, Long countNum, String userName, String comment, boolean encryption) {
+    private FileDto createFileDto(MultipartFile file, String uuidFileName, String fileSavePath, String fileOlePath, Long countNum, String userName, String comment/*, boolean encryption*/) {
         return FileDto.builder()
                 .UUIDFileName(uuidFileName)
                 .originFileName(file.getOriginalFilename())
@@ -102,7 +102,7 @@ public class FileUploadController {
                 .fileData(file)
                 .userName(userName)
                 .comment(comment)
-                .isEncrypt(encryption)
+                //.isEncrypt(encryption)
                 .build();
     }
 

@@ -5,7 +5,7 @@ import lombok.Data;
 @Data
 public class PostDeleteMessage {
 
-    private String message;
+    private Object message;
 
     public PostDeleteMessage() {
         this.message = "CREATE";

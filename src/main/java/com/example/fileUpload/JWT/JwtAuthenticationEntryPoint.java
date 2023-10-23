@@ -15,5 +15,15 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
         response.sendError(HttpServletResponse.SC_UNAUTHORIZED);
+
+        response.setContentType("application/json");
+        response.setCharacterEncoding("UTF-8");
+        response.setStatus(HttpServletResponse.SC_OK);
+
+        // JSON 형식의 응답 메시지 구성
+        String jsonMessage = "{\"message\": \"401\", \"reason\": \"" + authException.getMessage() + "\"}";
+
+        // 응답에 JSON 메시지를 쓰기
+        response.getWriter().write(jsonMessage);
     }
 }

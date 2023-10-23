@@ -1,6 +1,7 @@
 package com.example.fileUpload;
 
 import io.swagger.v3.oas.models.OpenAPI;
+import org.apache.xerces.parsers.SecurityConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import java.util.List;
@@ -46,4 +47,5 @@ public class SwaggerConfig {
 
             return new OpenAPI().info(info).servers(List.of(devServer));
         }
+
 }

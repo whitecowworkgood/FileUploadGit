@@ -42,7 +42,7 @@ public interface FileEntryMapperAnno {
 
 
     @Insert("INSERT INTO file_entity (uuidfile_name, file_ole_path, file_save_path, file_size, file_type, origin_file_name, count_num, user_name, comment, is_encrypt) " +
-            "VALUES (#{UUIDFileName}, #{fileOlePath}, #{fileSavePath}, #{fileSize}, #{fileType}, #{originFileName}, #{countNum}, #{userName}, #{comment}, #{isEncrypt})")
+            "VALUES (#{UUIDFileName}, #{fileOlePath}, #{fileSavePath}, #{fileSize}, #{fileType}, #{originFileName}, #{countNum}, #{userName}, #{comment}, DEFAULT)")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     boolean insertFileEntity(FileDto fileDto);
 

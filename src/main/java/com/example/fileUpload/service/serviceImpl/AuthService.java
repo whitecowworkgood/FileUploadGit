@@ -11,12 +11,15 @@ import com.example.fileUpload.model.Token.TokenRequestDto;
 import com.example.fileUpload.repository.MemberRepository;
 import com.example.fileUpload.repository.RefreshTokenRepository;
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -77,6 +80,26 @@ public class AuthService {
         refreshTokenRepository.save(newRefreshToken);
 
         return tokenDto;
+    }
+
+    @Transactional
+    public String logout(TokenRequestDto tokenRequestDto){
+        if(!tokenProvider.validateToken(tokenRequestDto.getRefreshToken())){
+            throw new RuntimeException("Refresh Token이 유효하지 않습니다.");
+        }
+        Authentication authentication = tokenProvider.getAuthentication(tokenRequestDto.getAccessToken());
+
+        RefreshToken refreshToken = refreshTokenRepository.findByKey(authentication.getName())
+                .orElseThrow(()->new RuntimeException("로그아웃된 사용자 입니다."));
+
+        if(!refreshToken.getValue().equals(tokenRequestDto.getRefreshToken())){
+            throw new RuntimeException("토큰의 유저 정보가 일치하지 않습니다.");
+        }
+        refreshTokenRepository.removeRefreshTokenByValue(tokenRequestDto.getRefreshToken())
+                .orElseThrow(()->new RuntimeException("로그아웃에 실패하였습니다."));
+
+        return "logout";
+
     }
     @Transactional(readOnly = true)
     public String getUserNameWeb() {
