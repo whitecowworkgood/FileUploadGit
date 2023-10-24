@@ -8,10 +8,10 @@ import com.example.fileUpload.model.Member.MemberResponseDto;
 import com.example.fileUpload.model.Token.RefreshToken;
 import com.example.fileUpload.model.Token.TokenDto;
 import com.example.fileUpload.model.Token.TokenRequestDto;
-import com.example.fileUpload.repository.MemberRepository;
-import com.example.fileUpload.repository.RefreshTokenRepository;
+import com.example.fileUpload.repository.MemberDao;
+import com.example.fileUpload.repository.RefreshTokenDao;
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.exception.ExceptionUtils;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -19,25 +19,26 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthService {
+
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
-    private final MemberRepository memberRepository;
+    private final MemberDao memberDao;
     private final PasswordEncoder passwordEncoder;
     private final TokenProvider tokenProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final RefreshTokenDao refreshTokenDao;
 
     @Transactional
     public MemberResponseDto signup(MemberRequestDto memberRequestDto){
-        if(memberRepository.existsByAccount(memberRequestDto.getAccount())){
+        if(memberDao.existsByAccount(memberRequestDto.getAccount())){
             throw new RuntimeException("이미 가입되어 있는 유저입니다.");
         }
 
         Member member = memberRequestDto.toMember(passwordEncoder);
-        return MemberResponseDto.of(memberRepository.save(member));
+
+        return MemberResponseDto.of(memberDao.save(member));
     }
 
     @Transactional
@@ -46,14 +47,14 @@ public class AuthService {
 
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
-        TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
+        TokenDto tokenDto = tokenProvider.generateTokenDto(authentication, true);
 
         RefreshToken refreshToken = RefreshToken.builder()
                 .key(authentication.getName())
                 .value(tokenDto.getRefreshToken())
                 .build();
 
-        refreshTokenRepository.save(refreshToken);
+        refreshTokenDao.save(refreshToken);
 
         return tokenDto;
     }
@@ -61,43 +62,46 @@ public class AuthService {
     @Transactional
     public TokenDto reissue(TokenRequestDto tokenRequestDto){
 
+        Authentication authentication = tokenProvider.getAuthentication(tokenRequestDto.getAccessToken());
+
         if(!tokenProvider.validateToken(tokenRequestDto.getRefreshToken())){
+            refreshTokenDao.removeRefreshTokenByValue(authentication.getName());
             throw new RuntimeException("Refresh Token이 유효하지 않습니다.");
         }
 
-        Authentication authentication = tokenProvider.getAuthentication(tokenRequestDto.getAccessToken());
 
-        RefreshToken refreshToken = refreshTokenRepository.findByKey(authentication.getName())
+        RefreshToken refreshToken = refreshTokenDao.findByKey(authentication.getName())
                 .orElseThrow(()->new RuntimeException("로그아웃된 사용자 입니다."));
 
         if(!refreshToken.getValue().equals(tokenRequestDto.getRefreshToken())){
             throw new RuntimeException("토큰의 유저 정보가 일치하지 않습니다.");
         }
-
-        TokenDto tokenDto = tokenProvider.generateTokenDto(authentication);
-
-        RefreshToken newRefreshToken = refreshToken.updateValue(tokenDto.getRefreshToken());
-        refreshTokenRepository.save(newRefreshToken);
+        //tokenProvider.getRefreshTokenExpiration(tokenRequestDto.getRefreshToken());
+        TokenDto tokenDto = tokenProvider.generateTokenDto(authentication, false);
 
         return tokenDto;
     }
 
     @Transactional
     public String logout(TokenRequestDto tokenRequestDto){
-        if(!tokenProvider.validateToken(tokenRequestDto.getRefreshToken())){
-            throw new RuntimeException("Refresh Token이 유효하지 않습니다.");
-        }
+
         Authentication authentication = tokenProvider.getAuthentication(tokenRequestDto.getAccessToken());
 
-        RefreshToken refreshToken = refreshTokenRepository.findByKey(authentication.getName())
+        if(!tokenProvider.validateToken(tokenRequestDto.getRefreshToken())){
+            refreshTokenDao.removeRefreshTokenByValue(authentication.getName());
+            throw new RuntimeException("Refresh Token이 유효하지 않습니다.");
+        }
+
+        RefreshToken refreshToken = refreshTokenDao.findByKey(authentication.getName())
                 .orElseThrow(()->new RuntimeException("로그아웃된 사용자 입니다."));
 
         if(!refreshToken.getValue().equals(tokenRequestDto.getRefreshToken())){
             throw new RuntimeException("토큰의 유저 정보가 일치하지 않습니다.");
         }
-        refreshTokenRepository.removeRefreshTokenByValue(tokenRequestDto.getRefreshToken())
-                .orElseThrow(()->new RuntimeException("로그아웃에 실패하였습니다."));
 
+        if (!refreshTokenDao.removeRefreshTokenByValue(tokenRequestDto.getRefreshToken())) {
+            throw new RuntimeException("로그아웃에 실패하였습니다.");
+        }
         return "logout";
 
     }

@@ -39,13 +39,6 @@ public class FileEncryptServiceImpl implements FileEncryptService {
 
     private final StringBuffer stringBuffer = new StringBuffer();
 
-    private static final int ENCRYPTION_BUFFER_SIZE = 1024;
-
-    private static final int READ_OPTION_SIZE = 516;
-    private static final int READ_ENCRYPT_IV_SIZE = 256;
-    private static final int READ_ENCRYPT_KEY_SIZE = 256;
-    private static final int READ_RSA_INDEX_SIZE = 4;
-
 
     @Value("${Save-Directory}")
     private String baseDir;

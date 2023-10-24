@@ -9,9 +9,9 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class MemberResponseDto {
 
-    private String account;
+    private boolean message;
 
-    public static MemberResponseDto of(Member member){
-        return new MemberResponseDto(member.getAccount());
+    public static MemberResponseDto of(boolean result){
+        return new MemberResponseDto(result);
     }
 }

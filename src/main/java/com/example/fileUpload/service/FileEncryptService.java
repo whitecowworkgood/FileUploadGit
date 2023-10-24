@@ -11,6 +11,12 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 public interface FileEncryptService {
+    int ENCRYPTION_BUFFER_SIZE = 1024;
+    int READ_OPTION_SIZE = 516;
+    int READ_ENCRYPT_IV_SIZE = 256;
+    int READ_ENCRYPT_KEY_SIZE = 256;
+    int READ_RSA_INDEX_SIZE = 4;
+
     void createRSAKeyPair() throws NoSuchAlgorithmException;
     void storedRSAKeyPair();
     void encryptFile(FileDto fileDto) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException;

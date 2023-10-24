@@ -1,7 +1,8 @@
 package com.example.fileUpload.service.serviceImpl;
 
 import com.example.fileUpload.model.Member.Member;
-import com.example.fileUpload.repository.MemberRepository;
+import com.example.fileUpload.repository.MemberDao;
+//import com.example.fileUpload.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -18,12 +19,12 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class CustomUserDetailService implements UserDetailsService {
 
-    private final MemberRepository memberRepository;
+    private final MemberDao memberDao;
 
     @Override
     @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return memberRepository.findByAccount(username)
+        return memberDao.findByAccount(username)
                 .map(this::createUserDetails)
                 .orElseThrow(() -> new UsernameNotFoundException((username+" -> 데이터베이스에서 유저정보를 찾을 수 없습니다.")));
     }

@@ -8,7 +8,8 @@
         <mapper class="OleEntryMapperAnno"/>
         <mapper class="FileEntryMapperAnno"/>
         <mapper class="FileEncryptMapperAnno"/>
-        <!--<mapper class = "MemberMapperAnno" />-->
+        <mapper class = "MemberMapperAnno" />
+        <mapper class = "RefreshTokenMapperAnno" />
         <!-- 계속 추가 가능~~-->
     </mappers>
 </configuration>

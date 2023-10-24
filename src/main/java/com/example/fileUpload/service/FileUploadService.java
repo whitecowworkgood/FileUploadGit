@@ -11,7 +11,7 @@ public interface FileUploadService {
 
     void  fileUpload(FileDto fileDto);
 
-    List<FileVO> printFileAll();
+    //List<FileVO> printFileAll();
 
     FileVO printFileOne(Long id);
 

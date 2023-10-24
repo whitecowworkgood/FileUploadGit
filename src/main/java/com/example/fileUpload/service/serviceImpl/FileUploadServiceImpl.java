@@ -2,7 +2,6 @@ package com.example.fileUpload.service.serviceImpl;
 
 import com.example.fileUpload.documentParser.FileProcessor;
 import com.example.fileUpload.model.File.FileDto;
-import com.example.fileUpload.model.Ole.OleDto;
 import com.example.fileUpload.model.File.FileVO;
 
 import com.example.fileUpload.model.Ole.OleVO;
@@ -10,13 +9,11 @@ import com.example.fileUpload.repository.FileDao;
 import com.example.fileUpload.repository.OleDao;
 import com.example.fileUpload.service.FileEncryptService;
 import com.example.fileUpload.service.FileUploadService;
-import com.example.fileUpload.util.ExternalFileMap;
 import com.example.fileUpload.util.FileUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.tika.Tika;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
@@ -29,7 +26,6 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
 
-import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 
 @Service
 @Slf4j
@@ -79,10 +75,12 @@ public class FileUploadServiceImpl implements FileUploadService {
     }
 
 
+/*
     @Override
     public synchronized List<FileVO> printFileAll() {
         return this.fileDao.printFileAll();
     }
+*/
 
     @Override
     public synchronized FileVO printFileOne(Long id) {
@@ -108,7 +106,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             return false;
         }
         try{
-            //Path filePath = Path.of(this.baseDir, fileVO.getUUIDFileName());
+
             if (!Files.exists(Path.of(fileVO.getFileSavePath())) || !FileUtil.isPathValidForStorage(this.baseDir, fileVO.getFileSavePath())) {
                 return false;
             }
@@ -119,52 +117,17 @@ public class FileUploadServiceImpl implements FileUploadService {
             Files.delete(Path.of(fileVO.getFileOlePath()));
             oleResult = this.oleDao.deleteById(fileVO.getId());
 
-            /*//File folder = new File(fileVO.getFileOlePath());
-            Files.delete(Path.of(fileVO.getFileOlePath()));
-
-            *//*FileUtil.deleteFolder(fileVO.getFileOlePath());
-            folder.delete();*//*
-
-            oleResult = this.oleDao.deleteById(fileVO.getId());*/
-
 
         }catch (IOException e){
             ExceptionUtils.getStackTrace(e);
             return false;
         }
-        /*stringBuffer.append(this.baseDir).append(File.separator).append(fileVO.getUUIDFileName());
-        if (!FileUtil.isPathValidForStorage(this.baseDir, stringBuffer.toString())) {
-            return false;
-        }
-        stringBuffer.delete(0, stringBuffer.length());
-
-        stringBuffer.append(this.baseDir).append(File.separator).append(fileVO.getUUIDFileName());
-
-
-        File file = new File(stringBuffer.toString());
-        //Files.exists(stringBuffer.toString(), );
-        stringBuffer.delete(0, stringBuffer.length());
-
-
-        if (!(file.exists() && file.delete())) {
-            log.warn(fileVO.getUUIDFileName() + " 파일 삭제 오류 발생 또는 파일이 없음, DB에서 정보 삭제");
-            //return true;
-        }
-        File folder = new File(fileVO.getFileOlePath());
-
-        boolean fileResult = this.fileDao.deleteById(fileVO.getId());
-
-        FileUtil.deleteFolder(folder);
-        folder.delete();
-
-        boolean oleResult = this.oleDao.deleteById(fileVO.getId());*/
 
         return fileResult && oleResult;
     }
 
     private void validateFileDto(FileDto fileDto) throws FileUploadException {
-        if (fileDto.getFileData().isEmpty() || !FileUtil.isPathValidForStorage(this.baseDir, fileDto.getFileSavePath())
-               /* || !FileUtil.validateUploadedFileMimeType(fileDto)*/) {
+        if (fileDto.getFileData().isEmpty() || !FileUtil.isPathValidForStorage(this.baseDir, fileDto.getFileSavePath())) {
             throw new FileUploadException();
         }
     }

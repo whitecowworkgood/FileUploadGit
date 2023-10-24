@@ -45,8 +45,11 @@ public class SecurityConfig {
 
                 .and()
                 .headers()
+                .xssProtection()
+                .and()
                 .frameOptions()
                 .sameOrigin()
+
 
                 .and()
                 .sessionManagement()

@@ -24,7 +24,7 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(HttpServletResponse.SC_OK);
 
         // JSON 형식의 응답 메시지 구성
-        String jsonMessage = "{\"message\": \"401\", \"reason\": \"" + "잘못된 접근입니다." + "\"}";
+        String jsonMessage = "{\"statusCode\": \"401\", \"message\": \"" + "잘못된 접근입니다." + "\"}";
 
         // 응답에 JSON 메시지를 쓰기
         response.getWriter().write(jsonMessage);
