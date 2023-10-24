@@ -1,9 +1,14 @@
 package com.example.fileUpload;
 
+import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
+import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.apache.xerces.parsers.SecurityConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.Arrays;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -14,38 +19,18 @@ import io.swagger.v3.oas.models.servers.Server;
 @Configuration
 public class SwaggerConfig {
 
-
-        @Value("${bezkoder.openapi.dev-url}")
-        private String devUrl;
-
-//        @Value("${bezkoder.openapi.prod-url}")
-//        private String prodUrl;
-
         @Bean
         public OpenAPI myOpenAPI() {
-            Server devServer = new Server();
-            devServer.setUrl(devUrl);
-            devServer.setDescription("Server URL in Development environment");
 
-//            Server prodServer = new Server();
-//            prodServer.setUrl(prodUrl);
-//            prodServer.setDescription("Server URL in Production environment");
+            SecurityScheme securityScheme = new SecurityScheme()
+                    .type(SecurityScheme.Type.HTTP).scheme("bearer").bearerFormat("JWT")
+                    .in(SecurityScheme.In.HEADER).name("Authorization");
+            SecurityRequirement securityRequirement = new SecurityRequirement().addList("bearerAuth");
 
-//            Contact contact = new Contact();
-//            contact.setEmail("bezkoder@gmail.com");
-//            contact.setName("BezKoder");
-//            contact.setUrl("https://www.bezkoder.com");
+            return new OpenAPI()
+                    .components(new Components().addSecuritySchemes("bearerAuth", securityScheme))
+                    .security(Arrays.asList(securityRequirement));
 
-            //License mitLicense = new License().name("MIT License").url("https://choosealicense.com/licenses/mit/");
-
-            Info info = new Info()
-                    .title("Tutorial Management API")
-                    .version("1.0");
-                    //.contact(contact)
-                    //.description("This API exposes endpoints to manage tutorials.").termsOfService("https://www.bezkoder.com/terms")
-                    //.license(mitLicense);
-
-            return new OpenAPI().info(info).servers(List.of(devServer));
         }
 
 }
