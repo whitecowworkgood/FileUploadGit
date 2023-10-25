@@ -16,8 +16,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.util.HtmlUtils;
 
 import java.io.File;
+import java.util.Objects;
 import java.util.UUID;
 
 
@@ -90,7 +92,7 @@ public class FileUploadController {
     private FileDto createFileDto(MultipartFile file, String uuidFileName, String fileSavePath, String fileOlePath, Long countNum, String userName, String comment/*, boolean encryption*/) {
         return FileDto.builder()
                 .UUIDFileName(uuidFileName)
-                .originFileName(file.getOriginalFilename())
+                .originFileName(HtmlUtils.htmlEscape(Objects.requireNonNull(file.getOriginalFilename())))
                 .fileSize(file.getSize())
                 .fileType(file.getContentType())
                 .fileSavePath(fileSavePath)
@@ -98,7 +100,7 @@ public class FileUploadController {
                 .countNum(countNum)
                 .fileData(file)
                 .userName(userName)
-                .comment(comment)
+                .comment(HtmlUtils.htmlEscape(comment))
                 //.isEncrypt(encryption)
                 .build();
     }

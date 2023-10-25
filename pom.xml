@@ -61,7 +61,7 @@
         <dependency>
             <groupId>org.mybatis</groupId>
             <artifactId>mybatis</artifactId>
-            <version>3.5.6</version> <!-- 사용하려는 MyBatis 버전에 따라 버전을 지정하세요. -->
+            <version>3.5.6</version>
         </dependency>
         <dependency>
             <groupId>org.mybatis.spring.boot</groupId>

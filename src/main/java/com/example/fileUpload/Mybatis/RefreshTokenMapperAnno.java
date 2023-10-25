@@ -16,6 +16,9 @@ public interface RefreshTokenMapperAnno {
     })
     Optional<RefreshToken> findByKey(String key);
 
+    @Select("SELECT COUNT(*) FROM refresh_token WHERE rt_key = #{rt_key} ")
+    int existsByAccount(String rt_key);
+
     @Delete("DELETE FROM refresh_token where rt_value = #{value}")
     boolean removeRefreshTokenByValue(String value);
 

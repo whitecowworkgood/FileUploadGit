@@ -5,8 +5,11 @@ import com.example.fileUpload.model.Token.TokenDto;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.*;
+import io.jsonwebtoken.security.SecurityException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -15,6 +18,7 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
+import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
@@ -55,11 +59,13 @@ public class TokenProvider {
         // Access Token 생성
         Date accessTokenExpiresIn = new Date(now + accessTokenExpireTime);
         String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())
+                .setHeaderParam("typ", "JWT")
+                .claim("sub", authentication.getName())
                 .claim(AUTHORITIES_KEY, authorities)
-                .setExpiration(accessTokenExpiresIn)
-                .signWith(key, SignatureAlgorithm.HS512)
+                .claim("exp", accessTokenExpiresIn)
+                .signWith(key)
                 .compact();
+
 
         TokenDto.TokenDtoBuilder builder = TokenDto.builder()
                 .grantType(BEARER_TYPE)
@@ -70,8 +76,9 @@ public class TokenProvider {
 
             // Refresh Token 생성
             String refreshToken = Jwts.builder()
-                    .setExpiration(new Date(now + refreshTokenExpireTime))
-                    .signWith(key, SignatureAlgorithm.HS512)
+                    .setHeaderParam("typ", "JWT")
+                    .claim("exp", new Date(now + refreshTokenExpireTime))
+                    .signWith(key)
                     .compact();
 
             builder.refreshToken(refreshToken);
@@ -89,7 +96,6 @@ public class TokenProvider {
             throw new RuntimeException("권한 정보가 없는 토큰입니다.");
         }
 
-        // 클레임에서 권한 정보 가져오기
         Collection<? extends GrantedAuthority> authorities =
                 Arrays.stream(claims.get(AUTHORITIES_KEY).toString().split(","))
                         .map(SimpleGrantedAuthority::new)
@@ -101,22 +107,13 @@ public class TokenProvider {
         return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 
-    public Date getRefreshTokenExpiration(String refreshToken) {
-        // 토큰 복호화
-        Claims claims = parseClaims(refreshToken);
-
-        if (claims.getExpiration().getTime() <= (new Date()).getTime()) {
-            throw new RuntimeException("만료된 토큰입니다.");
-        }
-        log.info(String.valueOf(claims.getExpiration()));
-        return claims.getExpiration();
-    }
-
     public boolean validateToken(String token) {
         try {
-            Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return true;
-        } catch (io.jsonwebtoken.security.SecurityException | MalformedJwtException e) {
+            Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+
+            return !claims.getBody().getExpiration().before(new Date());
+
+        }catch (SecurityException | MalformedJwtException e) {
             log.info("잘못된 JWT 서명입니다.");
         } catch (ExpiredJwtException e) {
             log.info("만료된 JWT 토큰입니다.");
@@ -130,63 +127,10 @@ public class TokenProvider {
 
     private Claims parseClaims(String accessToken) {
         try {
+
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
         } catch (ExpiredJwtException e) {
             return e.getClaims();
         }
     }
-/*   public TokenDto generateTokenDto(Authentication authentication) {
-        // 권한들 가져오기
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
-
-        long now = (new Date()).getTime();
-
-        // Access Token 생성
-        Date accessTokenExpiresIn = new Date(now + accessTokenExpireTime);
-        String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())       // payload "sub": "name"
-                .claim(AUTHORITIES_KEY, authorities)        // payload "auth": "ROLE_USER"
-                .setExpiration(accessTokenExpiresIn)        // payload "exp": 1516239022 (예시)
-                .signWith(key, SignatureAlgorithm.HS512)    // header "alg": "HS512"
-                .compact();
-
-        // Refresh Token 생성
-        String refreshToken = Jwts.builder()
-                .setExpiration(new Date(now + refreshTokenExpireTime))
-                .signWith(key, SignatureAlgorithm.HS512)
-                .compact();
-
-        return TokenDto.builder()
-                .grantType(BEARER_TYPE)
-                .accessToken(accessToken)
-                .accessTokenExpiresIn(accessTokenExpiresIn.getTime())
-                .refreshToken(refreshToken)
-                .build();
-    }
-    public TokenDto reGenerateTokenDto(Authentication authentication) {
-        // 권한들 가져오기
-        String authorities = authentication.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.joining(","));
-
-        long now = (new Date()).getTime();
-
-        // Access Token 생성
-        Date accessTokenExpiresIn = new Date(now + accessTokenExpireTime);
-        String accessToken = Jwts.builder()
-                .setSubject(authentication.getName())       // payload "sub": "name"
-                .claim(AUTHORITIES_KEY, authorities)        // payload "auth": "ROLE_USER"
-                .setExpiration(accessTokenExpiresIn)        // payload "exp": 1516239022 (예시)
-                .signWith(key, SignatureAlgorithm.HS512)    // header "alg": "HS512"
-                .compact();
-
-
-        return TokenDto.builder()
-                .grantType(BEARER_TYPE)
-                .accessToken(accessToken)
-                .accessTokenExpiresIn(accessTokenExpiresIn.getTime())
-                .build();
-    }*/
 }

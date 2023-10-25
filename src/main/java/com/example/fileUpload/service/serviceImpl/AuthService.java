@@ -12,12 +12,17 @@ import com.example.fileUpload.repository.MemberDao;
 import com.example.fileUpload.repository.RefreshTokenDao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.util.HtmlUtils;
+import org.unbescape.html.HtmlEscape;
+
+import java.sql.SQLException;
 
 @Service
 @RequiredArgsConstructor
@@ -38,14 +43,25 @@ public class AuthService {
 
         Member member = memberRequestDto.toMember(passwordEncoder);
 
+        member.setAccount(HtmlUtils.htmlEscape(member.getAccount()));
+
         return MemberResponseDto.of(memberDao.save(member));
     }
 
     @Transactional
     public TokenDto login(MemberRequestDto memberRequestDto){
-        UsernamePasswordAuthenticationToken authenticationToken = memberRequestDto.toAuthentication();
 
+        memberRequestDto.setAccount(HtmlUtils.htmlEscape(memberRequestDto.getAccount()));
+
+        UsernamePasswordAuthenticationToken authenticationToken = memberRequestDto.toAuthentication();
+        log.info(memberRequestDto.getAccount());
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+
+
+
+        if(refreshTokenDao.existsByAccount(authentication.getName())){
+            throw new RuntimeException("이미 로그인이 되어있는 사용자입니다.");
+        }
 
         TokenDto tokenDto = tokenProvider.generateTokenDto(authentication, true);
 

@@ -3,10 +3,13 @@ package com.example.fileUpload.model.Member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.util.HtmlUtils;
 
 @Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class MemberRequestDto {
