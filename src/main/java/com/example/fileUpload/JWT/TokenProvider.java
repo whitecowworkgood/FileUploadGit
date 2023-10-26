@@ -1,15 +1,14 @@
 package com.example.fileUpload.JWT;
 
 
+
 import com.example.fileUpload.model.Token.TokenDto;
+
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import io.jsonwebtoken.security.*;
-import io.jsonwebtoken.security.SecurityException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
@@ -18,11 +17,9 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
 import java.security.Key;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.Date;
 import java.util.stream.Collectors;
 
@@ -58,6 +55,7 @@ public class TokenProvider {
 
         // Access Token 생성
         Date accessTokenExpiresIn = new Date(now + accessTokenExpireTime);
+
         String accessToken = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .claim("sub", authentication.getName())

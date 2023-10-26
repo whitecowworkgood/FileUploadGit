@@ -156,3 +156,12 @@
     //https://velog.io/@jkijki12/Spirng-Security-Jwt-%EB%A1%9C%EA%B7%B8%EC%9D%B8-%EC%A0%81%EC%9A%A9%ED%95%98%EA%B8%B0
     //https://velog.io/@jkijki12/Jwt-Refresh-Token-%EC%A0%81%EC%9A%A9%EA%B8%B0
 
+    //10월 26일 피드백
+    //jwt서명 관련 문제 해결하기 -> 스프링시큐리티에 내장되어 있는 jwt사용해보기
+    //sqlInjection 방지 다른방법(어노테이션 인지하기)
+    //xss필터 구현하기 -> 지금은 입력하는 부분에 replace함수를 사용했지만, filter config만들어서 관리하기
+    // -> xss우회기법에 대해서 학습하고 방지하기
+    //토큰을 발급할때, 사용자별로 key를 따로 만들어 db에 저장하고, 관리하는 코드로 개선하기
+    //다른 취약점 방지코드 구현하기
+    //https://cordingmonster.tistory.com/95
+

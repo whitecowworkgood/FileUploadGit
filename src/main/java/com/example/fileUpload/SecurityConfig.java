@@ -45,8 +45,12 @@ public class SecurityConfig {
 
                 .and()
                 .headers()
-                .xssProtection()
+
+                /*.xssProtection()
                 .and()
+                .contentSecurityPolicy("script-src 'self")
+
+                .and()*/
                 .frameOptions()
                 .sameOrigin()
 
