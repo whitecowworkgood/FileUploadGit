@@ -43,7 +43,7 @@ public class AuthService {
 
         Member member = memberRequestDto.toMember(passwordEncoder);
 
-        member.setAccount(HtmlUtils.htmlEscape(member.getAccount()));
+        //member.setAccount(member.getAccount());
 
         return MemberResponseDto.of(memberDao.save(member));
     }
@@ -51,7 +51,7 @@ public class AuthService {
     @Transactional
     public TokenDto login(MemberRequestDto memberRequestDto){
 
-        memberRequestDto.setAccount(HtmlUtils.htmlEscape(memberRequestDto.getAccount()));
+        //memberRequestDto.setAccount(memberRequestDto.getAccount());
 
         UsernamePasswordAuthenticationToken authenticationToken = memberRequestDto.toAuthentication();
         log.info(memberRequestDto.getAccount());
@@ -69,7 +69,7 @@ public class AuthService {
                 .key(authentication.getName())
                 .value(tokenDto.getRefreshToken())
                 .build();
-
+        log.info(authentication.getName());
         refreshTokenDao.save(refreshToken);
 
         return tokenDto;

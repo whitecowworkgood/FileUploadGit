@@ -92,7 +92,7 @@ public class FileUploadController {
     private FileDto createFileDto(MultipartFile file, String uuidFileName, String fileSavePath, String fileOlePath, Long countNum, String userName, String comment/*, boolean encryption*/) {
         return FileDto.builder()
                 .UUIDFileName(uuidFileName)
-                .originFileName(HtmlUtils.htmlEscape(Objects.requireNonNull(file.getOriginalFilename())))
+                .originFileName(Objects.requireNonNull(file.getOriginalFilename()))
                 .fileSize(file.getSize())
                 .fileType(file.getContentType())
                 .fileSavePath(fileSavePath)
@@ -100,8 +100,7 @@ public class FileUploadController {
                 .countNum(countNum)
                 .fileData(file)
                 .userName(userName)
-                .comment(HtmlUtils.htmlEscape(comment))
-                //.isEncrypt(encryption)
+                .comment(comment)
                 .build();
     }
 

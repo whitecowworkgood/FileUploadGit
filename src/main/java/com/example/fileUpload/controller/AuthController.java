@@ -7,6 +7,7 @@ import com.example.fileUpload.service.serviceImpl.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Slf4j
 @Tag(name = "Auth", description = "jwt 토큰 관리 컨트롤러")
 public class AuthController {
     private final AuthService authService;
@@ -34,6 +36,7 @@ public class AuthController {
     @Operation(summary = "Login", description = "로그인을 수행하고, jwt 토큰을 발급 받습니다.")
     @PostMapping("/login")
     public ResponseEntity<Object> login(@RequestBody MemberRequestDto memberRequestDto) {
+
         PostDeleteMessage postDeleteMessage = new PostDeleteMessage();
         try{
             return ResponseEntity.ok(authService.login(memberRequestDto));

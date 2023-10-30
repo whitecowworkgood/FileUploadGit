@@ -4,6 +4,8 @@ import com.example.fileUpload.JWT.JwtAccessDeniedHandler;
 import com.example.fileUpload.JWT.JwtAuthenticationEntryPoint;
 import com.example.fileUpload.JWT.JwtSecurityConfig;
 import com.example.fileUpload.JWT.TokenProvider;
+
+import com.example.fileUpload.Security.XssProtectFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -45,15 +47,8 @@ public class SecurityConfig {
 
                 .and()
                 .headers()
-
-                /*.xssProtection()
-                .and()
-                .contentSecurityPolicy("script-src 'self")
-
-                .and()*/
                 .frameOptions()
                 .sameOrigin()
-
 
                 .and()
                 .sessionManagement()

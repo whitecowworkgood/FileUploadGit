@@ -149,26 +149,28 @@
         </dependency>
 
         <dependency>
+            <groupId>com.navercorp.lucy</groupId>
+            <artifactId>lucy-xss-servlet</artifactId>
+            <version>2.0.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.navercorp.lucy</groupId>
+            <artifactId>lucy-xss</artifactId>
+            <version>1.6.3</version>
+        </dependency>
+
+        <!-- StringEscapeUtils -->
+        <dependency>
+            <groupId>org.apache.commons</groupId>
+            <artifactId>commons-text</artifactId>
+            <version>1.8</version>
+        </dependency>
+
+        <dependency>
             <groupId>com.example</groupId>
             <artifactId>fileupload</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/com.auth0/java-jwt -->
-        <!-- https://mvnrepository.com/artifact/org.springframework.security/spring-security-jwt -->
-        <dependency>
-            <groupId>org.springframework.security</groupId>
-            <artifactId>spring-security-jwt</artifactId>
-            <version>1.1.1.RELEASE</version>
-        </dependency>
-        <!-- https://mvnrepository.com/artifact/org.bitbucket.b_c/jose4j -->
-        <dependency>
-            <groupId>org.bitbucket.b_c</groupId>
-            <artifactId>jose4j</artifactId>
-            <version>0.9.3</version>
-        </dependency>
-
-
 
 
     </dependencies>
