@@ -13,24 +13,6 @@ import java.util.*;
 @Slf4j
 public class FileUtil {
 
-    /**
-     * 업로드한 파일이 mime-type을 비교합니다.
-     *
-     * @param fileDto 업로드 파일의 정보를 가지고 있는 DTO
-     * @return mime-type을 처리하면 true, 아니면 false
-     * */
-    /*public static boolean validateUploadedFileMimeType(FileDto fileDto)throws RuntimeException{
-
-        List<String> validTypeList = Arrays.stream(MimeType.values())
-                .map(MimeType::getValue)
-                .toList();
-
-        if(!validTypeList.contains(fileDto.getFileType())){
-            throw new RuntimeException();
-        }
-
-        return validTypeList.contains(fileDto.getFileType());
-    }*/
     public static boolean validateUploadedFileMimeType(FileDto fileDto) {
         List<String> validTypeList = Arrays.stream(MimeType.values())
                 .map(MimeType::getValue)
@@ -83,14 +65,6 @@ public class FileUtil {
         String originalFileName = file.getOriginalFilename();
         if (originalFileName != null && originalFileName.contains(".")) {
             return "."+StringUtils.getFilenameExtension(originalFileName);
-        } else {
-            return ".bin"; // 확장자가 없을 경우 bin 문자열 반환
-        }
-    }
-    public static String getFileExtension(String fileName) {
-
-        if (fileName != null && fileName.contains(".")) {
-            return "."+StringUtils.getFilenameExtension(fileName);
         } else {
             return ".bin"; // 확장자가 없을 경우 bin 문자열 반환
         }

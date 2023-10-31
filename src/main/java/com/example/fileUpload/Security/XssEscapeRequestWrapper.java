@@ -26,7 +26,10 @@ public class XssEscapeRequestWrapper extends HttpServletRequestWrapper {
             Pattern.compile("\\\\[xX][0-9a-fA-F]{2}|\\\\[0-7]{3}|\\\\t", Pattern.CASE_INSENSITIVE),
             Pattern.compile("&(#[0-9]+|#x[0-9a-fA-F]+|[a-zA-Z]+);", Pattern.CASE_INSENSITIVE),
             Pattern.compile("<a\\shref=", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("</a>", Pattern.CASE_INSENSITIVE)
+            Pattern.compile("</a>", Pattern.CASE_INSENSITIVE),
+            Pattern.compile("<div(.*?)>", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
+            Pattern.compile("<img(.*?)>", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
+
 
     };
     public XssEscapeRequestWrapper(HttpServletRequest request) {

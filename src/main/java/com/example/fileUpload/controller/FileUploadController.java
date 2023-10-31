@@ -45,7 +45,7 @@ public class FileUploadController {
     @PostMapping("")
     public ResponseEntity<PostDeleteMessage> uploadFile(@RequestParam("countNum") Long countNum,
                                                         @RequestParam(value = "comment", required = false, defaultValue = "null") String comment,
-                                                        @RequestParam("file") MultipartFile file/*, @RequestParam(value = "encryption", defaultValue = "true") boolean encryption*/) {
+                                                        @RequestParam("file") MultipartFile file) {
         String userName = authService.getUserNameWeb();
         PostDeleteMessage postDeleteMessage = new PostDeleteMessage();
 
@@ -56,8 +56,9 @@ public class FileUploadController {
             String uuidFileName = generateUuidFileName(file, uuidName);
             String fileSavePath = generateFileSavePath(uuidFileName);
             String fileOlePath = generateFileOlePath(uuidName);
+            String dividedComment = diviedCommentSize(comment);
 
-            FileDto fileDto = createFileDto(file, uuidFileName, fileSavePath, fileOlePath, countNum, userName, comment/*, encryption*/);
+            FileDto fileDto = createFileDto(file, uuidFileName, fileSavePath, fileOlePath, countNum, userName, dividedComment);
 
             fileUploadService.fileUpload(fileDto);
 
@@ -87,6 +88,14 @@ public class FileUploadController {
                 .append(File.separator)
                 .append(uuidName)
                 .append(File.separator).toString();
+    }
+
+    private String diviedCommentSize(String comment){
+        int maxLength = 100;
+        if(comment != null && comment.length() > maxLength){
+            comment = comment.substring(0, maxLength);
+        }
+        return comment;
     }
 
     private FileDto createFileDto(MultipartFile file, String uuidFileName, String fileSavePath, String fileOlePath, Long countNum, String userName, String comment/*, boolean encryption*/) {

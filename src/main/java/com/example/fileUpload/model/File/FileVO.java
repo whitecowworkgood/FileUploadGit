@@ -23,5 +23,6 @@ public class FileVO {
     private String userName;
     private String comment;
     private String timeStamp;
+    @JsonIgnore
     private boolean isEncrypt;
 }

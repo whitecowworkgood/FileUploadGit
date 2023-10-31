@@ -12,17 +12,15 @@ import com.example.fileUpload.repository.MemberDao;
 import com.example.fileUpload.repository.RefreshTokenDao;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.util.HtmlUtils;
-import org.unbescape.html.HtmlEscape;
 
-import java.sql.SQLException;
+import static com.example.fileUpload.Security.LDAPFilter.MemberRequestDtoLDAPFilter;
+
 
 @Service
 @RequiredArgsConstructor
@@ -37,13 +35,14 @@ public class AuthService {
 
     @Transactional
     public MemberResponseDto signup(MemberRequestDto memberRequestDto){
+
+        MemberRequestDtoLDAPFilter(memberRequestDto);
+
         if(memberDao.existsByAccount(memberRequestDto.getAccount())){
             throw new RuntimeException("이미 가입되어 있는 유저입니다.");
         }
 
         Member member = memberRequestDto.toMember(passwordEncoder);
-
-        //member.setAccount(member.getAccount());
 
         return MemberResponseDto.of(memberDao.save(member));
     }
@@ -51,12 +50,10 @@ public class AuthService {
     @Transactional
     public TokenDto login(MemberRequestDto memberRequestDto){
 
-        //memberRequestDto.setAccount(memberRequestDto.getAccount());
+        MemberRequestDtoLDAPFilter(memberRequestDto);
 
         UsernamePasswordAuthenticationToken authenticationToken = memberRequestDto.toAuthentication();
-        log.info(memberRequestDto.getAccount());
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
-
 
 
         if(refreshTokenDao.existsByAccount(authentication.getName())){
@@ -69,7 +66,6 @@ public class AuthService {
                 .key(authentication.getName())
                 .value(tokenDto.getRefreshToken())
                 .build();
-        log.info(authentication.getName());
         refreshTokenDao.save(refreshToken);
 
         return tokenDto;
@@ -92,7 +88,7 @@ public class AuthService {
         if(!refreshToken.getValue().equals(tokenRequestDto.getRefreshToken())){
             throw new RuntimeException("토큰의 유저 정보가 일치하지 않습니다.");
         }
-        //tokenProvider.getRefreshTokenExpiration(tokenRequestDto.getRefreshToken());
+
         TokenDto tokenDto = tokenProvider.generateTokenDto(authentication, false);
 
         return tokenDto;

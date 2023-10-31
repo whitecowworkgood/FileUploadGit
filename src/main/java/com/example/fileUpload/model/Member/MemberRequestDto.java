@@ -1,5 +1,6 @@
 package com.example.fileUpload.model.Member;
 
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ public class MemberRequestDto {
 
     private String account;
     private String password;
+
 
     public Member toMember(PasswordEncoder passwordEncoder){
         return Member.builder()
