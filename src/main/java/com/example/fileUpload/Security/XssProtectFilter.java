@@ -1,40 +1,40 @@
 package com.example.fileUpload.Security;
 
-import jakarta.servlet.Filter;
-import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
-import jakarta.servlet.ServletRequest;
-import jakarta.servlet.ServletResponse;
+import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.io.IOException;
 import java.util.regex.Pattern;
 
 public class XssProtectFilter implements Filter {
-    private static final Pattern[] scriptPatterns = {
-            Pattern.compile("<script>(.*?)</script>", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("src[\\r\\n]*=[\\r\\n]*\\'(.*?)\\'", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
-            Pattern.compile("</script>", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("<script(.*?)>", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
-            Pattern.compile("eval\\((.*?)\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
-            Pattern.compile("expression\\((.*?)\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
-            Pattern.compile("javascript:", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("vbscript:", Pattern.CASE_INSENSITIVE),
-            Pattern.compile("onload(.*?)=", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
-            Pattern.compile("onmouseover(.*?)=", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
-            Pattern.compile("onerror(.*?)=", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
-            Pattern.compile("onfocus(.*?)=", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
-            Pattern.compile("on\\w+\\s*=(.*?)\\s*", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
-            Pattern.compile("import\\s*\\(.*?\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
-            Pattern.compile("expression\\((.*?)\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
-            Pattern.compile("iframe\\s*src=.*", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL)
-    };
+    private final RequestMatcher requiresXssProtectionRequestMatcher;
+
+    public XssProtectFilter(String pattern) {
+        requiresXssProtectionRequestMatcher = new AntPathRequestMatcher(pattern);
+    }
+    @Override
+    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+        if (requiresXssProtectionRequestMatcher.matches((HttpServletRequest) request)) {
+            // 사용자 입력을 검증하고 치환하는 로직을 적용
+            if (request instanceof XssEscapeRequestWrapper) {
+                chain.doFilter(request, response);
+            } else {
+                XssEscapeRequestWrapper xssRequestWrapper = new XssEscapeRequestWrapper((HttpServletRequest) request);
+                chain.doFilter(xssRequestWrapper, response);
+            }
+        } else {
+            chain.doFilter(request, response);
+        }
+
+    }
+    @Override
+    public void destroy() {
+    }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
-            throws IOException, ServletException {
-
-       
+    public void init(FilterConfig filterConfig) {
     }
 
 }

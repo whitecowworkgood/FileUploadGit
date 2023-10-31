@@ -39,6 +39,7 @@ public class SecurityConfig {
 
         http.csrf().disable()
                 .formLogin().disable()
+                .addFilterBefore(new XssProtectFilter("/api/**"), corsFilter.getClass())
                 .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
 
                 .exceptionHandling()
