@@ -292,24 +292,6 @@ public class FileEncryptServiceImpl implements FileEncryptService {
         return encryptedBytes;
     }
 
-
-    /*private void generateAESKey() throws NoSuchAlgorithmException {
-        SecureRandom secureRandom = SecureRandom.getInstanceStrong();
-        byte[] keyData = new byte[AES_SIZE]; // 256비트 키
-        secureRandom.nextBytes(keyData);
-        this.fileEncryptKey = new SecretKeySpec(keyData, "AES");
-
-
-
-    }
-
-    private void generateIV() throws NoSuchAlgorithmException {
-        SecureRandom secureRandom = SecureRandom.getInstanceStrong();
-        byte[] ivBytes = new byte[IV_SIZE];
-        secureRandom.nextBytes(ivBytes);
-        this.ivSpec = new IvParameterSpec(ivBytes);
-    }*/
-
     private void setEncryptKeys() throws NoSuchAlgorithmException {
         this.fileEncryptKey = new AES().generateAESKey();
         this.ivSpec = new AES().generateIV();

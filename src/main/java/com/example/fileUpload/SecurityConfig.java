@@ -5,6 +5,7 @@ import com.example.fileUpload.JWT.JwtAuthenticationEntryPoint;
 import com.example.fileUpload.JWT.JwtSecurityConfig;
 import com.example.fileUpload.JWT.TokenProvider;
 
+import com.example.fileUpload.Security.MultipartUploadFilter;
 import com.example.fileUpload.Security.XssProtectFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -41,6 +42,8 @@ public class SecurityConfig {
                 .formLogin().disable()
                 .addFilterBefore(new XssProtectFilter("/api/**"), corsFilter.getClass())
                 .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterAfter(new MultipartUploadFilter("/api/upload"), UsernamePasswordAuthenticationFilter.class)
+                //.addFilter(new MultipartUploadFilter("/api/upload"))
 
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)

@@ -4,10 +4,14 @@ package com.example.fileUpload.JWT;
 
 import com.example.fileUpload.model.Token.TokenDto;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -18,7 +22,9 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
+import java.io.UnsupportedEncodingException;
 import java.security.Key;
+import java.security.Security;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
@@ -108,7 +114,10 @@ public class TokenProvider {
 
     public boolean validateToken(String token) {
         try {
-            Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
+
+            Key validateKey = parseSigningKey(token);
+
+            Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(validateKey).build().parseClaimsJws(token);
 
             return !claims.getBody().getExpiration().before(new Date());
 
@@ -118,10 +127,29 @@ public class TokenProvider {
             log.info("만료된 JWT 토큰입니다.");
         } catch (UnsupportedJwtException e) {
             log.info("지원되지 않는 JWT 토큰입니다.");
-        } catch (IllegalArgumentException e) {
+        } catch (IllegalArgumentException | JsonProcessingException e) {
             log.info("JWT 토큰이 잘못되었습니다.");
         }
         return false;
+    }
+
+    private Key parseSigningKey(String token) throws JsonProcessingException {
+        String base64Payload = token.split("\\.")[1];
+        byte[] decodedBytes = Base64.decodeBase64(base64Payload);
+        String payload = new String(decodedBytes);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        JsonNode jsonNode = objectMapper.readTree(payload);
+
+        //return jsonNode.get("sub").asText();
+        //아직 구현하는 중...
+        return key;
+    }
+
+    private Key generateSigningKey(){
+        //랜덤 50글자정도 만들어서 base64디코딩 시켜서 키로 사용하는 방법으로 사용하기
+        return null;
     }
 
     private Claims parseClaims(String accessToken) {
