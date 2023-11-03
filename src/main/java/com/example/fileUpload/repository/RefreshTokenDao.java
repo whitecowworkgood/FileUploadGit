@@ -36,8 +36,8 @@ public class RefreshTokenDao {
 
     }
 
-    public void update(RefreshToken refreshToken){
-        sqlSession.getMapper(RefreshTokenMapperAnno.class).update(refreshToken);
+    public String selectKey(String userName){
+        return sqlSession.getMapper(RefreshTokenMapperAnno.class).selectKey(userName);
     }
 
 }

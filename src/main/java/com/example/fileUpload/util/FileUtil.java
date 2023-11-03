@@ -12,6 +12,7 @@ import java.util.*;
 
 @Slf4j
 public class FileUtil {
+    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
     public static boolean validateUploadedFileMimeType(FileDto fileDto) {
         List<String> validTypeList = Arrays.stream(MimeType.values())
@@ -110,6 +111,19 @@ public class FileUtil {
                 }
             }
         }
+    }
+
+    public static String generateRandomString(int length) {
+        Random random = new Random();
+        StringBuilder stringBuilder = new StringBuilder(length);
+
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(CHARACTERS.length());
+            char randomChar = CHARACTERS.charAt(index);
+            stringBuilder.append(randomChar);
+        }
+
+        return stringBuilder.toString();
     }
 }
 

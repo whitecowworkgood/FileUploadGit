@@ -23,9 +23,10 @@ public interface RefreshTokenMapperAnno {
     boolean removeRefreshTokenByValue(String value);
 
 
-    @Insert("insert into refresh_token (rt_key, rt_value) VALUES (#{key}, #{value})")
+    @Insert("insert into refresh_token (rt_key, rt_value, singningkey) VALUES (#{key}, #{value}, #{signingKey})")
     void save(RefreshToken refreshToken);
 
-    @Update("UPDATE refresh_token SET rt_value = #{value} WHERE rt_key = #{key}")
-    void update (RefreshToken refreshToken);
+
+    @Select("SELECT singningkey FROM refresh_token WHERE rt_key = #{userName}")
+    String selectKey(String userName);
 }

@@ -10,6 +10,7 @@ import com.example.fileUpload.model.Token.TokenDto;
 import com.example.fileUpload.model.Token.TokenRequestDto;
 import com.example.fileUpload.repository.MemberDao;
 import com.example.fileUpload.repository.RefreshTokenDao;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -65,6 +66,7 @@ public class AuthService {
         RefreshToken refreshToken = RefreshToken.builder()
                 .key(authentication.getName())
                 .value(tokenDto.getRefreshToken())
+                .signingKey(tokenDto.getUserKey())
                 .build();
         refreshTokenDao.save(refreshToken);
 
@@ -72,11 +74,12 @@ public class AuthService {
     }
 
     @Transactional
-    public TokenDto reissue(TokenRequestDto tokenRequestDto){
+    public TokenDto reissue(TokenRequestDto tokenRequestDto) throws JsonProcessingException {
 
         Authentication authentication = tokenProvider.getAuthentication(tokenRequestDto.getAccessToken());
 
         if(!tokenProvider.validateToken(tokenRequestDto.getRefreshToken())){
+
             refreshTokenDao.removeRefreshTokenByValue(authentication.getName());
             throw new RuntimeException("Refresh Token이 유효하지 않습니다.");
         }
@@ -95,7 +98,7 @@ public class AuthService {
     }
 
     @Transactional
-    public String logout(TokenRequestDto tokenRequestDto){
+    public String logout(TokenRequestDto tokenRequestDto) throws JsonProcessingException {
 
         Authentication authentication = tokenProvider.getAuthentication(tokenRequestDto.getAccessToken());
 

@@ -75,13 +75,6 @@ public class FileUploadServiceImpl implements FileUploadService {
     }
 
 
-/*
-    @Override
-    public synchronized List<FileVO> printFileAll() {
-        return this.fileDao.printFileAll();
-    }
-*/
-
     @Override
     public synchronized FileVO printFileOne(Long id) {
 

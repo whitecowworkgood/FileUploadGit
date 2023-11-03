@@ -31,11 +31,11 @@ CREATE TABLE IF NOT EXISTS `file_entity` (
   `count_num` bigint(10) NOT NULL DEFAULT 5,
   `user_name` varchar(50) NOT NULL,
   `is_active` tinyint(1) NOT NULL DEFAULT 0,
-  `comment` mediumtext NOT NULL DEFAULT 'TEST',
+  `comment` text DEFAULT NULL,
   `time_stamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `is_encrypt` tinyint(1) NOT NULL,
+  `is_encrypt` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS `member` (
   `authority` enum('ROLE_ADMIN','ROLE_USER') DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`member_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
@@ -57,14 +57,15 @@ CREATE TABLE IF NOT EXISTS `ole_entry` (
   `original_file_name` varchar(1020) NOT NULL,
   `super_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=31 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
 -- 테이블 file_store.refresh_token 구조 내보내기
 CREATE TABLE IF NOT EXISTS `refresh_token` (
   `rt_key` varchar(255) NOT NULL,
-  `rt_value` varchar(255) DEFAULT NULL,
+  `rt_value` varchar(255) NOT NULL,
+  `singningkey` varchar(100) NOT NULL,
   PRIMARY KEY (`rt_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -76,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `rsa_keys` (
   `public_key` text NOT NULL,
   `private_key` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=47 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=79 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 

@@ -4,6 +4,7 @@ import com.example.fileUpload.message.PostDeleteMessage;
 import com.example.fileUpload.model.Member.MemberRequestDto;
 import com.example.fileUpload.model.Token.TokenRequestDto;
 import com.example.fileUpload.service.serviceImpl.AuthService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -58,7 +59,7 @@ public class AuthController {
             return ResponseEntity.ok(postDeleteMessage);
 
 
-        }catch (RuntimeException e){
+        }catch (RuntimeException | JsonProcessingException e){
 
             postDeleteMessage.setMessage(e.getMessage());
             return ResponseEntity.ok().body(postDeleteMessage);
@@ -75,7 +76,7 @@ public class AuthController {
             postDeleteMessage.setMessage(authService.logout(tokenRequestDto));
             return ResponseEntity.ok(postDeleteMessage);
 
-        }catch (RuntimeException e){
+        }catch (RuntimeException | JsonProcessingException e){
 
             postDeleteMessage.setMessage(e.getMessage());
             return ResponseEntity.ok().body(postDeleteMessage);

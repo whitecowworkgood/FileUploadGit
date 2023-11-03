@@ -43,7 +43,6 @@ public class SecurityConfig {
                 .addFilterBefore(new XssProtectFilter("/api/**"), corsFilter.getClass())
                 .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterAfter(new MultipartUploadFilter("/api/upload"), UsernamePasswordAuthenticationFilter.class)
-                //.addFilter(new MultipartUploadFilter("/api/upload"))
 
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)

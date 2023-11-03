@@ -4,12 +4,15 @@ package com.example.fileUpload.JWT;
 
 import com.example.fileUpload.model.Token.TokenDto;
 
+import com.example.fileUpload.repository.RefreshTokenDao;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,38 +24,43 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import javax.crypto.SecretKey;
-import java.io.UnsupportedEncodingException;
 import java.security.Key;
-import java.security.Security;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
 import java.util.stream.Collectors;
 
+import static com.example.fileUpload.util.FileUtil.generateRandomString;
+
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class TokenProvider {
     private static final String AUTHORITIES_KEY = "auth";
     private static final String BEARER_TYPE = "Bearer";
-    private final long accessTokenExpireTime;
-    private final long refreshTokenExpireTime;
 
-    private final Key key;
+    @Value("${jwt.token-validity-in-seconds}")
+    private long accessTokenExpireTime;
 
-    public TokenProvider(@Value("${jwt.secret}") String secretKey,
-                         @Value("${jwt.token-validity-in-seconds}") Long accessTime,
-                         @Value("${refresh-in-seconds}") Long refreshTime){
-        byte[] keyBytes = Decoders.BASE64.decode(secretKey);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
+    @Value("${refresh-in-seconds}")
+    private long refreshTokenExpireTime;
 
-        this.accessTokenExpireTime = accessTime;
-        this.refreshTokenExpireTime = refreshTime;
-    }
-
-
+    private final RefreshTokenDao refreshTokenDao;
 
     public TokenDto generateTokenDto(Authentication authentication, boolean generateRefreshToken) {
+
+        //키를 생성하는 방법은 여기에 두면 안되고, 역할을 분리해야 함
+        //우선 사용자 명을 가져오는 방법을 찾지 못해서 여기에 뒀지만, 해결책을 찾고, 코드 수정하기
+        String random = generateSigningKey();
+
+        if (!generateRefreshToken) {
+            // Refresh Token 생성 시 새로운 키를 생성
+            random = refreshTokenDao.selectKey(authentication.getName());
+        }
+
+        byte[] keyBytes = Decoders.BASE64.decode(random);
+        Key key = Keys.hmacShaKeyFor(keyBytes);
+
         // 권한들 가져오기
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -71,17 +79,17 @@ public class TokenProvider {
                 .signWith(key)
                 .compact();
 
-
         TokenDto.TokenDtoBuilder builder = TokenDto.builder()
                 .grantType(BEARER_TYPE)
                 .accessToken(accessToken)
-                .accessTokenExpiresIn(accessTokenExpiresIn.getTime());
+                .accessTokenExpiresIn(accessTokenExpiresIn.getTime())
+                .userKey(random);
 
         if (generateRefreshToken) {
-
             // Refresh Token 생성
             String refreshToken = Jwts.builder()
                     .setHeaderParam("typ", "JWT")
+                    .claim("sub", authentication.getName())
                     .claim("exp", new Date(now + refreshTokenExpireTime))
                     .signWith(key)
                     .compact();
@@ -93,9 +101,12 @@ public class TokenProvider {
     }
 
 
-    public Authentication getAuthentication(String accessToken) {
+
+
+    public Authentication getAuthentication(String token) throws JsonProcessingException {
+        Key validateKey = parseSigningKey(token);
         // 토큰 복호화
-        Claims claims = parseClaims(accessToken);
+        Claims claims = parseClaims(token, validateKey);
 
         if (claims.get(AUTHORITIES_KEY) == null) {
             throw new RuntimeException("권한 정보가 없는 토큰입니다.");
@@ -121,7 +132,7 @@ public class TokenProvider {
 
             return !claims.getBody().getExpiration().before(new Date());
 
-        }catch (SecurityException | MalformedJwtException e) {
+        }catch (io.jsonwebtoken.security.SignatureException | SecurityException | MalformedJwtException e) {
             log.info("잘못된 JWT 서명입니다.");
         } catch (ExpiredJwtException e) {
             log.info("만료된 JWT 토큰입니다.");
@@ -141,18 +152,17 @@ public class TokenProvider {
         ObjectMapper objectMapper = new ObjectMapper();
 
         JsonNode jsonNode = objectMapper.readTree(payload);
+        String key = refreshTokenDao.selectKey(jsonNode.get("sub").asText());
 
-        //return jsonNode.get("sub").asText();
-        //아직 구현하는 중...
-        return key;
+        return Keys.hmacShaKeyFor(Decoders.BASE64.decode(key));
+
     }
 
-    private Key generateSigningKey(){
-        //랜덤 50글자정도 만들어서 base64디코딩 시켜서 키로 사용하는 방법으로 사용하기
-        return null;
+    private String generateSigningKey(){
+       return generateRandomString(50);
     }
 
-    private Claims parseClaims(String accessToken) {
+    private Claims parseClaims(String accessToken, Key key) {
         try {
             return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(accessToken).getBody();
 
