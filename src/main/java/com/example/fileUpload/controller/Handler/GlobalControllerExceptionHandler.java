@@ -1,6 +1,8 @@
 package com.example.fileUpload.controller.Handler;
 
+import com.example.fileUpload.message.ExceptionMessage;
 import com.example.fileUpload.message.GetMessage;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.boot.web.server.ErrorPage;
@@ -14,15 +16,39 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 @ControllerAdvice
-@Slf4j
 public class GlobalControllerExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-    public ResponseEntity<GetMessage> handleTypeMismatchException(MethodArgumentTypeMismatchException ex) {
+    public ResponseEntity<ExceptionMessage> handleTypeMismatchException(MethodArgumentTypeMismatchException ex) {
 
-        GetMessage getMessage = new GetMessage();
-        return ResponseEntity.status(HttpStatus.OK).body(getMessage);
+        ExceptionMessage exceptionMessage = new ExceptionMessage();
+        exceptionMessage.setMessage("올바르지 않는 타입의 매개변수 입니다.");
+
+        return ResponseEntity.status(HttpStatus.OK).body(exceptionMessage);
     }
 
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ExceptionMessage> handleRuntimeException(RuntimeException ex) {
+        ExceptionMessage exceptionMessage = new ExceptionMessage();
+        exceptionMessage.setMessage(ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.OK).body(exceptionMessage);
+    }
+
+    @ExceptionHandler(IllegalAccessException.class)
+    public ResponseEntity<ExceptionMessage> handleJsonProcessingException(IllegalAccessException ex) {
+        ExceptionMessage exceptionMessage = new ExceptionMessage();
+        exceptionMessage.setMessage(ex.getCause().getMessage());
+
+        return ResponseEntity.status(HttpStatus.OK).body(exceptionMessage);
+    }
+
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<ExceptionMessage> handleNullPointException(NullPointerException ex) {
+        ExceptionMessage exceptionMessage = new ExceptionMessage();
+        exceptionMessage.setMessage("선택된 파일을 찾을 수 없습니다.");
+
+        return ResponseEntity.status(HttpStatus.OK).body(exceptionMessage);
+    }
 
 }

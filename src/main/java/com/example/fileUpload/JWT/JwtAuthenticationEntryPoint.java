@@ -1,6 +1,5 @@
 package com.example.fileUpload.JWT;
 
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -16,8 +15,6 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException) throws IOException {
-
-        log.info(authException.getMessage());
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");

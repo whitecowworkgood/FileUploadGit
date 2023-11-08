@@ -15,9 +15,9 @@ import java.util.List;
 public class FileDao {
     public final SqlSession sqlSession;
 
-    public List<FileVO> printFileAll(){
+    /*public List<FileVO> printFileAll(){
         return sqlSession.getMapper(FileEntryMapperAnno.class).findAllEntry();
-    }
+    }*/
 
     public FileVO printFileOne(Long id){
         return sqlSession.getMapper(FileEntryMapperAnno.class).selectById(id);

@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -54,6 +55,10 @@ public class FileDownloadController {
     @GetMapping("/file/{id}")
     @ResponseBody
     public ResponseEntity<Resource> downloadFile( @PathVariable("id") Long id) throws IOException {
+
+        if(id<0){
+            throw new RuntimeException("잘못된 매개변수를 입력하셨습니다. id값은 0보다 커야 합니다.");
+        }
 
         String userName = authService.getUserNameWeb();
 

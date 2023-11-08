@@ -8,16 +8,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public interface FileEncryptMapperAnno {
 
-    @Select("<script>"+
-            "SELECT private_key FROM rsa_keys WHERE id = #{id}"
-            + "</script>")
+    @Select("SELECT private_key FROM rsa_keys WHERE id = #{id}")
     String findPrivateKey(long index);
 
 
-    @Insert("<script>"+
-            "INSERT INTO rsa_keys (public_key, private_key) " +
-            "VALUES (#{publicKey}, #{privateKey})"
-            + "</script>")
+    @Insert("INSERT INTO rsa_keys (public_key, private_key) " +
+            "VALUES (#{publicKey}, #{privateKey})")
     @Options(useGeneratedKeys = true, keyProperty = "id")
     void insertRSAKeys(ConcurrentHashMap<String, String> stringKeypair);
 

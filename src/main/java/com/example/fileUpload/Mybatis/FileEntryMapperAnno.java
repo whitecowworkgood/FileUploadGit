@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface FileEntryMapperAnno {
     @Select("SELECT id, uuidfile_name, file_ole_path," +
-            " file_save_path,file_size,origin_file_name, file_type, count_num, user_name,comment,time_stamp, is_encrypt FROM file_entity where id = #{id}")
+            " file_save_path,file_size,origin_file_name, file_type, count_num, user_name,comment,time_stamp, is_encrypt, is_active FROM file_entity where id = #{id}")
     @Results({
             @Result(column ="id", property="id"),
             @Result(column ="uuidfile_name", property="UUIDFileName"),
@@ -22,19 +22,20 @@ public interface FileEntryMapperAnno {
             @Result(column = "user_name", property = "userName"),
             @Result(column = "comment", property = "comment"),
             @Result(column = "time_stamp",property = "timeStamp"),
-            @Result(column = "is_encrypt", property = "isEncrypt")
+            @Result(column = "is_encrypt", property = "isEncrypt"),
+            @Result(column = "is_active", property = "isActive")
     })
     FileVO selectById(Long id);
 
     @Select("SELECT id, uuidfile_name, file_ole_path," +
-            " file_save_path,file_size,origin_file_name, file_type, count_num, user_name,comment,time_stamp, is_encrypt"+
+            " file_save_path,file_size,origin_file_name, file_type, count_num, user_name,comment,time_stamp, is_encrypt, is_active"+
             " FROM file_entity where id = #{id} AND user_name = #{userName}")
     FileVO selectByIdName(Long id, String userName);
 
 
-    @Select("SELECT id, uuidfile_name, file_ole_path," +
-            "file_save_path,file_size,origin_file_name, file_type, count_num, user_name, is_encrypt FROM file_entity")
-    List<FileVO> findAllEntry();
+    /*@Select("SELECT id, uuidfile_name, file_ole_path," +
+            "file_save_path,file_size,origin_file_name, file_type, count_num, user_name, is_encrypt, is_active FROM file_entity")
+    List<FileVO> findAllEntry();*/
 
 
     @Delete("Delete from file_entity where id = #{id}")
@@ -48,7 +49,7 @@ public interface FileEntryMapperAnno {
 
 
     @Select("SELECT id, uuidfile_name, file_ole_path," +
-            "file_save_path, file_size, origin_file_name, file_type, count_num, user_name, comment, time_stamp, is_encrypt FROM file_entity where is_active = '0'")
+            "file_save_path, file_size, origin_file_name, file_type, count_num, user_name, comment, time_stamp, is_encrypt, is_active FROM file_entity where is_active = '0'")
 
     List<FileVO> adminSelectView();
 

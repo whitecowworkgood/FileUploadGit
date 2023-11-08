@@ -27,7 +27,7 @@ public class ExcelParser extends OleExtractor {
     public void extractOleFromDocumentFile(FileDto fileDto) throws IOException {
 
         try{
-            //callOfficeHandler(fileDto);
+
             this.fs = new FileInputStream(fileDto.getFileSavePath());
 
             this.hssfWorkbook= new HSSFWorkbook(this.fs);

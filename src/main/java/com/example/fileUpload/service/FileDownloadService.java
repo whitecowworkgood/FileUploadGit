@@ -20,6 +20,4 @@ public interface FileDownloadService {
 
     List<UserFileVO> showAcceptedFiles(String userName);
 
-    void copyFile(Long id);
-
 }

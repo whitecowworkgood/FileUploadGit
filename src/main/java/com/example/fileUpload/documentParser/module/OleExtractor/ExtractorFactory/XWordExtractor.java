@@ -23,7 +23,7 @@ public class XWordExtractor extends OleExtractor {
 
 
         try {
-            writeXDocuemnt();
+            writeXDocument();
 
         }catch (Exception e){
             catchException(e);
@@ -33,7 +33,7 @@ public class XWordExtractor extends OleExtractor {
         }
     }
 
-    protected void writeXDocuemnt() throws Exception {
+    protected void writeXDocument() throws Exception {
         this.docPackage = OPCPackage.open(this.packagePart.getInputStream());
         this.document = new XWPFDocument(this.docPackage);
 

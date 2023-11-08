@@ -1,6 +1,7 @@
 package com.example.fileUpload.model.Member;
 
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

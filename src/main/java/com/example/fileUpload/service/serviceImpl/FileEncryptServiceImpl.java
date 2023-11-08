@@ -39,7 +39,6 @@ public class FileEncryptServiceImpl implements FileEncryptService {
 
     private final StringBuffer stringBuffer = new StringBuffer();
 
-
     @Value("${Save-Directory}")
     private String baseDir;
 

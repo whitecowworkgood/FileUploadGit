@@ -67,7 +67,7 @@ public class FileUploadServiceImpl implements FileUploadService {
             stringBuffer.append(this.baseDir).append(File.separator).append(fileDto.getUUIDFileName());
             Files.delete(Path.of(stringBuffer.toString()));
 
-           throw new FileUploadException("Failed to upload the File.");
+           throw new FileUploadException("파일 업로드에 실패하였습니다.");
 
         }finally {
             stringBuffer.delete(0, stringBuffer.length());

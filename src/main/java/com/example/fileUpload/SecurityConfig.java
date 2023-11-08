@@ -5,6 +5,7 @@ import com.example.fileUpload.JWT.JwtAuthenticationEntryPoint;
 import com.example.fileUpload.JWT.JwtSecurityConfig;
 import com.example.fileUpload.JWT.TokenProvider;
 
+import com.example.fileUpload.Security.MemberRequestDtoFilter;
 import com.example.fileUpload.Security.MultipartUploadFilter;
 import com.example.fileUpload.Security.XssProtectFilter;
 import lombok.RequiredArgsConstructor;
@@ -40,8 +41,9 @@ public class SecurityConfig {
 
         http.csrf().disable()
                 .formLogin().disable()
+                .addFilterBefore(new MemberRequestDtoFilter("/auth/login", "/auth/signup"), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new XssProtectFilter("/api/**"), corsFilter.getClass())
-                .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)//JsonDataFilter.class
                 .addFilterAfter(new MultipartUploadFilter("/api/upload"), UsernamePasswordAuthenticationFilter.class)
 
                 .exceptionHandling()

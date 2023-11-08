@@ -25,4 +25,5 @@ public class FileVO {
     private String timeStamp;
     @JsonIgnore
     private boolean isEncrypt;
+    private boolean isActive;
 }

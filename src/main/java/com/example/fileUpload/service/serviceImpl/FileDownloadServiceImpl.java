@@ -107,35 +107,4 @@ public class FileDownloadServiceImpl implements FileDownloadService {
         this.fileDao.decreaseCountNum(id);
     }
 
-    @Override
-    public void copyFile(Long id) {
-
-        String baseDownloadPath = this.stringBuffer.append(this.baseDir).append(File.separator)
-                .append("download").append(File.separator).append(this.fileDao.printFileOne(id).getUserName()).toString();
-
-        this.stringBuffer.delete(0, this.stringBuffer.length());
-
-        generateFolder(baseDownloadPath);
-
-
-        String srcPath = stringBuffer.append(this.baseDir)
-                .append(File.separator)
-                .append(this.fileDao.printFileOne(id).getUUIDFileName()).toString();
-        this.stringBuffer.delete(0, this.stringBuffer.length());
-
-        String destPath = this.stringBuffer.append(baseDownloadPath)
-                .append(File.separator)
-                .append(this.fileDao.printFileOne(id).getUUIDFileName())
-                .toString();
-        this.stringBuffer.delete(0, this.stringBuffer.length());
-
-        try{
-            Files.copy(Path.of(srcPath), Path.of(destPath));
-
-        }catch (IOException e){
-            ExceptionUtils.getStackTrace(e);
-
-        }
-
-    }
 }

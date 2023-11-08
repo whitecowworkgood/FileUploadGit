@@ -20,9 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.example.fileUpload.Security.LDAPFilter.MemberRequestDtoLDAPFilter;
-
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -37,8 +34,6 @@ public class AuthService {
     @Transactional
     public MemberResponseDto signup(MemberRequestDto memberRequestDto){
 
-        MemberRequestDtoLDAPFilter(memberRequestDto);
-
         if(memberDao.existsByAccount(memberRequestDto.getAccount())){
             throw new RuntimeException("이미 가입되어 있는 유저입니다.");
         }
@@ -50,8 +45,6 @@ public class AuthService {
 
     @Transactional
     public TokenDto login(MemberRequestDto memberRequestDto){
-
-        MemberRequestDtoLDAPFilter(memberRequestDto);
 
         UsernamePasswordAuthenticationToken authenticationToken = memberRequestDto.toAuthentication();
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
@@ -72,6 +65,7 @@ public class AuthService {
 
         return tokenDto;
     }
+
 
     @Transactional
     public TokenDto reissue(TokenRequestDto tokenRequestDto) throws JsonProcessingException {
@@ -97,10 +91,22 @@ public class AuthService {
         return tokenDto;
     }
 
-    @Transactional
-    public String logout(TokenRequestDto tokenRequestDto) throws JsonProcessingException {
 
-        Authentication authentication = tokenProvider.getAuthentication(tokenRequestDto.getAccessToken());
+    @Transactional
+    public String logout(TokenRequestDto tokenRequestDto) {
+        Authentication authentication = null;
+
+        try {
+            authentication= tokenProvider.getAuthentication(tokenRequestDto.getAccessToken());
+
+        } catch (JsonProcessingException  e) {
+
+            throw new IllegalArgumentException("토큰 증명에 실패하였습니다.");
+        }catch (IllegalArgumentException e){
+
+            throw new IllegalArgumentException("로그아웃된 사용자 입니다.");
+        }
+
 
         if(!tokenProvider.validateToken(tokenRequestDto.getRefreshToken())){
             refreshTokenDao.removeRefreshTokenByValue(authentication.getName());
@@ -109,8 +115,8 @@ public class AuthService {
 
         RefreshToken refreshToken = refreshTokenDao.findByKey(authentication.getName())
                 .orElseThrow(()->new RuntimeException("로그아웃된 사용자 입니다."));
-
-        if(!refreshToken.getValue().equals(tokenRequestDto.getRefreshToken())){
+        //로그아웃 판별 부분이 중복이여서 수정예정
+        if(/*refreshToken != null||*/!refreshToken.getValue().equals(tokenRequestDto.getRefreshToken())){
             throw new RuntimeException("토큰의 유저 정보가 일치하지 않습니다.");
         }
 

@@ -22,7 +22,7 @@ public class scriptRegex {
             Pattern.compile("<a\\shref=", Pattern.CASE_INSENSITIVE),
             Pattern.compile("</a>", Pattern.CASE_INSENSITIVE),
             Pattern.compile("<div(.*?)>", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
-            Pattern.compile("<img(.*?)>", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
-            Pattern.compile(".*\\.\\..*|.*[.]+/.*", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL)
+            Pattern.compile("<img(.*?)>", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL)
+
     };
 }

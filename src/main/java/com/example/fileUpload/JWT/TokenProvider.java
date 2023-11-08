@@ -1,7 +1,5 @@
 package com.example.fileUpload.JWT;
 
-
-
 import com.example.fileUpload.model.Token.TokenDto;
 
 import com.example.fileUpload.repository.RefreshTokenDao;
@@ -12,7 +10,6 @@ import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.beans.factory.annotation.Value;

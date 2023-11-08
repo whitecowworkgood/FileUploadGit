@@ -32,7 +32,6 @@ public class AdminController {
     private final AdminService adminService;
     private final FileUploadService fileUploadService;
     private final FileEncryptService fileEncryptService;
-    private final FileDownloadService fileDownloadService;
 
     @Operation(summary = "허가 대기 중인 파일 출력", description = "허가 대기 중인 파일 출력합니다.")
     @GetMapping("/files")
@@ -71,21 +70,18 @@ public class AdminController {
 
        PostDeleteMessage postDeleteMessage = new PostDeleteMessage();
 
+        if(id<=0){
+            throw new RuntimeException("잘못된 매개변수를 입력하셨습니다. id값은 0보다 커야 합니다.");
+        }
 
-        try{
+        if(!fileUploadService.printFileOne(id).isActive()){
+
             this.adminService.acceptFile(id);
-
-            if(fileUploadService.printFileOne(id).isEncrypt()){
-                this.fileEncryptService.decryptFile(id);
-
-            }else{
-                this.fileDownloadService.copyFile(id);
-            }
+            this.fileEncryptService.decryptFile(id);
             postDeleteMessage.setMessage("Change Completed");
 
-        }catch (NullPointerException e){
-            ExceptionUtils.getStackTrace(e);
-            postDeleteMessage.setMessage("Not Found");
+        }else{
+                postDeleteMessage.setMessage("Already Changed");
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(postDeleteMessage);
