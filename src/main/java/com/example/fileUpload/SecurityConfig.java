@@ -7,6 +7,7 @@ import com.example.fileUpload.JWT.TokenProvider;
 
 import com.example.fileUpload.Security.MemberRequestDtoFilter;
 import com.example.fileUpload.Security.MultipartUploadFilter;
+import com.example.fileUpload.Security.TokenDtoFilter;
 import com.example.fileUpload.Security.XssProtectFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -45,6 +46,7 @@ public class SecurityConfig {
                 .addFilterBefore(new XssProtectFilter("/api/**"), corsFilter.getClass())
                 .addFilterBefore(corsFilter, UsernamePasswordAuthenticationFilter.class)//JsonDataFilter.class
                 .addFilterAfter(new MultipartUploadFilter("/api/upload"), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new TokenDtoFilter("/auth/reissue", "/auth/logout"), UsernamePasswordAuthenticationFilter.class)
 
                 .exceptionHandling()
                 .authenticationEntryPoint(jwtAuthenticationEntryPoint)

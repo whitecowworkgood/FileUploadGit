@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -14,12 +13,15 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-@Slf4j
-public class MemberRequestDtoFilter implements Filter {
+public class TokenDtoFilter implements Filter {
+
     private final RequestMatcher[] requiresXssProtectionRequestMatchers;
+    private final String base64ErrorPattern = "[\\+/=,:;\"&<>^']"; //추가적으로 더 있을것임, 추가하기
 
-    public MemberRequestDtoFilter(String... patterns) {
+    public TokenDtoFilter(String... patterns) {
         requiresXssProtectionRequestMatchers = new RequestMatcher[patterns.length];
 
         for (int i = 0; i < patterns.length; i++) {
@@ -31,7 +33,7 @@ public class MemberRequestDtoFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 
         boolean shouldChain = false;
-        //MemberRequestDtoWrapper memberRequestDtoWrapper = null;
+        //TokenDtoWrapper tokenDtoWrapper = null;
         RequestWrapper requestWrapper = null;
         ServletInputStream servletInputStream = null;
 
@@ -45,31 +47,23 @@ public class MemberRequestDtoFilter implements Filter {
 
 
 
-                   // memberRequestDtoWrapper = new MemberRequestDtoWrapper((HttpServletRequest) request);
+                    //tokenDtoWrapper = new TokenDtoWrapper((HttpServletRequest) request);
                     requestWrapper = new RequestWrapper((HttpServletRequest) request);
 
                     ObjectMapper objectMapper = new ObjectMapper();
 
                     try {
-                        //servletInputStream = memberRequestDtoWrapper.getInputStream();
+                        //servletInputStream = tokenDtoWrapper.getInputStream();
                         servletInputStream = requestWrapper.getInputStream();
                         JsonNode jsonNode = objectMapper.readTree(servletInputStream);
 
-                        String account = jsonNode.get("account").asText();
-                        String password = jsonNode.get("password").asText();
+                        String accessToken = jsonNode.get("accessToken").asText();
+                        String refreshToken = jsonNode.get("refreshToken").asText();
 
-                        if (!isValidAccount(account) || !isValidPassword(password)) {
+                        if (isSpecialStringCheckToken(accessToken) || isSpecialStringCheckToken(refreshToken)) {
                             sendJsonErrorResponse( (HttpServletResponse) response, "잘못된 값을 입력하였습니다.");
                             return;
 
-                        }
-                        if (containsNewlineCharacters(account) || containsNewlineCharacters(password)) {
-                            sendJsonErrorResponse((HttpServletResponse) response, "개행문자는 입력할 수 없습니다.");
-                            return;
-                        }
-                        if (!isValidAccountLength(account) || !isValidPasswordLength(password)) {
-                            sendJsonErrorResponse((HttpServletResponse) response, "아이디 또는 패스워드의 길이가 적절하지 않습니다. 5~15 글자로 맞춰주세요");
-                            return;
                         }
 
                     } catch (RuntimeException e) {
@@ -86,7 +80,7 @@ public class MemberRequestDtoFilter implements Filter {
 
         if (shouldChain) {
 
-            //chain.doFilter(memberRequestDtoWrapper, response);
+            //chain.doFilter(tokenDtoWrapper, response);
             chain.doFilter(requestWrapper, response);
         } else {
 
@@ -94,27 +88,17 @@ public class MemberRequestDtoFilter implements Filter {
         }
     }
 
-
-    private boolean isValidAccount(String account) {
-        return account.matches("[\\w\\s]*");
+    private boolean isSpecialStringCheckToken(String jwt){
+        return jwt != null && containsPattern(jwt);
     }
 
-    private boolean isValidPassword(String password) {
-        return password.matches("[\\w\\s!@#$%^&*()_+-=]*");
+
+    private boolean containsPattern(String tokenString){
+        Pattern regex = Pattern.compile(base64ErrorPattern);
+        Matcher matcher = regex.matcher(tokenString);
+        return matcher.find();
     }
 
-    private boolean containsNewlineCharacters(String text) {
-        return text.contains("\r") || text.contains("\n") || text.contains("\t");
-    }
-
-    private boolean isValidAccountLength(String account) {
-        return account.length() >= 5 && account.length() <= 15;
-    }
-
-    private boolean isValidPasswordLength(String password) {
-        return password.length() >= 5 && password.length() <= 25;
-    }
-    // JSON 형식의 오류 응답을 전송하는 메서드
     private void sendJsonErrorResponse(HttpServletResponse response, String errorMessage) throws IOException {
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
