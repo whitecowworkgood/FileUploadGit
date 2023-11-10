@@ -67,7 +67,7 @@ public class GlobalControllerExceptionHandler {
     @ExceptionHandler(NullPointerException.class)
     public ResponseEntity<ExceptionMessage> handleNullPointException(NullPointerException ex) {
         ExceptionMessage exceptionMessage = new ExceptionMessage();
-        exceptionMessage.setMessage("선택된 파일을 찾을 수 없습니다.");
+        exceptionMessage.setMessage("자원 선택에 문제가 있습니다.");
 
         return ResponseEntity.status(HttpStatus.OK).body(exceptionMessage);
     }
