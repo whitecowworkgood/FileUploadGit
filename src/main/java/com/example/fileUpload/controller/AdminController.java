@@ -11,12 +11,16 @@ import com.example.fileUpload.service.FileEncryptService;
 import com.example.fileUpload.service.FileUploadService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -66,7 +70,7 @@ public class AdminController {
     @Operation(summary = "파일의 다운로드를 허가", description = "파일의 다운로드를 허가합니다..")
     @PutMapping("/accept")
     @ResponseBody
-    public ResponseEntity<PostDeleteMessage> acceptFile(@RequestParam("id")  Long id){
+    public ResponseEntity<PostDeleteMessage> acceptFile(@RequestParam("id") Long id){
 
        PostDeleteMessage postDeleteMessage = new PostDeleteMessage();
 
@@ -86,6 +90,7 @@ public class AdminController {
 
         return ResponseEntity.status(HttpStatus.OK).body(postDeleteMessage);
     }
+
 
 
 }

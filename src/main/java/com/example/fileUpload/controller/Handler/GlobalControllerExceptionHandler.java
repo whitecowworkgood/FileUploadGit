@@ -1,23 +1,15 @@
 package com.example.fileUpload.controller.Handler;
 
 import com.example.fileUpload.message.ExceptionMessage;
-import com.example.fileUpload.message.GetMessage;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.springframework.boot.web.server.ErrorPage;
-import org.springframework.boot.web.server.ErrorPageRegistrar;
-import org.springframework.boot.web.server.ErrorPageRegistry;
-import org.springframework.core.Ordered;
-import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Component;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.servlet.NoHandlerFoundException;
-
 @Slf4j
 @ControllerAdvice
 public class GlobalControllerExceptionHandler {
@@ -36,6 +28,17 @@ public class GlobalControllerExceptionHandler {
 
         ExceptionMessage exceptionMessage = new ExceptionMessage();
         exceptionMessage.setMessage("올바르지 않는 타입의 매개변수 입니다.");
+
+        return ResponseEntity.status(HttpStatus.OK).body(exceptionMessage);
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ExceptionMessage> handleTypeNotValidException(MethodArgumentNotValidException ex){
+        ExceptionMessage exceptionMessage = new ExceptionMessage();
+
+        ex.getBindingResult().getFieldErrors().forEach(error -> {
+            exceptionMessage.setMessage(error.getDefaultMessage());
+        });
 
         return ResponseEntity.status(HttpStatus.OK).body(exceptionMessage);
     }
@@ -72,4 +75,19 @@ public class GlobalControllerExceptionHandler {
         return ResponseEntity.status(HttpStatus.OK).body(exceptionMessage);
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ExceptionMessage> handleIllegalArgumentException(IllegalArgumentException ex) {
+        ExceptionMessage exceptionMessage = new ExceptionMessage();
+        exceptionMessage.setMessage("불법 논변");
+
+        return ResponseEntity.status(HttpStatus.OK).body(exceptionMessage);
+    }
+    //경로에 빈칸이 있가나 해서, 경로를 찾을 수 없는 경우
+    @ExceptionHandler(MissingPathVariableException.class)
+    public ResponseEntity<ExceptionMessage> handleMissingPathVariableException(MissingPathVariableException ex) {
+        ExceptionMessage exceptionMessage = new ExceptionMessage();
+        exceptionMessage.setMessage("경로가 잘못 지정 되었습니다.");
+
+        return ResponseEntity.status(HttpStatus.OK).body(exceptionMessage);
+    }
 }

@@ -8,16 +8,16 @@ import com.example.fileUpload.service.serviceImpl.AuthService;
 import com.example.fileUpload.util.FileUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.util.HtmlUtils;
 
 import java.io.File;
 import java.util.Objects;
@@ -44,15 +44,17 @@ public class FileUploadController {
      */
     @Operation(summary = "파일 업로드", description = "파일을 저장 합니다.")
     @PostMapping("")
-    public ResponseEntity<PostDeleteMessage> uploadFile(@RequestParam("countNum") Long countNum,
+    public ResponseEntity<PostDeleteMessage> uploadFile(@RequestParam(value = "countNum") Long countNum,
                                                         @RequestParam(value = "comment", required = false, defaultValue = "null") String comment,
                                                         @RequestParam("file") MultipartFile file) {
-        String userName = authService.getUserNameWeb();
-        PostDeleteMessage postDeleteMessage = new PostDeleteMessage();
+
 
         if(countNum<=0 || countNum>10){
             throw new RuntimeException("다운로드 횟수는 0 미만x, 10회까지 허용이 가능합니다.");
         }
+
+        String userName = authService.getUserNameWeb();
+        PostDeleteMessage postDeleteMessage = new PostDeleteMessage();
 
         try {
 

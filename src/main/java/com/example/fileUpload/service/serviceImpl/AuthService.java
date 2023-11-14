@@ -59,7 +59,7 @@ public class AuthService {
         RefreshToken refreshToken = RefreshToken.builder()
                 .key(authentication.getName())
                 .value(tokenDto.getRefreshToken())
-                .signingKey(tokenDto.getUserKey())
+                .signKey(tokenDto.getUserKey())
                 .build();
         refreshTokenDao.save(refreshToken);
 

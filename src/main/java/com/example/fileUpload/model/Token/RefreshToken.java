@@ -10,13 +10,13 @@ public class RefreshToken {
 
     private String key;
     private String value;
-    private String signingKey;
+    private String signKey;
 
     @Builder
-    public RefreshToken(String key, String value, String signingKey) {
+    public RefreshToken(String key, String value, String signKey) {
         this.key = key;
         this.value = value;
-        this.signingKey=signingKey;
+        this.signKey=signKey;
     }
 
     public RefreshToken updateValue(String token) {
