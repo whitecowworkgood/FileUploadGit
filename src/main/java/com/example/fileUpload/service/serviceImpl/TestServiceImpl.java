@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -65,23 +66,31 @@ public class TestServiceImpl implements TestService {
             }
             if(testVO.getStatusCode().equals("complete")){
                 testMessage.setStatus(testVO.getStatusCode());
-                testMessage.setFiles( accessOleFolder(testVO.getOlePath()));
+                List<String> list = accessOleFolder(testVO.getOlePath());
+                testMessage.setFiles(list);
+
             }
         }
         return testMessage;
     }
 
     private List<String> accessOleFolder(String olePath) {
-
-        try (Stream<Path> paths = Files.walk(Paths.get(olePath))) {
-
+        Stream<Path> paths = null;
+        try{
+            paths = Files.walk(Paths.get(olePath));
             return paths
                     .filter(Files::isRegularFile)
                     .map(Path::toString)
                     .collect(Collectors.toList());
+        } catch (NoSuchFileException e){
+            log.warn("OLE 추출 가능한 파일이 아님, key: "+olePath);
+            ExceptionUtils.getStackTrace(e);
+
         } catch (IOException e) {
             ExceptionUtils.getStackTrace(e);
             log.error("OLE 폴더 접근 에러 발생: ", e);
+        } finally {
+            paths = null;
         }
         return Collections.singletonList("");
     }

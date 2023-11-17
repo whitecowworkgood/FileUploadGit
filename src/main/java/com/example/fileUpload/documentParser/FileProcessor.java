@@ -24,13 +24,13 @@ public class FileProcessor {
     public synchronized void createOleExtractorHandlerTest(FileDto fileDto) {
 
         try {
-            //Thread.sleep(20000);
             OleExtractor oleExtractor = this.fileParserFactory.createParser(fileDto);
             oleExtractor.extractOleFromDocumentFile(fileDto);
-            //processExternalFiles(fileDto); 임시 주석
-            testDao.updateStatusCodeComplete(fileDto.getComment());
+
         }catch (Exception e) {
             catchException(e);
+        }finally {
+            testDao.updateStatusCodeComplete(fileDto.getComment());
         }
     }
 
