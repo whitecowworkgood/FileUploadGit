@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `file_entity` (
   `time_stamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `is_encrypt` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
@@ -46,7 +46,7 @@ CREATE TABLE IF NOT EXISTS `member` (
   `authority` enum('ROLE_ADMIN','ROLE_USER') DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`member_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=51 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `ole_entry` (
 CREATE TABLE IF NOT EXISTS `refresh_token` (
   `rt_key` varchar(255) NOT NULL,
   `rt_value` varchar(255) NOT NULL,
-  `singningkey` varchar(100) NOT NULL,
+  `signkey` varchar(100) NOT NULL,
   PRIMARY KEY (`rt_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -77,7 +77,19 @@ CREATE TABLE IF NOT EXISTS `rsa_keys` (
   `public_key` text NOT NULL,
   `private_key` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=79 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- 내보낼 데이터가 선택되어 있지 않습니다.
+
+-- 테이블 file_store.test 구조 내보내기
+CREATE TABLE IF NOT EXISTS `test` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `key_value` varchar(1024) NOT NULL DEFAULT '',
+  `file_path` varchar(2048) NOT NULL,
+  `status_code` varchar(100) NOT NULL DEFAULT 'watting',
+  `ole_path` varchar(2048) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
