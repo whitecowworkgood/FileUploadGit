@@ -41,7 +41,6 @@ public class WordParser extends OleExtractor {
                 DirectoryNode objectPools = (DirectoryNode) this.hwpfDocument.getDirectory().getEntry(OleEntry.OBJECTPOOL.getValue());
 
                 for (Iterator<Entry> it = objectPools.getEntries(); it.hasNext(); ) {
-
                     this.officeEntryHandler.parser((DirectoryNode)it.next(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
                 }
             }
@@ -51,7 +50,6 @@ public class WordParser extends OleExtractor {
 
         }finally{
             closeResources();
-
         }
 
     }

@@ -5,11 +5,7 @@ import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
 import com.example.fileUpload.model.File.FileDto;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
-
-import java.io.IOException;
-import java.util.Arrays;
 
 @NoArgsConstructor
 @Slf4j
@@ -38,6 +34,12 @@ public class FileParserFactory {
             case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" -> {
                 return new XExcelParser();
             }
+            case"application/haansofthwp" ->{
+                return new HwpParser();
+            }
+            case"application/haansoftdocx" ->{
+                return new XWordParser();
+            }
             case "application/octet-stream" -> {
 
                 if (!fileDto.getOriginFileName().endsWith(".hwp")) {
@@ -55,4 +57,5 @@ public class FileParserFactory {
 
         }
     }
+
 }

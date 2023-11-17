@@ -30,7 +30,7 @@ public class SecurityConfig {
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
 
-    private final String[] allowedUrls = {"/swagger-ui/**", "/api-docs/**"/*,"/h2-console/**"*/, "/auth/**"};
+    private final String[] allowedUrls = {"/swagger-ui/**", "/api-docs/**", "/auth/**", "/simul/**", "/file/**"};
 
     @Bean
     public PasswordEncoder passwordEncoder() {

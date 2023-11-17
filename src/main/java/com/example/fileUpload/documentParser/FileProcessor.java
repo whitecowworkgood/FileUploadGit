@@ -4,6 +4,7 @@ import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
 import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.model.Ole.OleDto;
 import com.example.fileUpload.repository.OleDao;
+import com.example.fileUpload.repository.TestDao;
 import com.example.fileUpload.util.ExternalFileMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +19,22 @@ public class FileProcessor {
 
     private final FileParserFactory fileParserFactory;
     private final OleDao oleDao;
+    private final TestDao testDao;
 
-    public void createOleExtractorHandler(FileDto fileDto) {
+    public synchronized void createOleExtractorHandlerTest(FileDto fileDto) {
+
+        try {
+            //Thread.sleep(20000);
+            OleExtractor oleExtractor = this.fileParserFactory.createParser(fileDto);
+            oleExtractor.extractOleFromDocumentFile(fileDto);
+            //processExternalFiles(fileDto); 임시 주석
+            testDao.updateStatusCodeComplete(fileDto.getComment());
+        }catch (Exception e) {
+            catchException(e);
+        }
+    }
+
+    public synchronized void createOleExtractorHandler(FileDto fileDto) {
 
         try {
             OleExtractor oleExtractor = this.fileParserFactory.createParser(fileDto);

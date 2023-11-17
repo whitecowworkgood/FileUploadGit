@@ -10,6 +10,7 @@
         <mapper class="FileEncryptMapperAnno"/>
         <mapper class = "MemberMapperAnno" />
         <mapper class = "RefreshTokenMapperAnno" />
+        <mapper class="TestMapperAnno" />
         <!-- 계속 추가 가능~~-->
     </mappers>
 </configuration>
