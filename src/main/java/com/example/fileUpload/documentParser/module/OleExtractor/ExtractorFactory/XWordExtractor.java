@@ -7,6 +7,7 @@ import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
 
+import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 
 import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
@@ -16,6 +17,7 @@ public class XWordExtractor extends OleExtractor {
 
     private final PackagePart packagePart;
     private FileOutputStream outputStream = null;
+    private BufferedOutputStream bo = null;
     private OPCPackage docPackage = null;
     private XWPFDocument document = null;
 
@@ -42,7 +44,8 @@ public class XWordExtractor extends OleExtractor {
         super.stringBuffer.append(this.oleSavePath).append(uuid);
 
         this.outputStream = new FileOutputStream(super.stringBuffer.toString());
-        this.document.write(this.outputStream);
+        this.bo = new BufferedOutputStream(this.outputStream);
+        this.document.write(this.bo);
     }
     @Override
     protected void closeResources() {
@@ -50,6 +53,7 @@ public class XWordExtractor extends OleExtractor {
         IOUtils.closeQuietly(this.docPackage);
         IOUtils.closeQuietly(this.document);
         IOUtils.closeQuietly(this.outputStream);
+        IOUtils.closeQuietly(this.bo);
     }
 
     public XWordExtractor(PackagePart pPart, FileDto fileDto) {

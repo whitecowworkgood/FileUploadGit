@@ -20,6 +20,7 @@ import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 public class ExcelParser extends OleExtractor {
 
     private FileInputStream fs = null;
+    private BufferedInputStream bi = null;
     private HSSFWorkbook hssfWorkbook=null;
     private final OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
 
@@ -29,8 +30,8 @@ public class ExcelParser extends OleExtractor {
         try{
 
             this.fs = new FileInputStream(fileDto.getFileSavePath());
-
-            this.hssfWorkbook= new HSSFWorkbook(this.fs);
+            this.bi = new BufferedInputStream(this.bi);
+            this.hssfWorkbook= new HSSFWorkbook(this.bi);
 
             if(!this.hssfWorkbook.getAllEmbeddedObjects().isEmpty()){
                 generateFolder(fileDto.getFileOlePath());
@@ -54,5 +55,6 @@ public class ExcelParser extends OleExtractor {
     protected void closeResources() {
         IOUtils.closeQuietly(this.fs);
         IOUtils.closeQuietly(this.hssfWorkbook);
+        IOUtils.closeQuietly(this.bi);
     }
 }

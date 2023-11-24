@@ -37,6 +37,7 @@ public class FileUploadServiceImpl implements FileUploadService {
     private final OleDao oleDao; //mybatis
     private final FileProcessor fileProcessor;
     private final FileEncryptService fileEncryptService;
+    private final AuthService authService;
 
     private final StringBuffer stringBuffer = new StringBuffer();
 
@@ -48,7 +49,9 @@ public class FileUploadServiceImpl implements FileUploadService {
     @Transactional
     public synchronized void fileUpload(FileDto fileDto) {
         try {
+            String userName = authService.getUserNameWeb();
 
+            fileDto.setUserName(userName);
             //코드의 순서와 로직을 조금 바꿔서 적절하게 재구축 해보기
             validateFileDto(fileDto);
 
@@ -80,7 +83,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
         Optional<FileVO> optionalFileVO = Optional.ofNullable(this.fileDao.printFileOne(id));
 
-        return optionalFileVO.orElse(null);
+        return optionalFileVO.orElseThrow(()->new RuntimeException("데이터 조회에 실패하였습니다."));
     }
 
     @Override

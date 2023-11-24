@@ -11,6 +11,7 @@ import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
 import org.apache.xmlbeans.XmlException;
 
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 
@@ -20,6 +21,7 @@ import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 public class XPowerPointParser extends OleExtractor {
 
     private FileInputStream fs = null;
+    private BufferedInputStream bi = null;
     private XMLSlideShow pptx = null;
 
     @Override
@@ -29,7 +31,8 @@ public class XPowerPointParser extends OleExtractor {
         try{
 
             this.fs = new FileInputStream(fileDto.getFileSavePath());
-            this.pptx = new XMLSlideShow(OPCPackage.open(this.fs));
+            this.bi = new BufferedInputStream(this.bi);
+            this.pptx = new XMLSlideShow(OPCPackage.open(this.bi));
 
             if(!this.pptx.getAllEmbeddedParts().isEmpty()){
                 generateFolder(fileDto.getFileOlePath());
@@ -52,5 +55,6 @@ public class XPowerPointParser extends OleExtractor {
     protected void closeResources() {
         IOUtils.closeQuietly(this.fs);
         IOUtils.closeQuietly(this.pptx);
+        IOUtils.closeQuietly(this.bi);
     }
 }

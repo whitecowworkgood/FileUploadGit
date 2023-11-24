@@ -33,8 +33,12 @@ import static com.example.fileUpload.util.FileUtil.generateRandomString;
 @Component
 @RequiredArgsConstructor
 public class TokenProvider {
-    private static final String AUTHORITIES_KEY = "auth";
-    private static final String BEARER_TYPE = "Bearer";
+    private final String AUTHORITIES_KEY = "auth";
+    private final String SUBJECT_TYPE = "sub";
+    private final String BEARER_TYPE = "Bearer";
+    private final String JWT_TYPE = "type";
+    private final String JWT_VALUE="JWT";
+    private final String EXPIRATION_TYPE = "exp";
 
     @Value("${jwt.token-validity-in-seconds}")
     private long accessTokenExpireTime;
@@ -78,19 +82,19 @@ public class TokenProvider {
 
     private String generateAccessToken(String subject, String authorities, Date expiration, Key key) {
         return Jwts.builder()
-                .setHeaderParam("typ", "JWT")
-                .claim("sub", subject)
+                .setHeaderParam(JWT_TYPE, JWT_VALUE)
+                .claim(SUBJECT_TYPE, subject)
                 .claim(AUTHORITIES_KEY, authorities)
-                .claim("exp", expiration)
+                .claim(EXPIRATION_TYPE, expiration)
                 .signWith(key)
                 .compact();
     }
 
     private String generateRefreshToken(String subject, long expiration, Key key) {
         return Jwts.builder()
-                .setHeaderParam("typ", "JWT")
-                .claim("sub", subject)
-                .claim("exp", new Date(expiration))
+                .setHeaderParam(JWT_TYPE, JWT_VALUE)
+                .claim(SUBJECT_TYPE, subject)
+                .claim(EXPIRATION_TYPE, new Date(expiration))
                 .signWith(key)
                 .compact();
     }
@@ -145,7 +149,7 @@ public class TokenProvider {
     }
     private Key parseSigningKey(String token) throws JsonProcessingException {
 
-        String key = null;
+        //String key = null;
 
         String base64Payload = token.split("\\.")[1];
         byte[] decodedBytes = Base64.decodeBase64(base64Payload);
@@ -154,9 +158,9 @@ public class TokenProvider {
         ObjectMapper objectMapper = new ObjectMapper();
 
         JsonNode jsonNode = objectMapper.readTree(payload);
-        key = refreshTokenDao.selectKey(jsonNode.get("sub").asText());
+        String key = refreshTokenDao.selectKey(jsonNode.get(SUBJECT_TYPE).asText());
 
-        if(key == null){
+        if(key.isEmpty()){
             throw new RuntimeException("로그아웃된 사용자 입니다.");
         }
 

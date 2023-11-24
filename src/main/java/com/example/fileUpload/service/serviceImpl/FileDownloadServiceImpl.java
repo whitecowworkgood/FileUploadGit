@@ -31,32 +31,23 @@ import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 public class FileDownloadServiceImpl implements FileDownloadService {
 
     private final FileDao fileDao;
+    private final AuthService authService;
 
     private final StringBuffer stringBuffer = new StringBuffer();
-
-    private Path fileStorageLocation = null;
-    private Resource fileResource = null;
-
-    private Long id = null;
-
-    private String fileName = null;
-    private String userName = null;
 
 
     @Value("${Save-Directory}")
     private String baseDir;
 
     @Override
-    public void setParameter(String userName, Long id){
-        this.userName = userName;
-        this.id = id;
-    }
+    public String getFileName(Long id){
 
-    @Override
-    public String getFileName(){
+        String fileName = null;
 
         try{
-            fileName = this.fileDao.printFileInfo(this.id, this.userName).getOriginalFileName();
+            String currentUserName = authService.getUserNameWeb();
+
+            fileName = this.fileDao.printFileInfo(id, currentUserName).orElseThrow(NullPointerException::new).getOriginalFileName();
 
         }catch(NullPointerException e){
             ExceptionUtils.getStackTrace(e);
@@ -67,18 +58,21 @@ public class FileDownloadServiceImpl implements FileDownloadService {
 
     @Override
     public Resource downloadFile(Long id){
+        Resource fileResource = null;
 
         try {
+            String currentUserName = authService.getUserNameWeb();
             this.stringBuffer.append(this.baseDir)
                     .append(File.separator)
                     .append("download")
                     .append(File.separator)
-                    .append(this.userName)
+                    .append(currentUserName)
                     .append(File.separator)
-                    .append(this.fileDao.printFileInfo(this.id, this.userName).getUUIDFileName());
+                    .append(this.fileDao.printFileInfo(id, currentUserName).orElseThrow(NullPointerException::new).getUUIDFileName());
 
-            this.fileStorageLocation = Path.of(this.stringBuffer.toString());
-            this.fileResource = new UrlResource(this.fileStorageLocation.toUri());
+
+            Path fileStorageLocation = Path.of(this.stringBuffer.toString());
+            fileResource = new UrlResource(fileStorageLocation.toUri());
 
         } catch (MalformedURLException | NullPointerException e) {
             ExceptionUtils.getStackTrace(e);
@@ -88,7 +82,7 @@ public class FileDownloadServiceImpl implements FileDownloadService {
             this.stringBuffer.delete(0, this.stringBuffer.length());
         }
 
-        return this.fileResource;
+        return fileResource;
 
     }
 
@@ -98,8 +92,8 @@ public class FileDownloadServiceImpl implements FileDownloadService {
     }
 
     @Override
-    public UserFileVO getUserFileVO(Long id){
-        return this.fileDao.acceptedFilesById(id);
+    public Boolean isDownloadAble(Long id){
+        return this.fileDao.acceptedFilesById(id).getCountNum()>0;
     }
 
     @Override

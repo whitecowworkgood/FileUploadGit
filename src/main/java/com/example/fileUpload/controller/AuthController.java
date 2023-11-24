@@ -1,6 +1,6 @@
 package com.example.fileUpload.controller;
 
-import com.example.fileUpload.message.PostDeleteMessage;
+import com.example.fileUpload.message.ResultMessage;
 import com.example.fileUpload.model.Member.MemberRequestDto;
 import com.example.fileUpload.model.Token.TokenRequestDto;
 import com.example.fileUpload.service.serviceImpl.AuthService;
@@ -10,8 +10,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -44,12 +45,13 @@ public class AuthController {
     }
     @Operation(summary = "Logout", description = "사용자 정보를 로그아웃 시킵니다..")
     @PostMapping("/logout")
-    public ResponseEntity<PostDeleteMessage> logout(@Valid @RequestBody TokenRequestDto tokenRequestDto) {
-        PostDeleteMessage postDeleteMessage = new PostDeleteMessage();
+    public ResponseEntity<String> logout(@Valid @RequestBody TokenRequestDto tokenRequestDto) {
 
-        postDeleteMessage.setMessage(authService.logout(tokenRequestDto));
-        return ResponseEntity.ok(postDeleteMessage);
+        String authMessage = authService.logout(tokenRequestDto);
 
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ResultMessage.getInstance().logoutOf(authMessage));
     }
 
 }

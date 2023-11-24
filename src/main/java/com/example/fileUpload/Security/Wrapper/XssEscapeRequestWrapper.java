@@ -40,10 +40,11 @@ public class XssEscapeRequestWrapper extends HttpServletRequestWrapper {
     private String cleanXSS(String value) {
 
         if (value != null) {
-            boolean hasMatched = false;
+            boolean hasMatched;
 
             do {
                 hasMatched = false;
+                //hasMatched = false;
                 for (Pattern pattern : scriptPatterns) {
                     Matcher matcher = pattern.matcher(value);
                     if (matcher.find()) {

@@ -11,4 +11,13 @@ public class OleVO {
 
     private String UUIDFileName;
     private String originalFileName;
+
+    @Override
+    public String toString() {
+        return "{\n" +
+                "\t\t\t\"originalFileName\": \"" + originalFileName + "\",\n" +
+                "\t\t\t\"uuidfileName\": \"" + UUIDFileName + "\"\n" +
+                "\t\t}";
+    }
+
 }

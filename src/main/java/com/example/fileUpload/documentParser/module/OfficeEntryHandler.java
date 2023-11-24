@@ -34,6 +34,7 @@ public class OfficeEntryHandler {
         EmbeddedFileExtractor embeddedFileExtractor = new EmbeddedFileExtractor();
 
         FileOutputStream outputStream = null;
+        BufferedOutputStream bo = null;
 
         if(directoryNode.hasEntry(Ole10Native.OLE10_NATIVE)){
             String bmpType = embeddedFileExtractor.parseFileType((DocumentEntry) directoryNode.getEntry(OleEntry.COMPOBJ.getValue()));
@@ -50,7 +51,9 @@ public class OfficeEntryHandler {
 
                 try {
                     outputStream = new FileOutputStream(stringBuffer.toString());
-                    outputStream.write(oleStream.readAllBytes());
+                    bo = new BufferedOutputStream(outputStream);
+                    bo.write(oleStream.readAllBytes());
+                    //outputStream.write(oleStream.readAllBytes());
 
                 } catch (IOException e) {
                     ExceptionUtils.getStackTrace(e);
@@ -59,6 +62,7 @@ public class OfficeEntryHandler {
                     stringBuffer.delete(0, stringBuffer.length());
                     IOUtils.closeQuietly(oleStream);
                     IOUtils.closeQuietly(outputStream);
+                    IOUtils.closeQuietly(bo);
                 }
 
             }else{
@@ -87,7 +91,9 @@ public class OfficeEntryHandler {
 
                 try {
                     outputStream = new FileOutputStream(stringBuffer.toString());
-                    hs.write(outputStream);
+                    bo = new BufferedOutputStream(outputStream);
+                    hs.write(bo);
+                    //hs.write(outputStream);
 
                 } catch (IOException e) {
                     ExceptionUtils.getStackTrace(e);
@@ -96,6 +102,7 @@ public class OfficeEntryHandler {
                     stringBuffer.delete(0, stringBuffer.length());
                     IOUtils.closeQuietly(outputStream);
                     IOUtils.closeQuietly(hs);
+                    IOUtils.closeQuietly(bo);
                 }
 
         }else if(directoryNode.hasEntry(OleEntry.PPT.getValue())){
@@ -113,7 +120,9 @@ public class OfficeEntryHandler {
 
             try {
                 outputStream = new FileOutputStream(stringBuffer.toString());
-                outputStream.write(embeddedData.getEmbeddedData());
+                bo = new BufferedOutputStream(outputStream);
+                bo.write(embeddedData.getEmbeddedData());
+                //outputStream.write(embeddedData.getEmbeddedData());
 
             } catch (IOException e) {
                 ExceptionUtils.getStackTrace(e);
@@ -121,6 +130,7 @@ public class OfficeEntryHandler {
             } finally {
                 stringBuffer.delete(0, stringBuffer.length());
                 IOUtils.closeQuietly(outputStream);
+                IOUtils.closeQuietly(bo);
             }
 
         }else if(directoryNode.hasEntry(OleEntry.WORD.getValue())){
@@ -141,7 +151,9 @@ public class OfficeEntryHandler {
 
             try {
                 outputStream = new FileOutputStream(stringBuffer.toString());
-                outputStream.write(embeddedData.getEmbeddedData());
+                bo = new BufferedOutputStream(outputStream);
+                bo.write(embeddedData.getEmbeddedData());
+                //outputStream.write(embeddedData.getEmbeddedData());
 
             } catch (IOException e) {
                 ExceptionUtils.getStackTrace(e);
@@ -149,6 +161,7 @@ public class OfficeEntryHandler {
             } finally {
                 stringBuffer.delete(0, stringBuffer.length());
                 IOUtils.closeQuietly(outputStream);
+                IOUtils.closeQuietly(bo);
             }
         }else if (directoryNode.hasEntry(OleEntry.HWPINFO.getValue())) {
 
@@ -167,7 +180,9 @@ public class OfficeEntryHandler {
 
             try {
                 outputStream = new FileOutputStream(stringBuffer.toString());
-                outputStream.write(embeddedData.getEmbeddedData());
+                bo = new BufferedOutputStream(outputStream);
+                bo.write(embeddedData.getEmbeddedData());
+                //outputStream.write(embeddedData.getEmbeddedData());
 
             } catch (IOException e) {
                 ExceptionUtils.getStackTrace(e);
@@ -175,6 +190,7 @@ public class OfficeEntryHandler {
             } finally {
                 stringBuffer.delete(0, stringBuffer.length());
                 IOUtils.closeQuietly(outputStream);
+                IOUtils.closeQuietly(bo);
             }
 
         } else if (directoryNode.hasEntry(OleEntry.ODF.getValue())) {
@@ -194,7 +210,9 @@ public class OfficeEntryHandler {
 
             try {
                 outputStream = new FileOutputStream(stringBuffer.toString());
-                outputStream.write(oleStream.readAllBytes());
+                bo = new BufferedOutputStream(outputStream);
+                bo.write(oleStream.readAllBytes());
+                //outputStream.write(oleStream.readAllBytes());
 
             } catch (IOException e) {
                 ExceptionUtils.getStackTrace(e);
@@ -203,6 +221,7 @@ public class OfficeEntryHandler {
                 stringBuffer.delete(0, stringBuffer.length());
                 IOUtils.closeQuietly(oleStream);
                 IOUtils.closeQuietly(outputStream);
+                IOUtils.closeQuietly(bo);
             }
 
         } else if (directoryNode.hasEntry(OleEntry.PACKAGE.getValue())) {
@@ -226,7 +245,9 @@ public class OfficeEntryHandler {
 
                 try {
                     outputStream = new FileOutputStream(stringBuffer.toString());
-                    xs.write(outputStream);
+                    bo = new BufferedOutputStream(outputStream);
+                    xs.write(bo);
+                    //xs.write(outputStream);
 
                 } catch (IOException e) {
                     ExceptionUtils.getStackTrace(e);
@@ -236,6 +257,7 @@ public class OfficeEntryHandler {
                     IOUtils.closeQuietly(oleStream);
                     IOUtils.closeQuietly(outputStream);
                     IOUtils.closeQuietly(xs);
+                    IOUtils.closeQuietly(bo);
                 }
 
             }else if(type!=null && type.equals(FileType.CSV.getValue())){
@@ -300,7 +322,9 @@ public class OfficeEntryHandler {
 
                 try {
                     outputStream = new FileOutputStream(stringBuffer.toString());
-                    outputStream.write(oleStream.readAllBytes());
+                    bo = new BufferedOutputStream(outputStream);
+                    bo.write(oleStream.readAllBytes());
+                    //outputStream.write(oleStream.readAllBytes());
 
                 } catch (IOException e) {
                     ExceptionUtils.getStackTrace(e);
@@ -309,6 +333,7 @@ public class OfficeEntryHandler {
                     stringBuffer.delete(0, stringBuffer.length());
                     IOUtils.closeQuietly(oleStream);
                     IOUtils.closeQuietly(outputStream);
+                    IOUtils.closeQuietly(bo);
                 }
             }
 

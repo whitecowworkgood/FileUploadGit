@@ -26,4 +26,21 @@ public class FileVO {
     @JsonIgnore
     private boolean isEncrypt;
     private boolean isActive;
+
+    @Override
+    public String toString() {
+        return "{" +
+                "\"id\": " + id +
+                ", \"fileSize\": " + fileSize +
+                ", \"originalFileName\": \"" + originalFileName + '\"' +
+                ", \"fileType\": \"" + fileType + '\"' +
+                ", \"countNum\": " + countNum +
+                ", \"userName\": \"" + userName + '\"' +
+                ", \"comment\": \"" + comment + '\"' +
+                ", \"timeStamp\": \"" + timeStamp + '\"' +
+                ", \"active\": " + isActive +
+                ", \"uuidFileName\": \"" + UUIDFileName + '\"' +
+                '}';
+    }
 }
+

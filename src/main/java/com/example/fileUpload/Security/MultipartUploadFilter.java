@@ -27,6 +27,7 @@ public class MultipartUploadFilter implements Filter {
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
+
         if (requiresXssProtectionRequestMatcher.matches((HttpServletRequest) request)) {
             if (isMultiPartType(request)) {
                 if (isValidFileName(request)) {

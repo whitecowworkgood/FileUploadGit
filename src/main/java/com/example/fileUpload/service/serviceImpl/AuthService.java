@@ -101,10 +101,10 @@ public class AuthService {
 
         } catch (JsonProcessingException  e) {
 
-            throw new IllegalArgumentException("토큰 증명에 실패하였습니다.");
+            throw new RuntimeException("토큰 증명에 실패하였습니다.");
         }catch (IllegalArgumentException e){
 
-            throw new IllegalArgumentException("로그아웃된 사용자 입니다.");
+            throw new RuntimeException("로그아웃된 사용자 입니다.");
         }
 
 

@@ -20,7 +20,6 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     public List<FileVO> printBeforeAcceptFiles() {
-
         return this.fileDao.beforeAcceptFiles();
     }
 

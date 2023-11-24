@@ -10,10 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
-import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 
 import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 
@@ -23,6 +20,7 @@ import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 public class HwpParser extends OleExtractor {
     private final OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
     private FileInputStream fs = null;
+    private BufferedInputStream bi = null;
     private InputStream inputStream = null;
     private POIFSFileSystem poifs = null;
 
@@ -31,10 +29,11 @@ public class HwpParser extends OleExtractor {
 
         try{
             this.fs = new FileInputStream(fileDto.getFileSavePath());
+            this.bi = new BufferedInputStream(this.fs);
 
             boolean hasOLEFile = false;
 
-            for (EmbeddedBinaryData data : HWPReader.fromInputStream(this.fs).getBinData().getEmbeddedBinaryDataList()) {
+            for (EmbeddedBinaryData data : HWPReader.fromInputStream(this.bi).getBinData().getEmbeddedBinaryDataList()) {
                 if (data.getName().endsWith(".OLE")) {
 
                     if (!hasOLEFile) {
@@ -66,5 +65,6 @@ public class HwpParser extends OleExtractor {
         IOUtils.closeQuietly(this.fs);
         IOUtils.closeQuietly(this.inputStream);
         IOUtils.closeQuietly(this.poifs);
+        IOUtils.closeQuietly(this.bi);
     }
 }

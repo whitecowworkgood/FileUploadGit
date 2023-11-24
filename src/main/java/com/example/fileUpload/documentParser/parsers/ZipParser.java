@@ -7,11 +7,13 @@ import org.apache.commons.compress.archivers.zip.ZipArchiveInputStream;
 import org.apache.commons.io.IOUtils;
 import org.apache.tika.Tika;
 
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 
 public class ZipParser extends OleExtractor {
     private FileInputStream fs = null;
+    private BufferedInputStream bi = null;
     private ZipArchiveInputStream zais = null;
     private ZipArchiveEntry entry = null;
     private Tika tika = new Tika();
@@ -21,7 +23,8 @@ public class ZipParser extends OleExtractor {
 
         try {
             this.fs = new FileInputStream(fileDto.getFileSavePath());
-            this.zais = new ZipArchiveInputStream(this.fs, "EUC-KR", true);
+            this.bi = new BufferedInputStream(this.fs);
+            this.zais = new ZipArchiveInputStream(this.bi, "EUC-KR", true);
 
             showZipDocument();
 
@@ -53,6 +56,7 @@ public class ZipParser extends OleExtractor {
     protected void closeResources() {
         IOUtils.closeQuietly(this.fs);
         IOUtils.closeQuietly(this.zais);
+        IOUtils.closeQuietly(this.bi);
         entry = null;
         tika = null;
     }

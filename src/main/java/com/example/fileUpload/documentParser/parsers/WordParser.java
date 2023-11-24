@@ -12,6 +12,7 @@ import org.apache.poi.hwpf.HWPFDocumentCore;
 import org.apache.poi.poifs.filesystem.DirectoryNode;
 import org.apache.poi.poifs.filesystem.Entry;
 
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Iterator;
@@ -22,6 +23,7 @@ import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 @NoArgsConstructor
 public class WordParser extends OleExtractor {
     private FileInputStream fs = null;
+    private BufferedInputStream bi = null;
     private HWPFDocumentCore hwpfDocument =null;
     private final OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
 
@@ -32,7 +34,8 @@ public class WordParser extends OleExtractor {
         try{
 
             this.fs = new FileInputStream(fileDto.getFileSavePath());
-            this.hwpfDocument = new HWPFDocument(this.fs);
+            this.bi = new BufferedInputStream(this.fs);
+            this.hwpfDocument = new HWPFDocument(this.bi);
 
             if (this.hwpfDocument.getDirectory().hasEntry(OleEntry.OBJECTPOOL.getValue())) {
 
@@ -58,5 +61,6 @@ public class WordParser extends OleExtractor {
     protected void closeResources() {
         IOUtils.closeQuietly(this.fs);
         IOUtils.closeQuietly(this.hwpfDocument);
+        IOUtils.closeQuietly(this.bi);
     }
 }

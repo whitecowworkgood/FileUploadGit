@@ -58,7 +58,7 @@ public class FileProcessor {
                     .originalFileName(entry.getKey())
                     .UUIDFileName(entry.getValue())
                     .build();
-            this.oleDao.insertOle(oleDto);
+            this.oleDao.saveOle(oleDto);
         });
         ExternalFileMap.resetMap();
     }

@@ -12,6 +12,8 @@ import java.io.IOException;
 @Component
 @Slf4j
 public class JwtAccessDeniedHandler  implements AccessDeniedHandler {
+
+    private final String jsonMessage = "{\"statusCode\": \"403\", \"message\": \"" + "접근 권한이 없습니다." + "\"}";
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {
 
@@ -19,8 +21,6 @@ public class JwtAccessDeniedHandler  implements AccessDeniedHandler {
         response.setCharacterEncoding("UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);
 
-        // JSON 형식의 응답 메시지 구성
-        String jsonMessage = "{\"statusCode\": \"403\", \"message\": \"" + "접근 권한이 없습니다." + "\"}";
 
         // 응답에 JSON 메시지를 쓰기
         response.getWriter().write(jsonMessage);

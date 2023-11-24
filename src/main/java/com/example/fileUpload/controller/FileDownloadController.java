@@ -1,7 +1,7 @@
 package com.example.fileUpload.controller;
 
 
-import com.example.fileUpload.message.GetMessage;
+import com.example.fileUpload.message.ResultMessage;
 import com.example.fileUpload.model.File.UserFileVO;
 import com.example.fileUpload.service.FileDownloadService;
 import com.example.fileUpload.service.serviceImpl.AuthService;
@@ -13,11 +13,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 @Controller
@@ -33,54 +35,48 @@ public class FileDownloadController {
     @Operation(summary = "허가받은 파일 출력", description = "관리자로 부터 다운로드 허가 받은 파일을 출력합니다.")
     @GetMapping("/files")
     @ResponseBody
-    public ResponseEntity<GetMessage> showFiles() {
+    public ResponseEntity<String> showFiles() {
 
         String userName = authService.getUserNameWeb();
 
         List<UserFileVO> userFileVOS = this.fileDownloadService.showAcceptedFiles(userName);
-        GetMessage getMessage = new GetMessage();
 
-        if(!userFileVOS.isEmpty()){
-            getMessage.setMessage("List");
-            getMessage.setData(userFileVOS);
-        }
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ResultMessage.getInstance().userFileOf("User_File_List", userFileVOS));
 
-        return ResponseEntity.status(HttpStatus.OK).body(getMessage);
     }
 
     @Operation(summary = "선택 파일 다운로드", description = "파일 id를 통해 파일을 다운로드 합니다.")
-    @GetMapping("/file/{id}")
+    @GetMapping("/file")
     @ResponseBody
-    public ResponseEntity<Resource> downloadFile( @PathVariable("id") Long id) throws IOException {
-
-        if(id<0){
+    public ResponseEntity<Resource> downloadFile(@RequestParam("id") Long id) throws IOException {
+        if (id <= 0) {
             throw new RuntimeException("잘못된 매개변수를 입력하셨습니다. id값은 0보다 커야 합니다.");
         }
 
-        String userName = authService.getUserNameWeb();
-
-        fileDownloadService.setParameter(userName, id);
-
-        String fileName = fileDownloadService.getFileName();
-
-        UserFileVO userFileVO = fileDownloadService.getUserFileVO(id);
         Resource resource = fileDownloadService.downloadFile(id);
 
-        if(userFileVO != null && !(fileName.isEmpty()) && resource.isFile()){
-
+        if (canDownloadFile(id, resource)) {
             fileDownloadService.decreaseCountNum(id);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentDispositionFormData("attachment", new String(fileName.getBytes("UTF-8"), "ISO-8859-1"));
-            headers.setContentLength(resource.contentLength());
-
             return ResponseEntity.ok()
-                    .headers(headers)
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + encodeFileName(id))
+                    .contentLength(resource.contentLength())
                     .body(resource);
         }
 
-        return ResponseEntity.status(HttpStatus.OK).build();
+        return ResponseEntity.ok().build();
+    }
 
+    private Boolean canDownloadFile(Long id, Resource resource) {
+        boolean downloadAble = fileDownloadService.isDownloadAble(id);
+        return resource != null && resource.isFile() && downloadAble;
+    }
+
+    private String encodeFileName(Long id) {
+        String fileName = fileDownloadService.getFileName(id);
+        return new String(fileName.getBytes(StandardCharsets.UTF_8), StandardCharsets.ISO_8859_1);
     }
 
 }

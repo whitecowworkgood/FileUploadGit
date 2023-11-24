@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `file_entity` (
   `time_stamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `is_encrypt` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `ole_entry` (
   `original_file_name` varchar(1020) NOT NULL,
   `super_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `rsa_keys` (
   `public_key` text NOT NULL,
   `private_key` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=20 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=165 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS `test` (
   `status_code` varchar(100) NOT NULL DEFAULT 'watting',
   `ole_path` varchar(2048) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 

@@ -7,6 +7,7 @@ import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.hslf.usermodel.HSLFSlideShow;
 import org.apache.poi.openxml4j.opc.PackagePart;
 
+import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -17,6 +18,7 @@ public class PowerPointExtractor extends OleExtractor {
 
     private final PackagePart packagePart;
     private FileOutputStream outputStream = null;
+    private BufferedOutputStream bo = null;
     private HSLFSlideShow slideShow = null;
 
     public void doExtract() {
@@ -33,21 +35,23 @@ public class PowerPointExtractor extends OleExtractor {
     }
 
     private void writePowerPoint() throws IOException {
-        slideShow = new HSLFSlideShow(packagePart.getInputStream());
+        this.slideShow = new HSLFSlideShow(this.packagePart.getInputStream());
 
-        String uuid = addUniqueFileNameMapping(removePath(String.valueOf(packagePart.getPartName())));
+        String uuid = addUniqueFileNameMapping(removePath(String.valueOf(this.packagePart.getPartName())));
 
-        stringBuffer.append(oleSavePath).append(uuid);
+        this.stringBuffer.append(this.oleSavePath).append(uuid);
 
-        outputStream = new FileOutputStream(stringBuffer.toString());
-        slideShow.write(outputStream);
+        this.outputStream = new FileOutputStream(this.stringBuffer.toString());
+        this.bo = new BufferedOutputStream(this.outputStream);
+        this.slideShow.write(this.bo);
     }
 
     @Override
     protected void closeResources() {
-        stringBuffer.delete(0, stringBuffer.length());
-        IOUtils.closeQuietly(slideShow);
-        IOUtils.closeQuietly(outputStream);
+        this.stringBuffer.delete(0, this.stringBuffer.length());
+        IOUtils.closeQuietly(this.slideShow);
+        IOUtils.closeQuietly(this.outputStream);
+        IOUtils.closeQuietly(this.bo);
     }
 
     public PowerPointExtractor(PackagePart pPart, FileDto fileDto) {

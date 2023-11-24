@@ -31,9 +31,14 @@ public class Aop {
 
         try{
             log.info("[서비스 트랜잭션 시작] {}", joinPoint.getSignature());
-
+            long startTime = System.nanoTime();
             Object result = joinPoint.proceed();
             log.info("[서비스 트랜잭션 커밋] {}", joinPoint.getSignature());
+
+            long endTime = System.nanoTime();
+            double elapsedTimeInMilliseconds = (endTime - startTime)/1e6;
+
+            log.info(String.format("Service Processing Time: %.2f milliseconds", elapsedTimeInMilliseconds));
 
             return result;
         }catch (Exception e){
@@ -53,9 +58,17 @@ public class Aop {
     public Object controllerLogger(ProceedingJoinPoint joinPoint) throws Throwable{
 
         try{
+
             log.info("[컨트롤러 트랜잭션 시작] {}", joinPoint.getSignature());
             Object result = joinPoint.proceed();
+            long startTime = System.nanoTime();
             log.info("[컨트롤러 트랜잭션 커밋] {}", joinPoint.getSignature());
+
+
+            long endTime = System.nanoTime();
+            double elapsedTimeInMilliseconds = (endTime - startTime)/1e6;
+
+            log.info(String.format("Controller Processing Time: %.2f milliseconds", elapsedTimeInMilliseconds));
 
             return result;
         }catch (Exception e){
@@ -71,4 +84,5 @@ public class Aop {
 
         callGenerateFolderMethods(baseDir);
     }
+
 }

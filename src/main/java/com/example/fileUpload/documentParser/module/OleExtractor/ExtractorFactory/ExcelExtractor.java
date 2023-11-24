@@ -6,6 +6,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.opc.PackagePart;
 
+import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -17,6 +18,7 @@ public class ExcelExtractor extends OleExtractor {
     private final PackagePart packagePart;
 
     private FileOutputStream outputStream = null;
+    private BufferedOutputStream bo = null;
     private HSSFWorkbook embeddedWorkbook = null;
 
     public void doExtract() {
@@ -42,7 +44,8 @@ public class ExcelExtractor extends OleExtractor {
         super.stringBuffer.append(this.oleSavePath).append(uuid);
 
         this.outputStream = new FileOutputStream(super.stringBuffer.toString());
-        this.embeddedWorkbook.write(this.outputStream);
+        this.bo = new BufferedOutputStream(this.outputStream);
+        this.embeddedWorkbook.write(this.bo);
     }
 
     @Override
@@ -50,6 +53,7 @@ public class ExcelExtractor extends OleExtractor {
         super.stringBuffer.delete(0, super.stringBuffer.length());
         IOUtils.closeQuietly(this.embeddedWorkbook);
         IOUtils.closeQuietly(this.outputStream);
+        IOUtils.closeQuietly(this.bo);
     }
 
     public ExcelExtractor(PackagePart pPart, FileDto fileDto) {

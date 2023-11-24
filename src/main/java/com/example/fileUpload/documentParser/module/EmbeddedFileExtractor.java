@@ -27,6 +27,7 @@ public class EmbeddedFileExtractor {
      * */
     public void parseOle10NativeEntry(InputStream inputStream, String fileOlePath) {
         ByteArrayOutputStream variableData =null;
+        BufferedOutputStream bo = null;
         try{
             variableData = new ByteArrayOutputStream();
 
@@ -84,9 +85,13 @@ public class EmbeddedFileExtractor {
 
             stringBuilder.append(fileOlePath).append(File.separator).append(uuid);
             try (FileOutputStream fileOutputStream = new FileOutputStream(stringBuilder.toString())) {
-                fileOutputStream.write(embeddedData);
+                bo = new BufferedOutputStream(fileOutputStream);
+                bo.write(embeddedData);
+                //fileOutputStream.write(embeddedData);
             } catch (IOException e) {
                 ExceptionUtils.getStackTrace(e);
+            }finally{
+                IOUtils.closeQuietly(bo);
             }
             stringBuilder.setLength(0);
         }catch (IOException e){
@@ -105,8 +110,8 @@ public class EmbeddedFileExtractor {
     public String parseFileType(DocumentEntry compObj){
         DocumentInputStream compObjStream = null;
 
-        String fileFormat=null;
-        String fileTypeString=null;
+        String fileFormat;
+        String fileTypeString;
         String fileType="other";
 
         try{
@@ -155,6 +160,7 @@ public class EmbeddedFileExtractor {
 
             if (fileTypeString.startsWith("Excel.Sheet.12") || fileFormat.equals("Microsoft Excel Worksheet")) {
                 fileType=".xlsx";
+                //return ".xlsx";
             }
             if (fileTypeString.startsWith("Word.Document.12") || fileFormat.equals("Microsoft Word Document")) {
                 fileType = ".docx";
@@ -177,6 +183,7 @@ public class EmbeddedFileExtractor {
             if(fileTypeString.startsWith("Excel.SheetMacroEnabled.12") || fileFormat.startsWith("Microsoft Excel Macro-Enabled")){
                 fileType=".csv";
             }
+
 
         }catch (IOException e){
             ExceptionUtils.getStackTrace(e);

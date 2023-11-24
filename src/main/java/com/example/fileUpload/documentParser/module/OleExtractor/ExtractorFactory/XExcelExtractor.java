@@ -9,6 +9,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBookView;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.STVisibility;
 
+import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 
 import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
@@ -18,6 +19,7 @@ public class XExcelExtractor extends OleExtractor {
 
     private final PackagePart packagePart;
     private FileOutputStream outputStream = null;
+    private BufferedOutputStream bo = null;
     private OPCPackage docPackage = null;
     private XSSFWorkbook embeddedWorkbook = null;
 
@@ -48,7 +50,8 @@ public class XExcelExtractor extends OleExtractor {
 
         super.stringBuffer.append(this.oleSavePath).append(uuid);
         this.outputStream = new FileOutputStream(super.stringBuffer.toString());
-        this.embeddedWorkbook.write(this.outputStream);
+        this.bo = new BufferedOutputStream(this.bo);
+        this.embeddedWorkbook.write(this.bo);
     }
     @Override
     protected void closeResources() {
@@ -56,6 +59,7 @@ public class XExcelExtractor extends OleExtractor {
         IOUtils.closeQuietly(this.embeddedWorkbook);
         IOUtils.closeQuietly(this.outputStream);
         IOUtils.closeQuietly(this.docPackage);
+        IOUtils.closeQuietly(this.bo);
     }
 
     public XExcelExtractor(PackagePart pPart, FileDto fileDto) {

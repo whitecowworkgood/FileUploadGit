@@ -12,8 +12,8 @@ public interface TestService {
     void processFiles(FileDto fileDto) throws InterruptedException;
 
     Object selectStatus(String code);
-/*    List<String> doService(FileDto fileDto);
-
+    //List<String> doService(FileDto fileDto);
+/*
     CompletableFuture<String> AsyncService(FileDto fileDto) throws InterruptedException;
 
     void enqueueFile(FileDto fileDto);

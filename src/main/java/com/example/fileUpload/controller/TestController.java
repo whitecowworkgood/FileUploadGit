@@ -1,6 +1,6 @@
 package com.example.fileUpload.controller;
 
-import com.example.fileUpload.message.GetMessage;
+/*import com.example.fileUpload.message.GetMessage;
 import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.service.TestService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,7 +18,6 @@ import java.nio.file.Files;
 import java.util.List;
 import java.util.UUID;
 
-/*
 @Controller
 @RequiredArgsConstructor
 @Slf4j
@@ -49,5 +48,4 @@ public class TestController {
         return ResponseEntity.status(HttpStatus.OK).body(getMessage);
 
     }
-}
-*/
+}*/

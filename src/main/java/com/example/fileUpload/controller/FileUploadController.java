@@ -1,20 +1,17 @@
 package com.example.fileUpload.controller;
 
 
-import com.example.fileUpload.message.PostDeleteMessage;
+import com.example.fileUpload.message.ResultMessage;
 import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.service.FileUploadService;
-import com.example.fileUpload.service.serviceImpl.AuthService;
 import com.example.fileUpload.util.FileUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -34,18 +31,11 @@ public class FileUploadController {
     @Value("${Save-Directory}")
     private String baseDir;
     private final FileUploadService fileUploadService;
-    private final AuthService authService;
 
-    /**
-     * 파일을 업로드합니다.
-     *
-     * @param file 업로드할 파일입니다.
-     * @return ResponseEntity<PostDeleteMessage> 파일 업로드 결과를 반환합니다.
-     */
     @Operation(summary = "파일 업로드", description = "파일을 저장 합니다.")
     @PostMapping("")
-    public ResponseEntity<PostDeleteMessage> uploadFile(@RequestParam(value = "countNum") Long countNum,
-                                                        @RequestParam(value = "comment", required = false, defaultValue = "null") String comment,
+    public ResponseEntity<String> uploadFile(@RequestParam(value = "countNum") Long countNum,
+                                                        @RequestParam(value = "comment", required = false, defaultValue = "") String comment,
                                                         @RequestParam("file") MultipartFile file) {
 
 
@@ -53,28 +43,19 @@ public class FileUploadController {
             throw new RuntimeException("다운로드 횟수는 0 미만x, 10회까지 허용이 가능합니다.");
         }
 
-        String userName = authService.getUserNameWeb();
-        PostDeleteMessage postDeleteMessage = new PostDeleteMessage();
+        String uuidName = UUID.randomUUID().toString();
+        String uuidFileName = generateUuidFileName(file, uuidName);
+        String fileSavePath = generateFileSavePath(uuidFileName);
+        String fileOlePath = generateFileOlePath(uuidName);
+        String dividedComment = dividedCommentSize(comment);
 
-        try {
+        FileDto fileDto = createFileDto(file, uuidFileName, fileSavePath, fileOlePath, countNum, dividedComment);
 
-            String uuidName = UUID.randomUUID().toString();
+        fileUploadService.fileUpload(fileDto);
 
-            String uuidFileName = generateUuidFileName(file, uuidName);
-            String fileSavePath = generateFileSavePath(uuidFileName);
-            String fileOlePath = generateFileOlePath(uuidName);
-            String dividedComment = diviedCommentSize(comment);
-
-            FileDto fileDto = createFileDto(file, uuidFileName, fileSavePath, fileOlePath, countNum, userName, dividedComment);
-
-            fileUploadService.fileUpload(fileDto);
-
-        } catch (Exception e) {
-            ExceptionUtils.getStackTrace(e);
-            postDeleteMessage.setMessage(e.getMessage());
-        }
-
-        return ResponseEntity.status(HttpStatus.OK).body(postDeleteMessage);
+        return ResponseEntity.status(HttpStatus.OK)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(ResultMessage.getInstance().fileUploadOf("File Upload Success"));
     }
 
     private String generateUuidFileName(MultipartFile file, String uuidName) {
@@ -97,7 +78,7 @@ public class FileUploadController {
                 .append(File.separator).toString();
     }
 
-    private String diviedCommentSize(String comment){
+    private String dividedCommentSize(String comment){
         int maxLength = 100;
         if(comment != null && comment.length() > maxLength){
             comment = comment.substring(0, maxLength);
@@ -105,7 +86,7 @@ public class FileUploadController {
         return comment;
     }
 
-    private FileDto createFileDto(MultipartFile file, String uuidFileName, String fileSavePath, String fileOlePath, Long countNum, String userName, String comment/*, boolean encryption*/) {
+    private FileDto createFileDto(MultipartFile file, String uuidFileName, String fileSavePath, String fileOlePath, Long countNum, String comment) {
         return FileDto.builder()
                 .UUIDFileName(uuidFileName)
                 .originFileName(Objects.requireNonNull(file.getOriginalFilename()))
@@ -115,7 +96,6 @@ public class FileUploadController {
                 .fileOlePath(fileOlePath)
                 .countNum(countNum)
                 .fileData(file)
-                .userName(userName)
                 .comment(comment)
                 .build();
     }

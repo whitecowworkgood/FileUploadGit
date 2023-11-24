@@ -22,9 +22,10 @@ public class JwtFilter extends OncePerRequestFilter {
 
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String BEARER_PREFIX = "Bearer ";
+    private static final String BASE64_ERROR_PATTERN = "[\\+/=,:;\"&<>^']"; //추가적으로 더 있을것임, 추가하기
+
 
     private final TokenProvider tokenProvider;
-    private final String base64ErrorPattern = "[\\+/=,:;\"&<>^']"; //추가적으로 더 있을것임, 추가하기
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
@@ -66,7 +67,7 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     private boolean containsPattern(String tokenString){
-        Pattern regex = Pattern.compile(base64ErrorPattern);
+        Pattern regex = Pattern.compile(BASE64_ERROR_PATTERN);
         Matcher matcher = regex.matcher(tokenString);
         return matcher.find();
     }

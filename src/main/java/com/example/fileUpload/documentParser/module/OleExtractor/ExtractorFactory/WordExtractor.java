@@ -6,6 +6,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.openxml4j.opc.PackagePart;
 
+import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
@@ -17,6 +18,7 @@ public class WordExtractor extends OleExtractor {
     private final PackagePart packagePart;
 
     private FileOutputStream outputStream = null;
+    private BufferedOutputStream bo = null;
     private HWPFDocument document = null;
 
     public void doExtract(){
@@ -40,7 +42,8 @@ public class WordExtractor extends OleExtractor {
         super.stringBuffer.append(this.oleSavePath).append(uuid);
 
         this.outputStream = new FileOutputStream(super.stringBuffer.toString());
-        this.document.write(this.outputStream);
+        this.bo = new BufferedOutputStream(this.outputStream);
+        this.document.write(this.bo);
     }
 
     @Override
@@ -48,6 +51,7 @@ public class WordExtractor extends OleExtractor {
         super.stringBuffer.delete(0, super.stringBuffer.length());
         IOUtils.closeQuietly(this.document);
         IOUtils.closeQuietly(this.outputStream);
+        IOUtils.closeQuietly(this.bo);
     }
 
     public WordExtractor(PackagePart pPart, FileDto fileDto) {

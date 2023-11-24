@@ -19,6 +19,7 @@ import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 @Slf4j
 public class XWordParser extends OleExtractor {
     private FileInputStream fs = null;
+    private BufferedInputStream bi = null;
     private XWPFDocument docx = null;
 
     @Override
@@ -27,7 +28,8 @@ public class XWordParser extends OleExtractor {
         try{
 
             this.fs = new FileInputStream(fileDto.getFileSavePath());
-            this.docx = new XWPFDocument(OPCPackage.open(this.fs));
+            this.bi = new BufferedInputStream(fs);
+            this.docx = new XWPFDocument(OPCPackage.open(this.bi));
 
             if(!this.docx.getAllEmbeddedParts().isEmpty()){
                 generateFolder(fileDto.getFileOlePath());
@@ -48,5 +50,6 @@ public class XWordParser extends OleExtractor {
     protected void closeResources() {
         IOUtils.closeQuietly(this.fs);
         IOUtils.closeQuietly(this.docx);
+        IOUtils.closeQuietly(this.bi);
     }
 }

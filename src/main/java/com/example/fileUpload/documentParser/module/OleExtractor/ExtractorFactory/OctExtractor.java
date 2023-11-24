@@ -8,6 +8,7 @@ import org.apache.commons.io.IOUtils;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.poifs.filesystem.*;
 
+import java.io.BufferedOutputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -17,6 +18,7 @@ public class OctExtractor extends OleExtractor {
 
     private final PackagePart packagePart;
     private POIFSFileSystem poifsFileSystem =null;
+    private BufferedOutputStream bo = null;
     private DirectoryNode directoryNode = null;
     private DocumentInputStream oleStream = null;
 
@@ -65,7 +67,9 @@ public class OctExtractor extends OleExtractor {
     private void tryFileSaveUseOleStream(){
         try {
             this.fs = new FileOutputStream(buildOutputPath());
-            this.fs.write(this.oleStream.readAllBytes());
+            this.bo = new BufferedOutputStream(this.fs);
+            this.bo.write(this.oleStream.readAllBytes());
+            //this.fs.write(this.oleStream.readAllBytes());
 
         } catch (IOException e) {
             catchIOException(e);
@@ -78,7 +82,9 @@ public class OctExtractor extends OleExtractor {
     private void tryFileSaveUsePOIFStream(){
         try {
             this.fs = new FileOutputStream(buildOutputPath());
-            this.poifsFileSystem.writeFilesystem(this.fs);
+            this.bo = new BufferedOutputStream(this.fs);
+            this.poifsFileSystem.writeFilesystem(this.bo);
+            //this.poifsFileSystem.writeFilesystem(this.fs);
 
         }catch (IOException e) {
             catchIOException(e);
@@ -100,9 +106,10 @@ public class OctExtractor extends OleExtractor {
         IOUtils.closeQuietly(this.poifsFileSystem);
         IOUtils.closeQuietly(this.oleStream);
         IOUtils.closeQuietly(this.fs);
+        IOUtils.closeQuietly(this.bo);
     }
 
-    public OctExtractor(PackagePart pPart, FileDto fileDto) throws Exception {
+    public OctExtractor(PackagePart pPart, FileDto fileDto) {
         super.originalFileName = fileDto.getOriginFileName();
         super.oleSavePath = fileDto.getFileOlePath();
         this.packagePart = pPart;

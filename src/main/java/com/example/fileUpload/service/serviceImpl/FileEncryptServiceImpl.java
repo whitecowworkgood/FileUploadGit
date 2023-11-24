@@ -69,6 +69,7 @@ public class FileEncryptServiceImpl implements FileEncryptService {
         this.storedRSAKeyPair();
 
         this.rsa.freeResource();
+
     }
 
     @Override

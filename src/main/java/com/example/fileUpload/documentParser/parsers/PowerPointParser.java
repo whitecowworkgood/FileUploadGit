@@ -9,6 +9,7 @@ import org.apache.poi.hslf.usermodel.HSLFObjectData;
 import org.apache.poi.hslf.usermodel.HSLFSlideShow;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.List;
@@ -19,6 +20,7 @@ import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 @NoArgsConstructor
 public class PowerPointParser extends OleExtractor {
     private FileInputStream fs =null;
+    private BufferedInputStream bi = null;
     private POIFSFileSystem poifs =null;
     private HSLFSlideShow hslfSlideShow =null;
     private final OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
@@ -29,7 +31,8 @@ public class PowerPointParser extends OleExtractor {
         try{
 
             this.fs = new FileInputStream(fileDto.getFileSavePath());
-            this.hslfSlideShow = new HSLFSlideShow(this.fs);
+            this.bi = new BufferedInputStream(this.fs);
+            this.hslfSlideShow = new HSLFSlideShow(this.bi);
 
             if(!List.of(this.hslfSlideShow.getEmbeddedObjects()).isEmpty()){
                 generateFolder(fileDto.getFileOlePath());
@@ -62,5 +65,6 @@ public class PowerPointParser extends OleExtractor {
         IOUtils.closeQuietly(this.fs);
         IOUtils.closeQuietly(this.poifs);
         IOUtils.closeQuietly(this.hslfSlideShow);
+        IOUtils.closeQuietly(this.bi);
     }
 }

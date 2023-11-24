@@ -10,6 +10,7 @@ import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
+import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.PreparedStatement;
@@ -20,6 +21,7 @@ import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 public class XExcelParser extends OleExtractor {
     private FileInputStream fs = null;
     private XSSFWorkbook xlsx = null;
+    private BufferedInputStream bi = null;
 
     @Override
     public void extractOleFromDocumentFile(FileDto fileDto) throws IOException, OpenXML4JException {
@@ -28,7 +30,8 @@ public class XExcelParser extends OleExtractor {
         try{
 
             this.fs = new FileInputStream(fileDto.getFileSavePath());
-            this.xlsx = new XSSFWorkbook(OPCPackage.open(this.fs));
+            this.bi = new BufferedInputStream(this.fs);
+            this.xlsx = new XSSFWorkbook(OPCPackage.open(this.bi));
 
             if(!this.xlsx.getAllEmbeddedParts().isEmpty()){
                 generateFolder(fileDto.getFileOlePath());
@@ -49,5 +52,6 @@ public class XExcelParser extends OleExtractor {
     protected void closeResources() {
         IOUtils.closeQuietly(this.fs);
         IOUtils.closeQuietly(this.xlsx);
+        IOUtils.closeQuietly(this.bi);
     }
 }
