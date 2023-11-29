@@ -3,7 +3,7 @@ package com.example.fileUpload;
 import com.example.fileUpload.JWT.JwtAccessDeniedHandler;
 import com.example.fileUpload.JWT.JwtAuthenticationEntryPoint;
 import com.example.fileUpload.JWT.JwtSecurityConfig;
-import com.example.fileUpload.JWT.TokenProvider;
+import com.example.fileUpload.JWT.TokenValidate;
 
 //import com.example.fileUpload.Security.MemberRequestDtoFilter;
 import com.example.fileUpload.Security.MultipartUploadFilter;
@@ -25,7 +25,7 @@ import org.springframework.web.filter.CorsFilter;
 @Configuration
 @RequiredArgsConstructor
 public class SecurityConfig {
-    private final TokenProvider tokenProvider;
+    private final TokenValidate tokenValidate;
     private final CorsFilter corsFilter;
     private final JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     private final JwtAccessDeniedHandler jwtAccessDeniedHandler;
@@ -66,7 +66,7 @@ public class SecurityConfig {
                                 .requestMatchers("/api/**").hasAnyRole("USER", "ADMIN")
                                 .anyRequest().authenticated()
                 )
-                .apply(new JwtSecurityConfig(tokenProvider));
+                .apply(new JwtSecurityConfig(tokenValidate));
 
         return http.build();
     }

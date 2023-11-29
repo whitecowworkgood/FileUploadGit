@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @Builder
-public class OleDto {
+public class OleDto{
     private Long id;
     private String UUIDFileName;
     private String originalFileName;

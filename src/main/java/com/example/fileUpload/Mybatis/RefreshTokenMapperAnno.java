@@ -11,22 +11,25 @@ public interface RefreshTokenMapperAnno {
     @Results({
             @Result(column ="rt_key", property="key"),
             @Result(column ="rt_value", property="value"),
-            @Result(column = "signkey", property = "signkey")
+            @Result(column = "signature_Key", property = "signatureKey")
 
     })
     Optional<RefreshToken> findByKey(String key);
 
-    @Select("SELECT COUNT(*) FROM refresh_token WHERE rt_key = #{rt_key} ")
-    int existsByAccount(String rt_key);
+    @Select("SELECT rt_key FROM refresh_token WHERE rt_key = #{rt_key} ")
+    Optional<String> existsByAccount(String rt_key);
 
     @Delete("DELETE FROM refresh_token where rt_value = #{value}")
     boolean removeRefreshTokenByValue(String value);
 
 
-    @Insert("insert into refresh_token (rt_key, rt_value, signkey) VALUES (#{key}, #{value}, #{signKey})")
+    @Insert("insert into refresh_token (rt_key, rt_value, signature_Key) VALUES (#{key}, #{value}, #{signatureKey})")
     void save(RefreshToken refreshToken);
 
+    @Update("UPDATE refresh_token SET signature_Key = #{signatureKey} WHERE rt_key = #{key}")
+    void update(String key, String signKey);
 
-    @Select("SELECT signkey FROM refresh_token WHERE rt_key = #{userName}")
+
+    @Select("SELECT signature_Key FROM refresh_token WHERE rt_key = #{userName}")
     String selectKey(String userName);
 }

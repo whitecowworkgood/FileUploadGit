@@ -7,7 +7,7 @@ import org.aspectj.lang.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import static com.example.fileUpload.util.DirectoryChecker.callGenerateFolderMethods;
+import static com.example.fileUpload.util.DirectoryChecker.checkAndCreateBasicFolder;
 
 
 @Component
@@ -15,9 +15,9 @@ import static com.example.fileUpload.util.DirectoryChecker.callGenerateFolderMet
 @Aspect
 @RequiredArgsConstructor
 public class Aop {
+
     @Value("${Save-Directory}")
     private String baseDir;
-
 
     /**
      *
@@ -82,7 +82,7 @@ public class Aop {
     @Before("execution(* com.example.fileUpload.*.*.*(..))")
     public void downloadFolderCheck() {
 
-        callGenerateFolderMethods(baseDir);
+        checkAndCreateBasicFolder(baseDir);
     }
 
 }

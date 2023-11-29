@@ -51,6 +51,7 @@ public class FileDownloadController {
     @GetMapping("/file")
     @ResponseBody
     public ResponseEntity<Resource> downloadFile(@RequestParam("id") Long id) throws IOException {
+
         if (id <= 0) {
             throw new RuntimeException("잘못된 매개변수를 입력하셨습니다. id값은 0보다 커야 합니다.");
         }

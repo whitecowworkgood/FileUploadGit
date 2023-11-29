@@ -7,7 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.example.fileUpload.util.scriptRegex.scriptPatterns;
+import static com.example.fileUpload.util.ScriptRegex.scriptPatterns;
 
 @Slf4j
 public class XssEscapeRequestWrapper extends HttpServletRequestWrapper {

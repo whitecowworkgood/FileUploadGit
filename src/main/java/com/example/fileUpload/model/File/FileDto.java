@@ -10,7 +10,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Setter
 @AllArgsConstructor
 @Builder
-public class FileDto {
+public class FileDto{
     private Long id;
     private String UUIDFileName;
     private String fileOlePath;

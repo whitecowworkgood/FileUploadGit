@@ -3,7 +3,7 @@ package com.example.fileUpload.documentParser.parsers;
 import com.example.fileUpload.documentParser.module.OfficeEntryHandler;
 import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
 import com.example.fileUpload.model.File.FileDto;
-import com.example.fileUpload.util.OleEntry;
+import com.example.fileUpload.util.Enum.OleEntry;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;

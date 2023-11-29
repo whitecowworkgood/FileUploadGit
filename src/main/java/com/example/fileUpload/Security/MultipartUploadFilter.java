@@ -3,8 +3,6 @@ package com.example.fileUpload.Security;
 import jakarta.servlet.*;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.servlet.http.Part;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 import org.springframework.security.web.util.matcher.RequestMatcher;
@@ -14,7 +12,7 @@ import java.io.PrintWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.example.fileUpload.util.scriptRegex.scriptPatterns;
+import static com.example.fileUpload.util.ScriptRegex.scriptPatterns;
 
 @Slf4j
 public class MultipartUploadFilter implements Filter {

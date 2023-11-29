@@ -1,5 +1,6 @@
 package com.example.fileUpload.JWT;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,12 +26,12 @@ public class JwtFilter extends OncePerRequestFilter {
     private static final String BASE64_ERROR_PATTERN = "[\\+/=,:;\"&<>^']"; //추가적으로 더 있을것임, 추가하기
 
 
-    private final TokenProvider tokenProvider;
+    private final TokenValidate tokenValidate;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws IOException, ServletException {
 
-        String jwt = resolveToken(request);
+        String jwt = extractJwtTokenFromHeader(request);
 
         if (isSpecialStringCheckToken(jwt)) {
             sendJsonErrorResponse(response, "사용된 토큰이 잘못되었습니다.");
@@ -38,34 +39,31 @@ public class JwtFilter extends OncePerRequestFilter {
         }
 
         if (isValidateToken(jwt)) {
-            Authentication authentication = tokenProvider.getAuthentication(jwt);
+            Authentication authentication = tokenValidate.getAuthentication(jwt);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
         filterChain.doFilter(request, response);
     }
 
-    private String resolveToken(HttpServletRequest request){
-        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
-
-        if(isValidateAuthorization(bearerToken)){
-            return bearerToken.substring(7);
-        }
-        return null;
+    private boolean isValidateToken(String jwt) throws JsonProcessingException {
+        return StringUtils.hasText(jwt) && !tokenValidate.ValidateExpiration(jwt);
     }
-
-    private boolean isValidateToken(String jwt){
-        return StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt);
-    }
-
     private boolean isSpecialStringCheckToken(String jwt){
-        return jwt != null && containsPattern(jwt);
+        return StringUtils.hasText(jwt) && containsPattern(jwt);
     }
-
-    private boolean isValidateAuthorization(String bearerToken){
+    private boolean isValidateBearerPrefix(String bearerToken){
         return StringUtils.hasText(bearerToken) && bearerToken.startsWith(BEARER_PREFIX);
     }
+    private String extractJwtTokenFromHeader(HttpServletRequest request){
+        String bearerToken = request.getHeader(AUTHORIZATION_HEADER);
 
+        if(isValidateBearerPrefix(bearerToken)){
+            return bearerToken.substring(7);
+        }
+
+        return "";
+    }
     private boolean containsPattern(String tokenString){
         Pattern regex = Pattern.compile(BASE64_ERROR_PATTERN);
         Matcher matcher = regex.matcher(tokenString);

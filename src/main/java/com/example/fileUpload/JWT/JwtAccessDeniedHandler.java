@@ -1,5 +1,6 @@
 package com.example.fileUpload.JWT;
 
+import com.example.fileUpload.message.ResultMessage;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -13,16 +14,14 @@ import java.io.IOException;
 @Slf4j
 public class JwtAccessDeniedHandler  implements AccessDeniedHandler {
 
-    private final String jsonMessage = "{\"statusCode\": \"403\", \"message\": \"" + "접근 권한이 없습니다." + "\"}";
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException {
+
+        String jsonMessage = ResultMessage.getInstance().jwtError("403", "접근 권한이 없습니다.");
 
         response.setContentType("application/json");
         response.setCharacterEncoding("UTF-8");
         response.setStatus(HttpServletResponse.SC_OK);
-
-
-        // 응답에 JSON 메시지를 쓰기
         response.getWriter().write(jsonMessage);
     }
 }

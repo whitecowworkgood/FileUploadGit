@@ -2,7 +2,7 @@ package com.example.fileUpload.util;
 
 import java.util.regex.Pattern;
 
-public class scriptRegex {
+public class ScriptRegex {
     public static final Pattern[] scriptPatterns = {
             Pattern.compile("<script(.*?)>", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),
             Pattern.compile("eval\\((.*?)\\)", Pattern.CASE_INSENSITIVE | Pattern.MULTILINE | Pattern.DOTALL),

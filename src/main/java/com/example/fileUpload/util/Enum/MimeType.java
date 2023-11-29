@@ -8,7 +8,7 @@ public enum MimeType {
     PPT("application/vnd.ms-powerpoint"),
     XLS("application/vnd.ms-excel"),
     DOC("application/msword"),
-    OLEOBJECT("application/vnd.openxmlformats-officedocument.oleObject"),
+    OLE_OBJECT("application/vnd.openxmlformats-officedocument.oleObject"),
     ZIP("application/zip"),
     HWP("application/octet-stream");
 

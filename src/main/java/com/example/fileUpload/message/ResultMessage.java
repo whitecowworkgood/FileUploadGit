@@ -20,8 +20,13 @@ public class ResultMessage {
     private volatile String POST_RESULT_FORMAT = "{\n" +
             "\t\"ResultMessage\": \"%s\",\n" +
             "}";
+
+    private volatile String JWT_ERROR_MESSAGE = "{\n" +
+            "\t\"ErrorCode\": \"%s\",\n" +
+            "\t\"Message\": \"%s\"\n" +
+            "}";
+
     private ResultMessage() {
-        // private 생성자로 외부에서 인스턴스 생성을 방지
     }
 
     public static ResultMessage getInstance() {
@@ -50,6 +55,10 @@ public class ResultMessage {
     }
     public String fileUploadOf(String fileUploadMessage){
         return String.format(POST_RESULT_FORMAT, fileUploadMessage);
+    }
+
+    public String jwtError(String code, String message){
+        return String.format(JWT_ERROR_MESSAGE, code, message);
     }
 
 }
