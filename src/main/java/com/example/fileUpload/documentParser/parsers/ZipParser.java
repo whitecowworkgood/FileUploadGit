@@ -22,7 +22,7 @@ public class ZipParser extends OleExtractor {
     public void extractOleFromDocumentFile(FileDto fileDto) throws Exception {
 
         try {
-            this.fs = new FileInputStream(fileDto.getFileSavePath());
+            this.fs = new FileInputStream(fileDto.getFileTempPath());
             this.bi = new BufferedInputStream(this.fs);
             this.zais = new ZipArchiveInputStream(this.bi, "EUC-KR", true);
 
@@ -39,7 +39,7 @@ public class ZipParser extends OleExtractor {
 
         while((this.entry = this.zais.getNextZipEntry()) != null) {
 
-            System.out.println(tika.detect(entry.getName()));
+            /*System.out.println(tika.detect(entry.getName()));
             System.out.print(entry.getTime() + "  ");
             System.out.print(entry.getName() + "  ");
             System.out.print(entry.getComment() + "  ");
@@ -47,7 +47,7 @@ public class ZipParser extends OleExtractor {
             System.out.print(entry.getCrc() + "  ");
             System.out.print(entry.getPlatform() + "  ");
             System.out.print(entry.getUnparseableExtraFieldData());
-            System.out.println();
+            System.out.println();*/
 
         }
     }

@@ -15,6 +15,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+
 
 @RestController
 @RequiredArgsConstructor
@@ -31,7 +33,7 @@ public class FileUploadController {
     @PostMapping("")
     public ResponseEntity<String> uploadFile(@RequestParam(value = "countNum") Long countNum,
                                              @RequestParam(value = "comment", required = false, defaultValue = "") String comment,
-                                             @RequestParam("file") MultipartFile file) {
+                                             @RequestParam("file") MultipartFile file) throws IOException {
 
 
         if(countNum<=0 || countNum>10){

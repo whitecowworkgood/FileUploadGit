@@ -1,6 +1,9 @@
 package com.example.fileUpload.service.serviceImpl;
 
-import com.example.fileUpload.documentParser.FileProcessor;
+import com.example.fileUpload.documentParser.*;
+import com.example.fileUpload.documentParser.model.DocumentFile;
+import com.example.fileUpload.documentParser.model.LegacyDocumentFile;
+import com.example.fileUpload.documentParser.model.ModernDocumentFile;
 import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.model.File.FileVO;
 
@@ -14,15 +17,21 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.poi.POIDocument;
+import org.apache.poi.hwpf.HWPFDocument;
+import org.apache.poi.poifs.filesystem.POIFSStream;
 import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.FileCopyUtils;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,16 +48,33 @@ public class FileUploadServiceImpl implements FileUploadService {
     private final FileEncryptService fileEncryptService;
     private final AuthService authService;
 
-    private final StringBuffer stringBuffer = new StringBuffer();
-
-    @Value("${Save-Directory}")
-    private String baseDir;
+    private final DocumentFileInstanceFactory documentFileInstanceFactory;
 
     @SneakyThrows
     @Override
     @Transactional
     public synchronized void fileUpload(FileDto fileDto) {
-        try {
+
+        //TODO 임시 경로에서 OLE 추출 로직과, 암호화 후, 정상 폴더로 올리는 로직 구현하기.
+        if(isInTemporaryFolder(fileDto.getFileTempPath())){
+
+            try{
+                String userName = authService.getUserNameWeb();
+                fileDto.setUserName(userName);
+
+                this.fileProcessor.createOleExtractorHandler(fileDto);
+                this.fileEncryptService.encryptFile(fileDto);
+            }catch(Exception e){
+                log.info("에러발생");
+            }
+            finally {
+                fileDto = null;
+            }
+        }
+
+
+
+        /*try {
             String userName = authService.getUserNameWeb();
 
             fileDto.setUserName(userName);
@@ -74,7 +100,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 
         }finally {
             stringBuffer.delete(0, stringBuffer.length());
-        }
+        }*/
     }
 
 
@@ -88,44 +114,11 @@ public class FileUploadServiceImpl implements FileUploadService {
 
     @Override
     public synchronized List<OleVO> printOleAll(Long id) {
-
         return this.oleDao.selectById(id);
     }
 
-    @Override
-    public synchronized boolean deleteOne(Long id) {
-        boolean fileResult;
-        boolean oleResult;
-
-        FileVO fileVO = this.fileDao.printFileOne(id);
-        if (fileVO == null) {
-            return false;
-        }
-        try{
-
-            if (!Files.exists(Path.of(fileVO.getFileSavePath())) || !FileUtil.isPathValidForStorage(this.baseDir, fileVO.getFileSavePath())) {
-                return false;
-            }
-
-            Files.delete(Path.of(fileVO.getFileSavePath()));
-            fileResult = this.fileDao.deleteById(fileVO.getId());
-
-            Files.delete(Path.of(fileVO.getFileOlePath()));
-            oleResult = this.oleDao.deleteById(fileVO.getId());
-
-
-        }catch (IOException e){
-            ExceptionUtils.getStackTrace(e);
-            return false;
-        }
-
-        return fileResult && oleResult;
-    }
-
-    private void validateFileDto(FileDto fileDto) throws FileUploadException {
-        if (fileDto.getFileData().isEmpty() || !FileUtil.isPathValidForStorage(this.baseDir, fileDto.getFileSavePath())) {
-            throw new FileUploadException();
-        }
+    private boolean isInTemporaryFolder(String tempPath) {
+        return Files.exists(Paths.get(tempPath));
     }
 
 

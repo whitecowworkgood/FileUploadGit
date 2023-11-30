@@ -29,7 +29,7 @@ public class XExcelParser extends OleExtractor {
 
         try{
 
-            this.fs = new FileInputStream(fileDto.getFileSavePath());
+            this.fs = new FileInputStream(fileDto.getFileTempPath());
             this.bi = new BufferedInputStream(this.fs);
             this.xlsx = new XSSFWorkbook(OPCPackage.open(this.bi));
 

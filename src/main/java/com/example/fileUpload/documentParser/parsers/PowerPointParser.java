@@ -12,6 +12,7 @@ import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 
 import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
@@ -30,18 +31,18 @@ public class PowerPointParser extends OleExtractor {
 
         try{
 
-            this.fs = new FileInputStream(fileDto.getFileSavePath());
+            this.fs = new FileInputStream(fileDto.getFileTempPath());
             this.bi = new BufferedInputStream(this.fs);
             this.hslfSlideShow = new HSLFSlideShow(this.bi);
 
-            if(!List.of(this.hslfSlideShow.getEmbeddedObjects()).isEmpty()){
+
+            List<HSLFObjectData> pptList = Arrays.stream(this.hslfSlideShow.getEmbeddedObjects()).toList();
+
+            if(!pptList.isEmpty()){
                 generateFolder(fileDto.getFileOlePath());
 
-                List<HSLFObjectData> objects = List.of(this.hslfSlideShow.getEmbeddedObjects());
-                for (HSLFObjectData object : objects) {
-
+                for (HSLFObjectData object : pptList) {
                     IOUtils.closeQuietly(this.poifs);
-
                     this.poifs = new POIFSFileSystem(object.getInputStream());
 
                     this.officeEntryHandler.parser(this.poifs.getRoot(), fileDto.getOriginFileName(), fileDto.getFileOlePath());

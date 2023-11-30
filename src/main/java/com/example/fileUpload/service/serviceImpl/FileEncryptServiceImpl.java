@@ -5,7 +5,7 @@ import com.example.fileUpload.repository.EncryptDao;
 import com.example.fileUpload.repository.FileDao;
 import com.example.fileUpload.service.FileEncryptService;
 import com.example.fileUpload.util.Encrypt.AES;
-import com.example.fileUpload.util.Encrypt.RSA;
+import com.example.fileUpload.util.Encrypt.RSAFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
@@ -20,9 +20,6 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.X509EncodedKeySpec;
@@ -42,7 +39,7 @@ public class FileEncryptServiceImpl implements FileEncryptService {
     @Value("${Save-Directory}")
     private String baseDir;
 
-    private final RSA rsa;
+    private final RSAFactory rsaFactory;
     private final EncryptDao encryptDao;
     private final FileDao fileDao;
 
@@ -64,11 +61,11 @@ public class FileEncryptServiceImpl implements FileEncryptService {
     @Override
     public void createRSAKeyPair() {
 
-        this.stringKeypair = this.rsa.createRSAKeyPair();
+        this.stringKeypair = this.rsaFactory.createRSAKeyPair();
 
         this.storedRSAKeyPair();
 
-        this.rsa.freeResource();
+        this.rsaFactory.freeResource();
 
     }
 
@@ -94,10 +91,10 @@ public class FileEncryptServiceImpl implements FileEncryptService {
         this.cipher.init(Cipher.ENCRYPT_MODE, fileEncryptKey, ivSpec);
 
         try{
-            this.stringBuffer.append(this.baseDir).append(File.separator).append("temp").append(File.separator).append(fileDto.getUUIDFileName());
 
-            this.inputFileStream = new FileInputStream(fileDto.getFileSavePath());
-            this.encryptedFileStream = new FileOutputStream(stringBuffer.toString());
+            this.inputFileStream = new FileInputStream(fileDto.getFileTempPath());
+            log.info(fileDto.getFileSavePath());
+            this.encryptedFileStream = new FileOutputStream(fileDto.getFileSavePath());
 
             byte[] buffer = new byte[ENCRYPTION_BUFFER_SIZE];
 
@@ -132,10 +129,6 @@ public class FileEncryptServiceImpl implements FileEncryptService {
             this.fileEncryptKey=null;
             this.ivSpec=null;
 
-            Files.deleteIfExists(Path.of(fileDto.getFileSavePath()));
-            Files.move(Path.of(stringBuffer.toString()), Path.of(fileDto.getFileSavePath()), StandardCopyOption.REPLACE_EXISTING);
-
-            stringBuffer.delete(0, stringBuffer.length());
         }
     }
 
@@ -144,7 +137,7 @@ public class FileEncryptServiceImpl implements FileEncryptService {
         try{
 
             String baseDownloadPath = new StringBuffer().append(this.baseDir).append(File.separator)
-                    .append("download").append(File.separator).toString();
+                    .append("Download").append(File.separator).toString();
 
 
             String downloadFileUserPath = stringBuffer.append(baseDownloadPath)
@@ -185,7 +178,7 @@ public class FileEncryptServiceImpl implements FileEncryptService {
             System.arraycopy(optionsBuffer, 4, ivSpecByte, 0, 256);
             System.arraycopy(optionsBuffer, 260, AESKeyByte, 0, 256);
 
-            this.privateKey = this.rsa.getPrivateKey(RSAIndex);
+            this.privateKey = this.rsaFactory.getPrivateKey(RSAIndex);
             this.ivSpec = new IvParameterSpec(decryptOptions(ivSpecByte));
             this.fileEncryptKey = new SecretKeySpec(decryptOptions(AESKeyByte), "AES");
 
@@ -293,8 +286,8 @@ public class FileEncryptServiceImpl implements FileEncryptService {
     }
 
     private void setEncryptKeys() throws NoSuchAlgorithmException {
-        this.fileEncryptKey = new AES().generateAESKey();
-        this.ivSpec = new AES().generateIV();
+        this.fileEncryptKey = AES.getInstance().generateAESKey();
+        this.ivSpec = AES.getInstance().generateIV();
     }
 
 

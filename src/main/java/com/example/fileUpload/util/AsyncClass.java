@@ -12,10 +12,10 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.LinkedBlockingQueue;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
+
 public class AsyncClass {
     private final FileProcessor fileProcessor;
     private final TestDao testDao;

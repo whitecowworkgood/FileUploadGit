@@ -37,7 +37,7 @@ public class FileController {
 
         FileDto fileDto = FileDto.builder()
                 .fileSavePath(fileExtractionRequest.getFilePath())
-                .fileType(mimeType)
+                //.fileType(mimeType)
                 .fileOlePath("C:/temp/" + uuid + File.separator)
                 .originFileName("test.test")
                 .comment(uuid)

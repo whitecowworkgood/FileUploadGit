@@ -8,8 +8,6 @@ import java.util.Optional;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import static com.example.fileUpload.util.FileUtil.generateRandomString;
-
 @Repository
 public class RefreshTokenDao {
 

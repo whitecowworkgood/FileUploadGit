@@ -30,8 +30,8 @@ public class XPowerPointParser extends OleExtractor {
 
         try{
 
-            this.fs = new FileInputStream(fileDto.getFileSavePath());
-            this.bi = new BufferedInputStream(this.bi);
+            this.fs = new FileInputStream(fileDto.getFileTempPath());
+            this.bi = new BufferedInputStream(this.fs);
             this.pptx = new XMLSlideShow(OPCPackage.open(this.bi));
 
             if(!this.pptx.getAllEmbeddedParts().isEmpty()){

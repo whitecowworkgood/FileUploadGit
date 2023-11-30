@@ -27,7 +27,7 @@ public class XWordParser extends OleExtractor {
 
         try{
 
-            this.fs = new FileInputStream(fileDto.getFileSavePath());
+            this.fs = new FileInputStream(fileDto.getFileTempPath());
             this.bi = new BufferedInputStream(fs);
             this.docx = new XWPFDocument(OPCPackage.open(this.bi));
 

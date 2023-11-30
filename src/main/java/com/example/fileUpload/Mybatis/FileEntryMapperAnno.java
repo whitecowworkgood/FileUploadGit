@@ -32,12 +32,6 @@ public interface FileEntryMapperAnno {
             " FROM file_entity where id = #{id} AND user_name = #{userName}")
     FileVO selectByIdName(Long id, String userName);
 
-
-    /*@Select("SELECT id, uuidfile_name, file_ole_path," +
-            "file_save_path,file_size,origin_file_name, file_type, count_num, user_name, is_encrypt, is_active FROM file_entity")
-    List<FileVO> findAllEntry();*/
-
-
     @Delete("Delete from file_entity where id = #{id}")
     boolean deleteFileEntry(Long id);
 

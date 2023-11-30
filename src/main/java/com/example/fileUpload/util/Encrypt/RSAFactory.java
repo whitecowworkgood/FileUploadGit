@@ -1,7 +1,6 @@
 package com.example.fileUpload.util.Encrypt;
 
 import com.example.fileUpload.repository.EncryptDao;
-import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -10,14 +9,13 @@ import org.springframework.stereotype.Component;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
-import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.concurrent.ConcurrentHashMap;
 
 @RequiredArgsConstructor
 @Slf4j
 @Component
-public class RSA {
+public class RSAFactory {
 
     private final EncryptDao encryptDao;
 
@@ -57,6 +55,7 @@ public class RSA {
     public synchronized PrivateKey getPrivateKey(byte[] data) {
         long value = 0;
         PrivateKey privateKey = null;
+
         for (int i = 0; i < data.length; i++) {
             value = (value << 8) | (data[i] & 0xFF);
         }

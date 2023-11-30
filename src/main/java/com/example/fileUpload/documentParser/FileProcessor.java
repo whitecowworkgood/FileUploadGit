@@ -24,7 +24,7 @@ public class FileProcessor {
     public synchronized void createOleExtractorHandlerTest(FileDto fileDto) {
 
         try {
-            OleExtractor oleExtractor = this.fileParserFactory.createParser(fileDto);
+            OleExtractor oleExtractor = this.fileParserFactory.createParser(fileDto.getFileType(), fileDto.getUUIDFileName());
             oleExtractor.extractOleFromDocumentFile(fileDto);
 
         }catch (Exception e) {
@@ -37,9 +37,9 @@ public class FileProcessor {
     public synchronized void createOleExtractorHandler(FileDto fileDto) {
 
         try {
-            OleExtractor oleExtractor = this.fileParserFactory.createParser(fileDto);
+            OleExtractor oleExtractor = this.fileParserFactory.createParser(fileDto.getFileType(), fileDto.getUUIDFileName());
             oleExtractor.extractOleFromDocumentFile(fileDto);
-            processExternalFiles(fileDto);
+            //processExternalFiles(fileDto);
 
         }catch (Exception e) {
             catchException(e);

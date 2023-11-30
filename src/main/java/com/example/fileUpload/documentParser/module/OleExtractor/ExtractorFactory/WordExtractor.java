@@ -5,10 +5,10 @@ import com.example.fileUpload.model.File.FileDto;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.openxml4j.opc.PackagePart;
+import org.apache.poi.poifs.filesystem.DocumentInputStream;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
-import java.io.BufferedOutputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 
 import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
 import static com.example.fileUpload.util.FileUtil.removePath;

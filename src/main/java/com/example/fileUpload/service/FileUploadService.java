@@ -15,5 +15,5 @@ public interface FileUploadService {
 
     List<OleVO> printOleAll(Long id);
 
-    boolean deleteOne(Long id);
+    //boolean deleteOne(Long id);
 }

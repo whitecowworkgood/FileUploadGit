@@ -1,12 +1,16 @@
 package com.example.fileUpload.JWT;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.UnsupportedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.util.StringUtils;
@@ -38,7 +42,7 @@ public class JwtFilter extends OncePerRequestFilter {
             return;
         }
 
-        if (isValidateToken(jwt)) {
+        if (isValidateToken(response, jwt)) {
             Authentication authentication = tokenValidate.getAuthentication(jwt);
             SecurityContextHolder.getContext().setAuthentication(authentication);
         }
@@ -46,8 +50,27 @@ public class JwtFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    private boolean isValidateToken(String jwt) throws JsonProcessingException {
-        return StringUtils.hasText(jwt) && !tokenValidate.ValidateExpiration(jwt);
+    private boolean isValidateToken( HttpServletResponse response, String jwt) throws IOException {
+        boolean validateValue = false;
+        try{
+            validateValue =  StringUtils.hasText(jwt) && !tokenValidate.ValidateExpiration(jwt);
+
+        } catch (io.jsonwebtoken.security.SignatureException | SecurityException | MalformedJwtException e) {
+            sendJsonErrorResponse(response, "잘못된 JWT 토큰입니다.");
+
+        } catch (ExpiredJwtException e) {
+            sendJsonErrorResponse(response, "만료된 JWT 토큰입니다.");
+
+        } catch (UnsupportedJwtException e) {
+            sendJsonErrorResponse(response, "지원되지 않는 JWT 토큰입니다.");
+
+        } catch (IllegalArgumentException e) {
+            sendJsonErrorResponse(response, "JWT 토큰이 잘못되었습니다.");
+
+        } catch(NullPointerException e){
+            sendJsonErrorResponse(response, "로그아웃된 사용자 접근");
+        }
+        return validateValue;
     }
     private boolean isSpecialStringCheckToken(String jwt){
         return StringUtils.hasText(jwt) && containsPattern(jwt);

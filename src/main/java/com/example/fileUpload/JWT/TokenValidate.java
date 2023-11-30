@@ -32,7 +32,7 @@ public class TokenValidate {
     private final String SUBJECT_TYPE = "sub";
 
 
-    public Authentication getAuthentication(String token) throws JsonProcessingException {
+    public Authentication getAuthentication(String token) {
         try{
             Key validateKey = parseSignitureKey(token);
             Claims claims = parseClaims(token, validateKey);
@@ -55,18 +55,21 @@ public class TokenValidate {
 
         }catch (JsonProcessingException e){
             throw new RuntimeException("토큰에서 값을 가져오는데 실패하였습니다.");
+        }catch (ExpiredJwtException e){
+            throw new RuntimeException("JWT 토큰의 사용기간이 만료되었습니다.");
         }
 
     }
 
-    public boolean ValidateExpiration(String token) throws NullPointerException, JsonProcessingException {
+    public boolean ValidateExpiration(String token) throws NullPointerException, JsonProcessingException, ExpiredJwtException {
 
         Key validateKey = parseSignitureKey(token);
         Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(validateKey).build().parseClaimsJws(token);
 
         return claims.getBody().getExpiration().before(new Date());
+
     }
-    private Key parseSignitureKey(String token) throws NullPointerException, JsonProcessingException {
+    private Key parseSignitureKey(String token) throws NullPointerException, JsonProcessingException, ExpiredJwtException{
 
         String userName = decodeTokenPayload(token);
         String key = refreshTokenDao.selectKey(userName);

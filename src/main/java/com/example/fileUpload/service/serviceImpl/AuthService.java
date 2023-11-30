@@ -23,11 +23,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
 
+import java.util.Random;
 import java.util.concurrent.Executors;
-
-import static com.example.fileUpload.util.FileUtil.generateRandomString;
 
 @Service
 @RequiredArgsConstructor
@@ -155,5 +153,21 @@ public class AuthService {
     public String getUserNameWeb() {
         Authentication currentUser = SecurityContextHolder.getContext().getAuthentication();
         return currentUser.getName();
+    }
+
+    public String generateRandomString(int length) {
+
+        final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+        Random random = new Random();
+        StringBuffer stringBuffer = new StringBuffer(length);
+
+        for (int i = 0; i < length; i++) {
+            int index = random.nextInt(CHARACTERS.length());
+            char randomChar = CHARACTERS.charAt(index);
+            stringBuffer.append(randomChar);
+        }
+
+        return stringBuffer.toString();
     }
 }

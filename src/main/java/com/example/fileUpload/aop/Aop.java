@@ -1,5 +1,6 @@
 package com.example.fileUpload.aop;
 
+import com.example.fileUpload.util.DirectoryChecker;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -7,24 +8,19 @@ import org.aspectj.lang.annotation.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import static com.example.fileUpload.util.DirectoryChecker.checkAndCreateBasicFolder;
-
-
-@Component
 @Slf4j
 @Aspect
 @RequiredArgsConstructor
+@Component
 public class Aop {
 
-    @Value("${Save-Directory}")
-    private String baseDir;
+    @Value("${Ole-Directory}")
+    private String oleDir;
+    @Value("${Temp-Diractory}")
+    private String tempDir;
+    @Value("${Download-Directory}")
+    private String downloadDir;
 
-    /**
-     *
-     * @author 임재준
-     * AOP를 이용하여, service 클래스(컴포넌트) 호출시, 트랜잭션을 감지 및 출력
-     *
-     * */
 
     @Around("execution(* com.example.fileUpload.service.*.*(..))")
     public Object serviceLogger(ProceedingJoinPoint joinPoint) throws Throwable{
@@ -49,11 +45,6 @@ public class Aop {
         }
     }
 
-    /**
-     *
-     * @author 임재준
-     * AOP를 이용하여, controller 클래스(컴포넌트) 호출시, 트랜잭션을 감지 및 출력
-     * */
     @Around("execution(* com.example.fileUpload.controller.*.*(..))")
     public Object controllerLogger(ProceedingJoinPoint joinPoint) throws Throwable{
 
@@ -79,10 +70,11 @@ public class Aop {
         }
     }
 
-    @Before("execution(* com.example.fileUpload.*.*.*(..))")
+    @Before("execution(* com.example.fileUpload.*.*(..))")
     public void downloadFolderCheck() {
-
-        checkAndCreateBasicFolder(baseDir);
+        DirectoryChecker.generateFolder(oleDir);
+        DirectoryChecker.generateFolder(tempDir);
+        DirectoryChecker.generateFolder(downloadDir);
     }
 
 }

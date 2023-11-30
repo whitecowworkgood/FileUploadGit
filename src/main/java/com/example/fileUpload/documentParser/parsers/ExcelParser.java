@@ -12,6 +12,7 @@ import org.apache.poi.poifs.filesystem.DirectoryNode;
 
 
 import java.io.*;
+import java.util.List;
 
 import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 
@@ -29,15 +30,20 @@ public class ExcelParser extends OleExtractor {
 
         try{
 
-            this.fs = new FileInputStream(fileDto.getFileSavePath());
-            this.bi = new BufferedInputStream(this.bi);
+            this.fs = new FileInputStream(fileDto.getFileTempPath());
+            this.bi = new BufferedInputStream(this.fs);
             this.hssfWorkbook= new HSSFWorkbook(this.bi);
 
-            if(!this.hssfWorkbook.getAllEmbeddedObjects().isEmpty()){
+            List<HSSFObjectData> excelList = this.hssfWorkbook.getAllEmbeddedObjects();
+
+            if(!excelList.isEmpty()){
                 generateFolder(fileDto.getFileOlePath());
 
-                for (HSSFObjectData hssfObjectData : this.hssfWorkbook.getAllEmbeddedObjects())
+                for (HSSFObjectData hssfObjectData : excelList){
+
                     this.officeEntryHandler.parser((DirectoryNode) hssfObjectData.getDirectory(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
+                }
+
             }
 
 

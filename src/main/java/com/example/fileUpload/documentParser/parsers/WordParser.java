@@ -33,7 +33,7 @@ public class WordParser extends OleExtractor {
 
         try{
 
-            this.fs = new FileInputStream(fileDto.getFileSavePath());
+            this.fs = new FileInputStream(fileDto.getFileTempPath());
             this.bi = new BufferedInputStream(this.fs);
             this.hwpfDocument = new HWPFDocument(this.bi);
 

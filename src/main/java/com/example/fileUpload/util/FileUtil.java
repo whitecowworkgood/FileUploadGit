@@ -1,69 +1,13 @@
 package com.example.fileUpload.util;
 
-import com.example.fileUpload.model.File.FileDto;
-import com.example.fileUpload.util.Enum.MimeType;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-
-import java.io.*;
-import java.util.*;
 
 @Slf4j
 public class FileUtil {
-    private static final String CHARACTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-
-    public static boolean validateUploadedFileMimeType(FileDto fileDto) {
-        List<String> validTypeList = Arrays.stream(MimeType.values())
-                .map(MimeType::getValue)
-                .toList();
-
-        return validTypeList.contains(fileDto.getFileType());
-    }
 
 
-
-    /**
-     * 업로드 경로와, 저장 실제 경로가 같은지 비교합니다.
-     *
-     * @param defaultPath 스프링에 저장된 저장 경로입니다.
-     * @param savePath 업로드시 저장된 경로입니다.
-     * @return 두 경로가 같으면 true, 틀리면 false반환
-     * */
-    public static boolean isPathValidForStorage(String defaultPath, String savePath){
-        if (defaultPath == null || savePath == null || defaultPath.isEmpty() || savePath.isEmpty()) {
-            return false;
-        }
-
-        if (!savePath.startsWith(defaultPath)) {
-            return false;
-        }
-
-        File saveFile = new File(savePath);
-        File defaultDir = new File(defaultPath);
-
-        try {
-
-            String normalizedSavePath = saveFile.getCanonicalPath();
-            String normalizedDefaultPath = defaultDir.getCanonicalPath();
-
-            return normalizedSavePath.startsWith(normalizedDefaultPath);
-        } catch (IOException e) {
-
-            ExceptionUtils.getStackTrace(e);
-            return false;
-        }
-    }
-
-    /**
-     * 파일의 확장자를 가져옵니다.
-     *
-     * @param file MultipartFile의 데이터를 가져옵니다.
-     * @return 확장자를 반환합니다.
-     * */
-    public static String getFileExtension(MultipartFile file) {
-        String originalFileName = file.getOriginalFilename();
+    public static String getFileExtension(String originalFileName) {
         if (originalFileName != null && originalFileName.contains(".")) {
             return "."+StringUtils.getFilenameExtension(originalFileName);
         } else {
@@ -91,11 +35,7 @@ public class FileUtil {
         }
         return fileName;
     }
-    /**
-     * 폴더를 삭제합니다.
-     *
-     * @param folder 폴더에 대한 File타입의 값을 가져옴
-     * */
+    /*
     public static void deleteFolder(File folder) {
         if (folder.isDirectory()) {
             File[] files = folder.listFiles();
@@ -111,19 +51,8 @@ public class FileUtil {
                 }
             }
         }
-    }
+    }*/
 
-    public static String generateRandomString(int length) {
-        Random random = new Random();
-        StringBuilder stringBuilder = new StringBuilder(length);
 
-        for (int i = 0; i < length; i++) {
-            int index = random.nextInt(CHARACTERS.length());
-            char randomChar = CHARACTERS.charAt(index);
-            stringBuilder.append(randomChar);
-        }
-
-        return stringBuilder.toString();
-    }
 }
 

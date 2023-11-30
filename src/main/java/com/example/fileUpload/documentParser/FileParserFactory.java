@@ -12,9 +12,9 @@ import org.springframework.stereotype.Component;
 @Component
 public class FileParserFactory {
 
-    public OleExtractor createParser(FileDto fileDto) {
+    public OleExtractor createParser(String mimeType, String uuidFileName) {
 
-        switch (fileDto.getFileType()) {
+        switch (mimeType) {
 
             case "application/vnd.ms-powerpoint" -> {
                 return new PowerPointParser();
@@ -25,7 +25,8 @@ public class FileParserFactory {
             case "application/msword" -> {
                 return new WordParser();
             }
-            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document" -> {
+            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+                    "application/haansoftdocx" -> {
                 return new XWordParser();
             }
             case "application/vnd.openxmlformats-officedocument.presentationml.presentation" -> {
@@ -37,12 +38,9 @@ public class FileParserFactory {
             case"application/haansofthwp" ->{
                 return new HwpParser();
             }
-            case"application/haansoftdocx" ->{
-                return new XWordParser();
-            }
             case "application/octet-stream" -> {
 
-                if (!fileDto.getOriginFileName().endsWith(".hwp")) {
+                if (!uuidFileName.endsWith(".hwp")) {
                     throw new IllegalArgumentException();
 
                 }

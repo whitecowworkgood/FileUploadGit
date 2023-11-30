@@ -1,7 +1,9 @@
 package com.example.fileUpload.controller.Handler;
 
 import com.example.fileUpload.message.ExceptionMessage;
+import io.jsonwebtoken.ExpiredJwtException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -19,6 +21,14 @@ public class GlobalControllerExceptionHandler {
         ExceptionMessage exceptionMessage = new ExceptionMessage();
 
         exceptionMessage.setMessage("응애 나 최상위 예외");
+
+        return ResponseEntity.status(HttpStatus.OK).body(exceptionMessage);
+    }
+    @ExceptionHandler(FileUploadException.class)
+    public ResponseEntity<ExceptionMessage> handleException(FileUploadException ex) {
+        ExceptionMessage exceptionMessage = new ExceptionMessage();
+
+        exceptionMessage.setMessage("업로드가 처리되지 않았습니다.");
 
         return ResponseEntity.status(HttpStatus.OK).body(exceptionMessage);
     }

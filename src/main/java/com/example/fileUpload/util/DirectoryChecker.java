@@ -2,23 +2,16 @@ package com.example.fileUpload.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 @Slf4j
+@Component
 public class DirectoryChecker {
-
-
-    public static void checkAndCreateBasicFolder(String baseDir){
-
-        generateFolder(baseDir+ File.separator+"ole");
-        generateFolder(baseDir+ File.separator+"download");
-        generateFolder(baseDir+ File.separator+"temp");
-    }
 
     public static void generateFolder(String folderPath){
         Path folder = Paths.get(folderPath);

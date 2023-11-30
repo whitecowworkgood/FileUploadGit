@@ -6,6 +6,8 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.poifs.filesystem.DocumentEntry;
 import org.apache.poi.poifs.filesystem.DocumentInputStream;
+import org.apache.poi.poifs.filesystem.Ole10Native;
+import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 
 import java.io.*;
@@ -19,13 +21,10 @@ import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMappi
 public class EmbeddedFileExtractor {
     static StringBuilder stringBuilder = new StringBuilder();
 
-    /**
-     * 문서내 저장된 기타 파일(이미지, pdf등등)을 추출합니다.
-     *
-     * @param fileOlePath 추출된 ole파일을 저장할 폴더경로
-     * @param inputStream 업로드 된 문서의 Ole10Native를 Inputstream으로 가져옴.
-     * */
+
+
     public void parseOle10NativeEntry(InputStream inputStream, String fileOlePath) {
+
         ByteArrayOutputStream variableData =null;
         BufferedOutputStream bo = null;
         try{

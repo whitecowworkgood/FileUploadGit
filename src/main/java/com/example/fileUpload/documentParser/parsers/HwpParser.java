@@ -3,11 +3,13 @@ package com.example.fileUpload.documentParser.parsers;
 import com.example.fileUpload.documentParser.module.OfficeEntryHandler;
 import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
 import com.example.fileUpload.model.File.FileDto;
+import kr.dogfoot.hwplib.object.bindata.BinData;
 import kr.dogfoot.hwplib.object.bindata.EmbeddedBinaryData;
 import kr.dogfoot.hwplib.reader.HWPReader;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.poi.extractor.ExtractorFactory;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
 import java.io.*;
@@ -28,12 +30,14 @@ public class HwpParser extends OleExtractor {
     public void extractOleFromDocumentFile(FileDto fileDto) throws Exception {
 
         try{
-            this.fs = new FileInputStream(fileDto.getFileSavePath());
+            this.fs = new FileInputStream(fileDto.getFileTempPath());
             this.bi = new BufferedInputStream(this.fs);
 
             boolean hasOLEFile = false;
 
-            for (EmbeddedBinaryData data : HWPReader.fromInputStream(this.bi).getBinData().getEmbeddedBinaryDataList()) {
+            BinData binData = HWPReader.fromInputStream(this.bi).getBinData();
+
+            for (EmbeddedBinaryData data : binData.getEmbeddedBinaryDataList()) {
                 if (data.getName().endsWith(".OLE")) {
 
                     if (!hasOLEFile) {

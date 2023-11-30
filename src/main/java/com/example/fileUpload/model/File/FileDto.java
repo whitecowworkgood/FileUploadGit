@@ -18,7 +18,8 @@ public class FileDto{
     private Long fileSize;
     private String fileType;
     private String originFileName;
-    private MultipartFile fileData;
+    //private MultipartFile multipartFile;
+    private String fileTempPath;
     private Long countNum;
     private String userName;
     private String comment;

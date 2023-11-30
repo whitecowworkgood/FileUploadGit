@@ -35,7 +35,7 @@ CREATE TABLE IF NOT EXISTS `file_entity` (
   `time_stamp` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `is_encrypt` tinyint(1) NOT NULL DEFAULT 1,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
@@ -57,7 +57,7 @@ CREATE TABLE IF NOT EXISTS `ole_entry` (
   `original_file_name` varchar(1020) NOT NULL,
   `super_id` bigint(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=27 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `ole_entry` (
 CREATE TABLE IF NOT EXISTS `refresh_token` (
   `rt_key` varchar(255) NOT NULL,
   `rt_value` varchar(255) NOT NULL,
-  `signkey` varchar(100) NOT NULL,
+  `signature_Key` varchar(100) NOT NULL,
   PRIMARY KEY (`rt_key`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -77,7 +77,7 @@ CREATE TABLE IF NOT EXISTS `rsa_keys` (
   `public_key` text NOT NULL,
   `private_key` text NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=165 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=101 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- 내보낼 데이터가 선택되어 있지 않습니다.
 
