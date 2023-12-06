@@ -2,7 +2,7 @@ package com.example.fileUpload.util;
 
 import com.example.fileUpload.documentParser.FileProcessor;
 import com.example.fileUpload.model.File.FileDto;
-import com.example.fileUpload.repository.TestDao;
+import com.example.fileUpload.repository.TestDAO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Async;
@@ -18,7 +18,7 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 public class AsyncClass {
     private final FileProcessor fileProcessor;
-    private final TestDao testDao;
+    private final TestDAO testDao;
     private final BlockingQueue<FileDto> fileQueue = new LinkedBlockingQueue<>();
 
     @Async

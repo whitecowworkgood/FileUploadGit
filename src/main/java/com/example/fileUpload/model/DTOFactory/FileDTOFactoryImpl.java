@@ -3,7 +3,6 @@ package com.example.fileUpload.model.DTOFactory;
 import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;

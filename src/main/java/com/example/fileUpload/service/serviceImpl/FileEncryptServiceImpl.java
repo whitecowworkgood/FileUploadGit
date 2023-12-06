@@ -1,16 +1,17 @@
 package com.example.fileUpload.service.serviceImpl;
 
 import com.example.fileUpload.model.File.FileDto;
-import com.example.fileUpload.repository.EncryptDao;
-import com.example.fileUpload.repository.FileDao;
+import com.example.fileUpload.model.File.FileVO;
+import com.example.fileUpload.repository.RSAKeysDAO;
+import com.example.fileUpload.repository.FileEntityDAO;
 import com.example.fileUpload.service.FileEncryptService;
 import com.example.fileUpload.util.Encrypt.AES;
 import com.example.fileUpload.util.Encrypt.RSAFactory;
+import com.google.common.primitives.Bytes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,11 +21,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.file.Paths;
 import java.security.*;
-import java.security.spec.InvalidKeySpecException;
-import java.security.spec.X509EncodedKeySpec;
-import java.util.Base64;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 
@@ -34,261 +32,235 @@ import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 @Transactional
 public class FileEncryptServiceImpl implements FileEncryptService {
 
-    private final StringBuffer stringBuffer = new StringBuffer();
+    @Value("${Download-Directory}")
+    private String downloadDir;
 
-    @Value("${Save-Directory}")
-    private String baseDir;
+    private final String CIPHER_TRANSFORMATION_MAIN = "AES/CBC/PKCS5Padding";
+    private final String CIPHER_TRANSFORMATION_OPTION = "RSA/ECB/PKCS1Padding";
 
     private final RSAFactory rsaFactory;
-    private final EncryptDao encryptDao;
-    private final FileDao fileDao;
-
-    private ConcurrentHashMap<String, String> stringKeypair = null;
-    private Cipher cipher = null;
-    private Long latestInsertedId = null;
-
-    private String publicKey = null;
-
-    private SecretKey fileEncryptKey = null;
-    private IvParameterSpec ivSpec = null;
-    private PrivateKey privateKey = null;
-
-    private FileInputStream inputFileStream = null;
-    private FileOutputStream encryptedFileStream = null;
-
-    private RandomAccessFile randomAccessFile =null;
+    private final FileEntityDAO fileEntityDao;
+    private final RSAKeysDAO RSAKeysDao;
+    private final AES aes;
 
     @Override
-    public void createRSAKeyPair() {
+    public void encryptFile(FileDto fileDto){
 
-        this.stringKeypair = this.rsaFactory.createRSAKeyPair();
+        FileInputStream inputFileStream = null;
+        FileOutputStream encryptedOutputStream = null;
 
-        this.storedRSAKeyPair();
-
-        this.rsaFactory.freeResource();
-
-    }
-
-    @Override
-    public void storedRSAKeyPair(){
-        this.encryptDao.saveRSAKey(this.stringKeypair);
-
-        int targetNum = this.stringKeypair.toString().indexOf("id=")+3;
-
-        this.latestInsertedId = NumberUtils.toLong(this.stringKeypair.toString().substring(targetNum, this.stringKeypair.toString().length()-1));
-
-        this.publicKey = this.stringKeypair.get("publicKey");
-        this.stringKeypair = null;
-
-    }
-
-    @Override
-    public void encryptFile(FileDto fileDto) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, InvalidAlgorithmParameterException, IOException {
-
-        setEncryptKeys();
-
-        this.cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-        this.cipher.init(Cipher.ENCRYPT_MODE, fileEncryptKey, ivSpec);
+        byte[] buffer = new byte[ENCRYPTION_BUFFER_SIZE];
+        int bytesRead = -1;
 
         try{
+            SecretKey fileEncryptKey = aes.generateAESKey();
+            IvParameterSpec ivSpec = aes.generateIV();
 
-            this.inputFileStream = new FileInputStream(fileDto.getFileTempPath());
-            log.info(fileDto.getFileSavePath());
-            this.encryptedFileStream = new FileOutputStream(fileDto.getFileSavePath());
+            Cipher encryptCipher = getEncryptCipher(fileEncryptKey, ivSpec);
 
-            byte[] buffer = new byte[ENCRYPTION_BUFFER_SIZE];
+            inputFileStream = new FileInputStream(fileDto.getFileTempPath());
+            encryptedOutputStream = new FileOutputStream(fileDto.getFileSavePath());
 
-            int bytesRead;
+            while ((bytesRead = inputFileStream.read(buffer)) != -1) {
 
-            while ((bytesRead = this.inputFileStream.read(buffer)) != -1) {
-
-                byte[] encryptedBytes = this.cipher.update(buffer, 0, bytesRead);
-
-                if(encryptedBytes != null){
-                    this.encryptedFileStream.write(encryptedBytes);
+                byte[] encryptedBytes = encryptCipher.update(buffer, 0, bytesRead);
+                if (encryptedBytes != null) {
+                    encryptedOutputStream.write(encryptedBytes);
                 }
-
             }
 
-            byte[] outBytes = this.cipher.doFinal();
-
-            if(outBytes != null){
-                this.encryptedFileStream.write(outBytes);
+            byte[] finalEncryptedBytes = encryptCipher.doFinal();
+            if (finalEncryptedBytes != null) {
+                encryptedOutputStream.write(finalEncryptedBytes);
             }
 
-            this.encryptedFileStream.write(ByteBuffer.allocate(4).putInt(Math.toIntExact(this.latestInsertedId)).array());
-            this.encryptedFileStream.write(encryptOptions(this.ivSpec.getIV()));
-            this.encryptedFileStream.write(encryptOptions(this.fileEncryptKey.getEncoded()));
+            encryptedOutputStream.write(appendEncryptedOptions(fileEncryptKey, ivSpec));
 
         } catch (IllegalBlockSizeException | IOException | BadPaddingException e) {
             ExceptionUtils.getStackTrace(e);
+            throw new RuntimeException("파일 암호화에 실패하였습니다.");
 
         }finally{
-            IOUtils.closeQuietly(this.inputFileStream);
-            IOUtils.closeQuietly(this.encryptedFileStream);
-            this.fileEncryptKey=null;
-            this.ivSpec=null;
-
+            IOUtils.closeQuietly(inputFileStream);
+            IOUtils.closeQuietly(encryptedOutputStream);
         }
     }
 
     @Override
     public void decryptFile(Long id) {
+
+        FileOutputStream decryptedOutputStream = null;
+        RandomAccessFile randomAccessFile = null;
+        byte[] decryptedBuffer = new byte[ENCRYPTION_BUFFER_SIZE];
+        int totalBytesRead = 0;
+
         try{
+            String outputFilePath = appendDecryptedPath(id);
 
-            String baseDownloadPath = new StringBuffer().append(this.baseDir).append(File.separator)
-                    .append("Download").append(File.separator).toString();
+            randomAccessFile = new RandomAccessFile(this.fileEntityDao.printFileOne(id).getFileSavePath(), "r");
+            decryptedOutputStream = new FileOutputStream(outputFilePath);
 
+            long encryptedContentPosition = calcPosition(randomAccessFile.length());
+            Cipher decryptCipher =  getDecryptCipher(randomAccessFile, encryptedContentPosition);
 
-            String downloadFileUserPath = stringBuffer.append(baseDownloadPath)
-                        .append(this.fileDao.printFileOne(id).getUserName()).toString();
-            stringBuffer.delete(0, stringBuffer.length());
-
-            generateFolder(downloadFileUserPath);
-
-
-            this.randomAccessFile = new RandomAccessFile(this.fileDao.printFileOne(id).getFileSavePath(), "r");
-            this.encryptedFileStream = new FileOutputStream(stringBuffer.append(downloadFileUserPath)
-                                                                        .append(File.separator)
-                                                                        .append(this.fileDao.printFileOne(id).getUUIDFileName())
-                                                                        .toString()
-            );
-
-            long fileSize = this.randomAccessFile.length();
-
-            // 하위 516바이트를 읽기 시작할 위치를 계산합니다.
-            long position = fileSize - READ_OPTION_SIZE;
-
-            // 파일 포인터를 설정하여 하위 516바이트의 위치로 이동합니다.
-            this.randomAccessFile.seek(position);
-
-            // 516바이트를 읽어올 배열을 생성합니다.
-            byte[] optionsBuffer = new byte[READ_OPTION_SIZE];
-
-            // 파일에서 데이터를 읽어옵니다.
-            this.randomAccessFile.read(optionsBuffer);
-
-
-            // 4바이트, 256바이트, 256바이트로 분리합니다.
-            byte[] RSAIndex = new byte[READ_RSA_INDEX_SIZE];
-            byte[] ivSpecByte = new byte[READ_ENCRYPT_IV_SIZE];
-            byte[] AESKeyByte = new byte[READ_ENCRYPT_KEY_SIZE];
-
-            System.arraycopy(optionsBuffer, 0, RSAIndex, 0, 4);
-            System.arraycopy(optionsBuffer, 4, ivSpecByte, 0, 256);
-            System.arraycopy(optionsBuffer, 260, AESKeyByte, 0, 256);
-
-            this.privateKey = this.rsaFactory.getPrivateKey(RSAIndex);
-            this.ivSpec = new IvParameterSpec(decryptOptions(ivSpecByte));
-            this.fileEncryptKey = new SecretKeySpec(decryptOptions(AESKeyByte), "AES");
-
-            this.cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            this.cipher.init(Cipher.DECRYPT_MODE, fileEncryptKey, ivSpec);
-
-            this.randomAccessFile.seek(0);
-
-            byte[] decryptedBuffer = new byte[ENCRYPTION_BUFFER_SIZE];
-
-            // 복호화할 데이터를 읽어옵니다.
-            int totalBytesRead = 0;
-
-            while (totalBytesRead < position) {
+            while (totalBytesRead < encryptedContentPosition) {
                 int bytesRead;
 
-                if (position - totalBytesRead >= ENCRYPTION_BUFFER_SIZE) {
-                    bytesRead = this.randomAccessFile.read(decryptedBuffer, 0, ENCRYPTION_BUFFER_SIZE);
+                if (encryptedContentPosition - totalBytesRead >= ENCRYPTION_BUFFER_SIZE) {
+                    bytesRead = randomAccessFile.read(decryptedBuffer, 0, ENCRYPTION_BUFFER_SIZE);
                 } else {
-                    bytesRead = this.randomAccessFile.read(decryptedBuffer, 0, (int) (position - totalBytesRead));
+                    bytesRead = randomAccessFile.read(decryptedBuffer, 0, (int) (encryptedContentPosition - totalBytesRead));
                 }
 
-                byte[] decryptedBytes = this.cipher.update(decryptedBuffer, 0, bytesRead);
+                byte[] decryptedBytes = decryptCipher.update(decryptedBuffer, 0, bytesRead);
 
                 if(decryptedBytes != null){
-                    this.encryptedFileStream.write(decryptedBytes);
+                    decryptedOutputStream.write(decryptedBytes);
                 }
 
                 totalBytesRead += bytesRead;
             }
 
-            byte[] finalObuf = this.cipher.doFinal();
-            if (finalObuf != null) {
-                this.encryptedFileStream.write(finalObuf);
+            byte[] finalOutBuffer = decryptCipher.doFinal();
+
+            if (finalOutBuffer != null) {
+                decryptedOutputStream.write(finalOutBuffer);
             }
 
 
-        } catch (IOException | InvalidKeyException | InvalidAlgorithmParameterException | NoSuchAlgorithmException |
-                 NoSuchPaddingException | IllegalBlockSizeException | BadPaddingException e) {
+        } catch (IOException |  IllegalBlockSizeException | BadPaddingException e) {
             ExceptionUtils.getStackTrace(e);
 
         } finally {
-            IOUtils.closeQuietly(this.inputFileStream);
-            IOUtils.closeQuietly(this.encryptedFileStream);
-            IOUtils.closeQuietly(this.randomAccessFile);
-
-            this.cipher=null;
-            this.privateKey = null;
-            this.ivSpec = null;
-            this.fileEncryptKey = null;
-            stringBuffer.delete(0, stringBuffer.length());
+            IOUtils.closeQuietly(decryptedOutputStream);
+            IOUtils.closeQuietly(randomAccessFile);
 
         }
+
+    }
+
+    private byte[] appendEncryptedOptions(SecretKey fileEncryptKey, IvParameterSpec ivSpec){
+
+        long latestInsertedId = this.RSAKeysDao.getLatestId();
+
+        byte[] RSAIndex = ByteBuffer.allocate(4).putInt(Math.toIntExact(latestInsertedId)).array();
+        byte[] IV = encryptOptions(ivSpec.getIV());
+        byte[] AESKey = encryptOptions(fileEncryptKey.getEncoded());
+
+        return Bytes.concat(RSAIndex, IV, AESKey);
 
     }
 
     private byte[] encryptOptions(byte[] byteData){
 
-        byte[] encryptedBytes = null;
-
         try{
-            //나중에 rsa생성 후, id값 가져오고, map정리 및 필요한 공개키는 별도의 변수로 저장
-            byte[] publicKeyBytes = Base64.getDecoder().decode(this.publicKey);
+            PublicKey publicKey = this.rsaFactory.getPublicKey();
 
-
-            // 바이트 배열을 공개 키로 변환
-            X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            PublicKey publicKey = keyFactory.generatePublic(publicKeySpec);
-
-            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
+            Cipher cipher = Cipher.getInstance(this.CIPHER_TRANSFORMATION_OPTION);
             cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 
-            encryptedBytes = cipher.doFinal(byteData);
-
-        } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException |
-                 BadPaddingException | InvalidKeyException | InvalidKeySpecException e) {
-
-            ExceptionUtils.getStackTrace(e);
-
-        }
-
-        return encryptedBytes;
-    }
-
-    private byte[] decryptOptions(byte[] byteData){
-
-        byte[] encryptedBytes = null;
-
-        try{
-
-            Cipher cipher = Cipher.getInstance("RSA/ECB/PKCS1Padding");
-            cipher.init(Cipher.DECRYPT_MODE, this.privateKey);
-
-            encryptedBytes = cipher.doFinal(byteData);
+            return cipher.doFinal(byteData);
 
         } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException |
                  BadPaddingException | InvalidKeyException e) {
 
             ExceptionUtils.getStackTrace(e);
-
+            throw new RuntimeException("옵션 암호화에 실패하였습니다.");
         }
 
-        return encryptedBytes;
     }
 
-    private void setEncryptKeys() throws NoSuchAlgorithmException {
-        this.fileEncryptKey = AES.getInstance().generateAESKey();
-        this.ivSpec = AES.getInstance().generateIV();
+    private byte[] decryptOptions(byte[] byteData, PrivateKey privateKey){
+
+        try{
+            Cipher cipher = Cipher.getInstance(this.CIPHER_TRANSFORMATION_OPTION);
+            cipher.init(Cipher.DECRYPT_MODE, privateKey);
+
+            return cipher.doFinal(byteData);
+
+        } catch (NoSuchPaddingException | IllegalBlockSizeException | NoSuchAlgorithmException |
+                 BadPaddingException | InvalidKeyException e) {
+
+            ExceptionUtils.getStackTrace(e);
+            throw new RuntimeException("옵션 복호화에 실패하였습니다.");
+        }
+
     }
+
+    private Cipher getEncryptCipher(SecretKey fileEncryptKey, IvParameterSpec ivSpec){
+
+        try {
+            Cipher cipher = Cipher.getInstance(this.CIPHER_TRANSFORMATION_MAIN);
+            cipher.init(Cipher.ENCRYPT_MODE, fileEncryptKey, ivSpec);
+
+            return cipher;
+        } catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException |
+                 InvalidKeyException e) {
+            ExceptionUtils.getStackTrace(e);
+            throw new RuntimeException("암호화용 Cipher 생성에 실패하였습니다.");
+        }
+
+    }
+
+    private Cipher getDecryptCipher(RandomAccessFile randomAccessFile, long encryptedContentPosition){
+
+        try {
+            randomAccessFile.seek(encryptedContentPosition);
+            byte[] optionsBuffer =  new byte[]{randomAccessFile.readByte()};
+
+            PrivateKey privateKey = this.rsaFactory.getPrivateKey(getRSAId(optionsBuffer));
+            IvParameterSpec ivSpec = new IvParameterSpec(decryptOptions(getIV(optionsBuffer), privateKey));
+            SecretKey fileEncryptKey = new SecretKeySpec(decryptOptions(getAESKey(optionsBuffer), privateKey), "AES");
+
+            Cipher cipher = Cipher.getInstance(this.CIPHER_TRANSFORMATION_MAIN);
+            cipher.init(Cipher.DECRYPT_MODE, fileEncryptKey, ivSpec);
+
+            return cipher;
+
+        } catch (IOException e) {
+            ExceptionUtils.getStackTrace(e);
+            throw new RuntimeException("암호화 되어있는 옵션 정보를 가져오는데 실패하였습니다.");
+        }catch (NoSuchAlgorithmException | NoSuchPaddingException | InvalidAlgorithmParameterException |
+                InvalidKeyException e) {
+            ExceptionUtils.getStackTrace(e);
+            throw new RuntimeException("복호화용 Cipher 생성에 실패하였습니다.");
+        }
+
+    }
+
+    private long calcPosition(long fileSize){
+        return fileSize - this.READ_OPTION_SIZE;
+    }
+
+    private byte[] getIV(byte[] input){
+        byte[] ivSpecByte = new byte[READ_ENCRYPT_IV_SIZE];
+        System.arraycopy(input, 4, ivSpecByte, 0, READ_ENCRYPT_IV_SIZE);
+        return ivSpecByte;
+
+    }
+    private byte[] getAESKey(byte[] input){
+        byte[] AESKeyByte = new byte[READ_ENCRYPT_KEY_SIZE];
+        System.arraycopy(input, 260, AESKeyByte, 0, READ_ENCRYPT_KEY_SIZE);
+        return AESKeyByte;
+    }
+    private byte[] getRSAId(byte[] input){
+        byte[] RSAIndex = new byte[READ_RSA_INDEX_SIZE];
+        System.arraycopy(input, 0, RSAIndex, 0, READ_RSA_INDEX_SIZE);
+        return RSAIndex;
+    }
+
+    private String appendDecryptedPath(Long id){
+
+        FileVO fileVO = this.fileEntityDao.printFileOne(id);
+        String userName = fileVO.getUserName();
+        String uuidFileName = fileVO.getUUIDFileName();
+
+        String downloadFileUserPath = Paths.get(this.downloadDir, userName).toString();
+        generateFolder(downloadFileUserPath);
+
+        return Paths.get(downloadFileUserPath, uuidFileName).toString();
+    }
+
 
 
 }

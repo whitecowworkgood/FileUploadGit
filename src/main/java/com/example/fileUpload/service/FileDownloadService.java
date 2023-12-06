@@ -14,8 +14,6 @@ public interface FileDownloadService {
     void decreaseCountNum(Long id);
 
     String getFileName(Long id);
-    //FileDownloadServiceImpl of(String userName, Long id);
-    //oid setParameter(Long id);
 
     Resource downloadFile(Long id);
 

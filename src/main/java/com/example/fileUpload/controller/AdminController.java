@@ -32,7 +32,6 @@ public class AdminController {
     private final FileUploadService fileUploadService;
     private final FileEncryptService fileEncryptService;
 
-
     @Operation(summary = "허가 대기 중인 파일 출력", description = "허가 대기 중인 파일 출력합니다.")
     @GetMapping("/files")
     @ResponseBody

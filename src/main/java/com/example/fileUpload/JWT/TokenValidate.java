@@ -1,6 +1,6 @@
 package com.example.fileUpload.JWT;
 
-import com.example.fileUpload.repository.RefreshTokenDao;
+import com.example.fileUpload.repository.RefreshTokenDAO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.*;
@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class TokenValidate {
 
-    private final RefreshTokenDao refreshTokenDao;
+    private final RefreshTokenDAO refreshTokenDao;
     private final String AUTHORITIES_KEY = "auth";
     private final String SUBJECT_TYPE = "sub";
 

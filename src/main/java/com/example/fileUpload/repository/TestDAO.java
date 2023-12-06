@@ -8,11 +8,11 @@ import org.springframework.stereotype.Repository;
 
 
 @Repository
-public class TestDao {
+public class TestDAO {
 
     private final SqlSessionTemplate sqlSession;
 
-    public TestDao(SqlSessionTemplate sqlSession) {
+    public TestDAO(SqlSessionTemplate sqlSession) {
         this.sqlSession = sqlSession;
     }
 

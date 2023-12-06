@@ -3,8 +3,8 @@ package com.example.fileUpload.documentParser;
 import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
 import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.model.Ole.OleDto;
-import com.example.fileUpload.repository.OleDao;
-import com.example.fileUpload.repository.TestDao;
+import com.example.fileUpload.repository.OleEntryDAO;
+import com.example.fileUpload.repository.TestDAO;
 import com.example.fileUpload.util.ExternalFileMap;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -18,8 +18,8 @@ import org.springframework.stereotype.Component;
 public class FileProcessor {
 
     private final FileParserFactory fileParserFactory;
-    private final OleDao oleDao;
-    private final TestDao testDao;
+    private final OleEntryDAO oleEntryDao;
+    private final TestDAO testDao;
 
     public synchronized void createOleExtractorHandlerTest(FileDto fileDto) {
 
@@ -58,7 +58,7 @@ public class FileProcessor {
                     .originalFileName(entry.getKey())
                     .UUIDFileName(entry.getValue())
                     .build();
-            this.oleDao.saveOle(oleDto);
+            this.oleEntryDao.saveOle(oleDto);
         });
         ExternalFileMap.resetMap();
     }

@@ -1,7 +1,7 @@
 package com.example.fileUpload.service.serviceImpl;
 
 import com.example.fileUpload.model.Member.Member;
-import com.example.fileUpload.repository.MemberDao;
+import com.example.fileUpload.repository.MemberDAO;
 //import com.example.fileUpload.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
@@ -19,7 +19,7 @@ import java.util.Collections;
 @RequiredArgsConstructor
 public class CustomUserDetailService implements UserDetailsService {
 
-    private final MemberDao memberDao;
+    private final MemberDAO memberDao;
 
     @Override
     @Transactional

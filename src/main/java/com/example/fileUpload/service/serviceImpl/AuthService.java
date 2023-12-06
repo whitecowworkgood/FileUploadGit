@@ -8,8 +8,8 @@ import com.example.fileUpload.model.Member.MemberResponseDto;
 import com.example.fileUpload.model.Token.RefreshToken;
 import com.example.fileUpload.model.Token.TokenDto;
 import com.example.fileUpload.model.Token.TokenRequestDto;
-import com.example.fileUpload.repository.MemberDao;
-import com.example.fileUpload.repository.RefreshTokenDao;
+import com.example.fileUpload.repository.MemberDAO;
+import com.example.fileUpload.repository.RefreshTokenDAO;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
@@ -33,10 +33,10 @@ import java.util.concurrent.Executors;
 public class AuthService {
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
-    private final MemberDao memberDao;
+    private final MemberDAO memberDao;
     private final PasswordEncoder passwordEncoder;
     private final TokenValidate tokenValidate;
-    private final RefreshTokenDao refreshTokenDao;
+    private final RefreshTokenDAO refreshTokenDao;
 
     @Transactional
     public MemberResponseDto signup(MemberRequestDto memberRequestDto){

@@ -35,24 +35,5 @@ public class FileUtil {
         }
         return fileName;
     }
-    /*
-    public static void deleteFolder(File folder) {
-        if (folder.isDirectory()) {
-            File[] files = folder.listFiles();
-            if (files != null) {
-                for (File file : files) {
-                    if (file.isDirectory()) {
-                        // 서브폴더인 경우 재귀 호출로 서브폴더 삭제
-                        deleteFolder(file);
-                    } else {
-                        // 파일인 경우 삭제
-                        file.delete();
-                    }
-                }
-            }
-        }
-    }*/
-
-
 }
 

@@ -24,7 +24,7 @@ public class DirectoryChecker {
             } catch (IOException e) {
                 // 폴더 생성 실패에 대한 예외 처리
                 ExceptionUtils.getStackTrace(e);
-
+                log.warn(folder+"에 대핸 생성을 완료하지 못했습니다.");
             }
         }
     }

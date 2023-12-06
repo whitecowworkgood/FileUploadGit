@@ -9,12 +9,12 @@ import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 
 @Repository
-public class RefreshTokenDao {
+public class RefreshTokenDAO {
 
     private final SqlSessionTemplate sqlSession;
 
     @Autowired
-    public RefreshTokenDao(SqlSessionTemplate sqlSession) {
+    public RefreshTokenDAO(SqlSessionTemplate sqlSession) {
         this.sqlSession = sqlSession;
     }
 

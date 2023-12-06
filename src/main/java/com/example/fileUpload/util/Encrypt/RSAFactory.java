@@ -1,6 +1,6 @@
 package com.example.fileUpload.util.Encrypt;
 
-import com.example.fileUpload.repository.EncryptDao;
+import com.example.fileUpload.repository.RSAKeysDAO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import java.security.*;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.util.Base64;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -17,70 +18,77 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class RSAFactory {
 
-    private final EncryptDao encryptDao;
+    private final int RSA_KEY_SIZE = 2048;
+    private final String RSA_ALGORITHM = "RSA";
+    private final String RSA_PUBLIC_KEY = "publicKey";
+    private final String RSA_PRIVATE_KEY = "privateKey";
 
-    private ConcurrentHashMap<String, String> stringKeypair = new ConcurrentHashMap<>();
-    private PublicKey publicKey = null;
-    private PrivateKey privateKey = null;
-    private String stringPublicKey = null;
-    private String stringPrivateKey = null;
+    private final RSAKeysDAO RSAKeysDao;
 
+    private final ConcurrentHashMap<String, String> stringKeypair = new ConcurrentHashMap<>();
 
-    public ConcurrentHashMap<String, String> createRSAKeyPair() {
+    public void createRSAKeyPair() {
 
         try{
             SecureRandom secureRandom = new SecureRandom();
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-            keyPairGenerator.initialize(2048, secureRandom);
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(this.RSA_ALGORITHM);
+            keyPairGenerator.initialize(this.RSA_KEY_SIZE, secureRandom);
             KeyPair keyPair = keyPairGenerator.genKeyPair();
 
-            this.publicKey = keyPair.getPublic();
-            this.privateKey = keyPair.getPrivate();
+            String stringPublicKey = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
+            String stringPrivateKey = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
 
-            this.stringPublicKey = Base64.getEncoder().encodeToString(this.publicKey.getEncoded());
-            this.stringPrivateKey = Base64.getEncoder().encodeToString(this.privateKey.getEncoded());
+            this.stringKeypair.put(this.RSA_PUBLIC_KEY, stringPublicKey);
+            this.stringKeypair.put(this.RSA_PRIVATE_KEY, stringPrivateKey);
 
-            this.stringKeypair.put("publicKey", this.stringPublicKey);
-            this.stringKeypair.put("privateKey", this.stringPrivateKey);
-
+            this.RSAKeysDao.saveRSAKey(this.stringKeypair);
 
         }catch(NoSuchAlgorithmException e){
             ExceptionUtils.getStackTrace(e);
 
         }
 
-        return this.stringKeypair;
+    }
+
+    public synchronized PublicKey getPublicKey(){
+
+        String stringPublicKey = this.stringKeypair.get(this.RSA_PUBLIC_KEY);
+
+        byte[] publicKeyBytes = Base64.getDecoder().decode(stringPublicKey);
+
+        try {
+            X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
+            KeyFactory keyFactory = KeyFactory.getInstance(this.RSA_ALGORITHM);
+
+            return keyFactory.generatePublic(publicKeySpec);
+        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+            ExceptionUtils.getStackTrace(e);
+            throw new RuntimeException("공개키를 가져오는데 문제가 발생하였습니다.");
+        }
+
     }
 
     public synchronized PrivateKey getPrivateKey(byte[] data) {
-        long value = 0;
-        PrivateKey privateKey = null;
 
-        for (int i = 0; i < data.length; i++) {
-            value = (value << 8) | (data[i] & 0xFF);
-        }
         try{
-            byte[] privateKeyBytes = Base64.getDecoder().decode(this.encryptDao.findPrivateKey(value));
+            long value = 0;
+
+            for (byte datum : data) {
+                value = (value << 8) | (datum & 0xFF);
+            }
+
+            byte[] privateKeyBytes = Base64.getDecoder().decode(this.RSAKeysDao.findPrivateKey(value));
 
             PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
-            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
-            privateKey = keyFactory.generatePrivate(privateKeySpec);
+            KeyFactory keyFactory = KeyFactory.getInstance(this.RSA_ALGORITHM);
+
+            return keyFactory.generatePrivate(privateKeySpec);
 
         }catch (NoSuchAlgorithmException | InvalidKeySpecException e){
             ExceptionUtils.getStackTrace(e);
+            throw new RuntimeException("개인키를 가져오는데 문제가 발생하였습니다.");
         }
 
-        return privateKey;
     }
-
-
-    public void freeResource(){
-        this.stringKeypair = null;
-        this.publicKey = null;
-        this.privateKey = null;
-        this.stringPublicKey = null;
-        this.stringPrivateKey = null;
-    }
-
 
 }

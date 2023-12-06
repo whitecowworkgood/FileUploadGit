@@ -1,12 +1,10 @@
 package com.example.fileUpload.service.serviceImpl;
 
-import com.example.fileUpload.model.File.FileVO;
 import com.example.fileUpload.model.File.UserFileVO;
-import com.example.fileUpload.repository.FileDao;
+import com.example.fileUpload.repository.FileEntityDAO;
 import com.example.fileUpload.service.FileDownloadService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.catalina.User;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -15,14 +13,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.MalformedURLException;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-
-import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 
 @Service
 @Slf4j
@@ -30,7 +23,7 @@ import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 @Transactional
 public class FileDownloadServiceImpl implements FileDownloadService {
 
-    private final FileDao fileDao;
+    private final FileEntityDAO fileEntityDao;
     private final AuthService authService;
 
     private final StringBuffer stringBuffer = new StringBuffer();
@@ -47,7 +40,7 @@ public class FileDownloadServiceImpl implements FileDownloadService {
         try{
             String currentUserName = authService.getUserNameWeb();
 
-            fileName = this.fileDao.printFileInfo(id, currentUserName).orElseThrow(NullPointerException::new).getOriginalFileName();
+            fileName = this.fileEntityDao.printFileInfo(id, currentUserName).orElseThrow(NullPointerException::new).getOriginalFileName();
 
         }catch(NullPointerException e){
             ExceptionUtils.getStackTrace(e);
@@ -68,7 +61,7 @@ public class FileDownloadServiceImpl implements FileDownloadService {
                     .append(File.separator)
                     .append(currentUserName)
                     .append(File.separator)
-                    .append(this.fileDao.printFileInfo(id, currentUserName).orElseThrow(NullPointerException::new).getUUIDFileName());
+                    .append(this.fileEntityDao.printFileInfo(id, currentUserName).orElseThrow(NullPointerException::new).getUUIDFileName());
 
 
             Path fileStorageLocation = Path.of(this.stringBuffer.toString());
@@ -88,17 +81,17 @@ public class FileDownloadServiceImpl implements FileDownloadService {
 
     @Override
     public List<UserFileVO> showAcceptedFiles(String userName) {
-        return this.fileDao.acceptedFiles(userName);
+        return this.fileEntityDao.acceptedFiles(userName);
     }
 
     @Override
     public Boolean isDownloadAble(Long id){
-        return this.fileDao.acceptedFilesById(id).getCountNum()>0;
+        return this.fileEntityDao.acceptedFilesById(id).getCountNum()>0;
     }
 
     @Override
     public void decreaseCountNum(Long id) {
-        this.fileDao.decreaseCountNum(id);
+        this.fileEntityDao.decreaseCountNum(id);
     }
 
 }

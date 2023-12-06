@@ -7,7 +7,7 @@ import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
-public interface FileEntryMapperAnno {
+public interface FileEntityMapperAnno {
     @Select("SELECT id, uuidfile_name, file_ole_path," +
             " file_save_path,file_size,origin_file_name, file_type, count_num, user_name,comment,time_stamp, is_encrypt, is_active FROM file_entity where id = #{id}")
     @Results({

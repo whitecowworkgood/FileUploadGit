@@ -3,7 +3,7 @@ package com.example.fileUpload.service.serviceImpl;
 import com.example.fileUpload.message.TestMessage;
 import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.model.TestVO;
-import com.example.fileUpload.repository.TestDao;
+import com.example.fileUpload.repository.TestDAO;
 import com.example.fileUpload.service.TestService;
 import com.example.fileUpload.util.AsyncClass;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +29,7 @@ import java.util.stream.Stream;
 public class TestServiceImpl implements TestService {
 
     private final AsyncClass asyncClass;
-    private final TestDao testDao;
+    private final TestDAO testDao;
     @Override
     public void processFiles(FileDto fileDto) {
 

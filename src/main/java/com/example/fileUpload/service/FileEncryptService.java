@@ -17,9 +17,8 @@ public interface FileEncryptService {
     int READ_ENCRYPT_KEY_SIZE = 256;
     int READ_RSA_INDEX_SIZE = 4;
 
-    void createRSAKeyPair() throws NoSuchAlgorithmException;
-    void storedRSAKeyPair();
     void encryptFile(FileDto fileDto) throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException, IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException, IOException;
+
     void decryptFile(Long id);
 
 

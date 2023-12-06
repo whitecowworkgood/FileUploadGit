@@ -9,10 +9,10 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public class OleDao {
+public class OleEntryDAO {
     private final SqlSessionTemplate sqlSession;
 
-    public OleDao(SqlSessionTemplate sqlSession) {
+    public OleEntryDAO(SqlSessionTemplate sqlSession) {
         this.sqlSession = sqlSession;
     }
 

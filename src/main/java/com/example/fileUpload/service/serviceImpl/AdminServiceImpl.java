@@ -1,7 +1,7 @@
 package com.example.fileUpload.service.serviceImpl;
 
 import com.example.fileUpload.model.File.FileVO;
-import com.example.fileUpload.repository.FileDao;
+import com.example.fileUpload.repository.FileEntityDAO;
 import com.example.fileUpload.service.AdminService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,15 +16,15 @@ import java.util.List;
 @Transactional
 public class AdminServiceImpl implements AdminService {
 
-    private final FileDao fileDao;
+    private final FileEntityDAO fileEntityDao;
 
     @Override
     public List<FileVO> printBeforeAcceptFiles() {
-        return this.fileDao.beforeAcceptFiles();
+        return this.fileEntityDao.beforeAcceptFiles();
     }
 
     @Override
     public synchronized void acceptFile(Long id) {
-        this.fileDao.acceptFile(id);
+        this.fileEntityDao.acceptFile(id);
     }
 }

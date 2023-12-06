@@ -10,11 +10,11 @@ import java.util.Optional;
 
 @Repository
 @Slf4j
-public class MemberDao {
+public class MemberDAO {
 
     private final SqlSessionTemplate sqlSession;
 
-    public MemberDao(SqlSessionTemplate sqlSession) {
+    public MemberDAO(SqlSessionTemplate sqlSession) {
         this.sqlSession = sqlSession;
     }
 
