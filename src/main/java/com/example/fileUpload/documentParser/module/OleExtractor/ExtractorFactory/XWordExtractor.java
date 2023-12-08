@@ -6,12 +6,13 @@ import org.apache.commons.io.IOUtils;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.xwpf.usermodel.XWPFDocument;
+import org.springframework.util.StringUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 
 import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
-import static com.example.fileUpload.util.FileUtil.removePath;
+
 
 public class XWordExtractor extends OleExtractor {
 
@@ -39,7 +40,7 @@ public class XWordExtractor extends OleExtractor {
         this.docPackage = OPCPackage.open(this.packagePart.getInputStream());
         this.document = new XWPFDocument(this.docPackage);
 
-        String uuid = addUniqueFileNameMapping(removePath(String.valueOf(this.packagePart.getPartName())));
+        String uuid = addUniqueFileNameMapping(StringUtils.getFilename(String.valueOf(this.packagePart.getPartName())));
 
         super.stringBuffer.append(this.oleSavePath).append(uuid);
 

@@ -20,11 +20,6 @@ public class OleEntryDAO {
         return this.sqlSession.getMapper(OleEntryMapperAnno.class).selectById(id);
     }
 
-
-    public Boolean deleteById(Long id){
-        return sqlSession.getMapper(OleEntryMapperAnno.class).deleteOleEntry(id);
-    }
-
     public boolean saveOle(OleDto oleDto){
         return sqlSession.getMapper(OleEntryMapperAnno.class).insertOleEntry(oleDto);
     }

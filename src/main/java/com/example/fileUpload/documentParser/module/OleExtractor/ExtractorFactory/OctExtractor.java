@@ -47,10 +47,9 @@ public class OctExtractor extends OleExtractor {
 
                 tryFileSaveUseOleStream();
             }
-            if(type.equals("other")){
 
-                DocumentEntry ole10Native = (DocumentEntry) this.directoryNode.getEntry(Ole10Native.OLE10_NATIVE);
-                super.embeddedFileExtractor.parseOle10NativeEntry(new DocumentInputStream(ole10Native), this.oleSavePath);
+            if(type.equals("other")){
+                embeddedFileExtractor.parserOleNativeEntry(this.directoryNode, this.oleSavePath);
             }
         }
         if (this.directoryNode.hasEntry(OleEntry.ODF.getValue())) {

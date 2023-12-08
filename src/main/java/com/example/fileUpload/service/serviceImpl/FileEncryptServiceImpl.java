@@ -21,6 +21,8 @@ import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.security.*;
 
@@ -35,8 +37,8 @@ public class FileEncryptServiceImpl implements FileEncryptService {
     @Value("${Download-Directory}")
     private String downloadDir;
 
-    private final String CIPHER_TRANSFORMATION_MAIN = "AES/CBC/PKCS5Padding";
-    private final String CIPHER_TRANSFORMATION_OPTION = "RSA/ECB/PKCS1Padding";
+    private static final String CIPHER_TRANSFORMATION_MAIN = "AES/CBC/PKCS5Padding";
+    private static final String CIPHER_TRANSFORMATION_OPTION = "RSA/ECB/PKCS1Padding";
 
     private final RSAFactory rsaFactory;
     private final FileEntityDAO fileEntityDao;
@@ -44,10 +46,11 @@ public class FileEncryptServiceImpl implements FileEncryptService {
     private final AES aes;
 
     @Override
-    public void encryptFile(FileDto fileDto){
+    public void encryptFile(FileDto fileDto) throws IOException {
 
         FileInputStream inputFileStream = null;
         FileOutputStream encryptedOutputStream = null;
+
 
         byte[] buffer = new byte[ENCRYPTION_BUFFER_SIZE];
         int bytesRead = -1;
@@ -76,6 +79,7 @@ public class FileEncryptServiceImpl implements FileEncryptService {
 
             encryptedOutputStream.write(appendEncryptedOptions(fileEncryptKey, ivSpec));
 
+
         } catch (IllegalBlockSizeException | IOException | BadPaddingException e) {
             ExceptionUtils.getStackTrace(e);
             throw new RuntimeException("파일 암호화에 실패하였습니다.");
@@ -83,21 +87,26 @@ public class FileEncryptServiceImpl implements FileEncryptService {
         }finally{
             IOUtils.closeQuietly(inputFileStream);
             IOUtils.closeQuietly(encryptedOutputStream);
+
+            Files.delete(Path.of(fileDto.getFileTempPath()));
         }
     }
 
     @Override
-    public void decryptFile(Long id) {
+    public void decryptFile(Long id) throws IOException {
 
         FileOutputStream decryptedOutputStream = null;
         RandomAccessFile randomAccessFile = null;
+
         byte[] decryptedBuffer = new byte[ENCRYPTION_BUFFER_SIZE];
         int totalBytesRead = 0;
+        String targetFilePath = null;
 
         try{
+            targetFilePath = this.fileEntityDao.printFileOne(id).getFileSavePath();
             String outputFilePath = appendDecryptedPath(id);
 
-            randomAccessFile = new RandomAccessFile(this.fileEntityDao.printFileOne(id).getFileSavePath(), "r");
+            randomAccessFile = new RandomAccessFile(targetFilePath, "r");
             decryptedOutputStream = new FileOutputStream(outputFilePath);
 
             long encryptedContentPosition = calcPosition(randomAccessFile.length());
@@ -135,6 +144,7 @@ public class FileEncryptServiceImpl implements FileEncryptService {
             IOUtils.closeQuietly(decryptedOutputStream);
             IOUtils.closeQuietly(randomAccessFile);
 
+            Files.delete(Path.of(targetFilePath));
         }
 
     }
@@ -156,7 +166,7 @@ public class FileEncryptServiceImpl implements FileEncryptService {
         try{
             PublicKey publicKey = this.rsaFactory.getPublicKey();
 
-            Cipher cipher = Cipher.getInstance(this.CIPHER_TRANSFORMATION_OPTION);
+            Cipher cipher = Cipher.getInstance(CIPHER_TRANSFORMATION_OPTION);
             cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 
             return cipher.doFinal(byteData);
@@ -173,7 +183,7 @@ public class FileEncryptServiceImpl implements FileEncryptService {
     private byte[] decryptOptions(byte[] byteData, PrivateKey privateKey){
 
         try{
-            Cipher cipher = Cipher.getInstance(this.CIPHER_TRANSFORMATION_OPTION);
+            Cipher cipher = Cipher.getInstance(CIPHER_TRANSFORMATION_OPTION);
             cipher.init(Cipher.DECRYPT_MODE, privateKey);
 
             return cipher.doFinal(byteData);
@@ -190,7 +200,7 @@ public class FileEncryptServiceImpl implements FileEncryptService {
     private Cipher getEncryptCipher(SecretKey fileEncryptKey, IvParameterSpec ivSpec){
 
         try {
-            Cipher cipher = Cipher.getInstance(this.CIPHER_TRANSFORMATION_MAIN);
+            Cipher cipher = Cipher.getInstance(CIPHER_TRANSFORMATION_MAIN);
             cipher.init(Cipher.ENCRYPT_MODE, fileEncryptKey, ivSpec);
 
             return cipher;
@@ -212,7 +222,7 @@ public class FileEncryptServiceImpl implements FileEncryptService {
             IvParameterSpec ivSpec = new IvParameterSpec(decryptOptions(getIV(optionsBuffer), privateKey));
             SecretKey fileEncryptKey = new SecretKeySpec(decryptOptions(getAESKey(optionsBuffer), privateKey), "AES");
 
-            Cipher cipher = Cipher.getInstance(this.CIPHER_TRANSFORMATION_MAIN);
+            Cipher cipher = Cipher.getInstance(CIPHER_TRANSFORMATION_MAIN);
             cipher.init(Cipher.DECRYPT_MODE, fileEncryptKey, ivSpec);
 
             return cipher;

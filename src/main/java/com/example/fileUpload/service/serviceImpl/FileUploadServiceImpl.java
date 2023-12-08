@@ -13,6 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -34,28 +35,23 @@ public class FileUploadServiceImpl implements FileUploadService {
     private final FileEncryptService fileEncryptService;
     private final AuthService authService;
 
-    private final DocumentFileInstanceFactory documentFileInstanceFactory;
-
     @SneakyThrows
     @Override
     @Transactional
     public synchronized void fileUpload(FileDto fileDto) {
 
-        //TODO 임시 경로에서 OLE 추출 로직과, 암호화 후, 정상 폴더로 올리는 로직 구현하기.
         if(isInTemporaryFolder(fileDto.getFileTempPath())){
 
             try{
                 String userName = authService.getUserNameWeb();
                 fileDto.setUserName(userName);
 
+                this.fileEntityDao.saveFile(fileDto);
                 this.fileProcessor.createOleExtractorHandler(fileDto);
                 this.fileEncryptService.encryptFile(fileDto);
             }catch(Exception e){
                 ExceptionUtils.getStackTrace(e);
                 log.error("에러발생");
-            }
-            finally {
-                fileDto = null;
             }
         }
 

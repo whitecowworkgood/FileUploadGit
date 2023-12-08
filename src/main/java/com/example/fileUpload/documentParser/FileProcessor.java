@@ -1,5 +1,6 @@
 package com.example.fileUpload.documentParser;
 
+import com.example.fileUpload.documentParser.parsers.FileProcessorTest;
 import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
 import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.model.Ole.OleDto;
@@ -28,7 +29,7 @@ public class FileProcessor {
             oleExtractor.extractOleFromDocumentFile(fileDto);
 
         }catch (Exception e) {
-            catchException(e);
+            ExceptionUtils.getStackTrace(e);
         }finally {
             testDao.updateStatusCodeComplete(fileDto.getComment());
         }
@@ -37,21 +38,20 @@ public class FileProcessor {
     public synchronized void createOleExtractorHandler(FileDto fileDto) {
 
         try {
+            FileProcessorTest.getParser(fileDto.getFileTempPath(), fileDto.getUUIDFileName());
+
             OleExtractor oleExtractor = this.fileParserFactory.createParser(fileDto.getFileType(), fileDto.getUUIDFileName());
             oleExtractor.extractOleFromDocumentFile(fileDto);
-            //processExternalFiles(fileDto);
+            processExternalFiles(fileDto);
 
         }catch (Exception e) {
-            catchException(e);
+            ExceptionUtils.getStackTrace(e);
         }
     }
 
-    private void catchException(Exception e){
-        ExceptionUtils.getStackTrace(e);
-        throw new RuntimeException(e);
-    }
 
     private void processExternalFiles(FileDto fileDto) {
+
         ExternalFileMap.forEach(entry -> {
             OleDto oleDto = OleDto.builder()
                     .superId(fileDto.getId())

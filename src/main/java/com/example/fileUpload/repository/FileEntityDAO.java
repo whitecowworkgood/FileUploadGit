@@ -4,6 +4,7 @@ import com.example.fileUpload.Mybatis.FileEntityMapperAnno;
 import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.model.File.FileVO;
 import com.example.fileUpload.model.File.UserFileVO;
+import org.apache.tomcat.util.http.fileupload.FileUploadException;
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.stereotype.Repository;
 
@@ -22,16 +23,14 @@ public class FileEntityDAO {
     public FileVO printFileOne(Long id){
         return this.sqlSession.getMapper(FileEntityMapperAnno.class).selectById(id);
     }
+
     public Optional<FileVO> printFileInfo(Long id, String userName){
         return Optional.ofNullable(this.sqlSession.getMapper(FileEntityMapperAnno.class).selectByIdName(id, userName));
     }
 
-    public boolean saveFile(FileDto fileDto){
-        return this.sqlSession.getMapper(FileEntityMapperAnno.class).insertFileEntity(fileDto);
-    }
-
-    public boolean deleteById(Long id){
-        return this.sqlSession.getMapper(FileEntityMapperAnno.class).deleteFileEntry(id);
+    public Optional<Boolean> saveFile(FileDto fileDto) throws FileUploadException {
+        return Optional.ofNullable(Optional.of(this.sqlSession.getMapper(FileEntityMapperAnno.class).insertFileEntity(fileDto))
+                .orElseThrow(() -> new FileUploadException("파일 업로드에 실패하였습니다.")));
     }
 
     public List<FileVO> beforeAcceptFiles(){

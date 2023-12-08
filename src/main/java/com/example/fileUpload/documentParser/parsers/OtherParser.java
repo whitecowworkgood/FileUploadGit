@@ -11,18 +11,4 @@ public class OtherParser extends OleExtractor {
 
     }
 
-    @Override
-    protected void catchIOException(IOException e) {
-        super.catchIOException(e);
-    }
-
-    @Override
-    protected void catchException(Exception e) {
-        super.catchException(e);
-    }
-
-    @Override
-    protected void closeResources() {
-
-    }
 }

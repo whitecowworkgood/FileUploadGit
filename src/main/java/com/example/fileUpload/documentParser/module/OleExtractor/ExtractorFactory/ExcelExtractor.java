@@ -5,13 +5,14 @@ import com.example.fileUpload.model.File.FileDto;
 import org.apache.commons.io.IOUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.openxml4j.opc.PackagePart;
+import org.springframework.util.StringUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
 import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
-import static com.example.fileUpload.util.FileUtil.removePath;
+
 
 public class ExcelExtractor extends OleExtractor {
 
@@ -39,7 +40,7 @@ public class ExcelExtractor extends OleExtractor {
         this.embeddedWorkbook = new HSSFWorkbook(this.packagePart.getInputStream());
         this.embeddedWorkbook.setHidden(false);
 
-        String uuid = addUniqueFileNameMapping(removePath(String.valueOf(this.packagePart.getPartName())));
+        String uuid = addUniqueFileNameMapping(StringUtils.getFilename(String.valueOf(this.packagePart.getPartName())));
 
         super.stringBuffer.append(this.oleSavePath).append(uuid);
 

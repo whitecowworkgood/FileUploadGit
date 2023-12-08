@@ -19,6 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 
 @Controller
@@ -59,7 +60,7 @@ public class AdminController {
     @Operation(summary = "파일의 다운로드를 허가", description = "파일의 다운로드를 허가합니다..")
     @PutMapping("/accept")
     @ResponseBody
-    public ResponseEntity<String> acceptFile(@Valid @RequestParam("id") @Min(value = 0)Long id){
+    public ResponseEntity<String> acceptFile(@Valid @RequestParam("id") @Min(value = 0)Long id) throws IOException {
 
         String message = handleDatabaseAndFileProcessing(id);
 
@@ -68,7 +69,7 @@ public class AdminController {
                 .body(ResultMessage.getInstance().acceptOf(message));
     }
 
-    private String handleDatabaseAndFileProcessing(Long id){
+    private String handleDatabaseAndFileProcessing(Long id) throws IOException {
         if(fileUploadService.printFileOne(id).isActive()){
             return "Already Changed";
         }

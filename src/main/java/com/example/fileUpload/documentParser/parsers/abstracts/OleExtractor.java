@@ -9,12 +9,5 @@ import java.io.IOException;
 public abstract class OleExtractor {
     public abstract void extractOleFromDocumentFile(FileDto fileDto) throws Exception;
 
-    protected void catchIOException(IOException e){
-        ExceptionUtils.getStackTrace(e);
-    }
-    protected void catchException(Exception e){
-        ExceptionUtils.getStackTrace(e);
-    }
 
-    protected abstract void closeResources();
 }

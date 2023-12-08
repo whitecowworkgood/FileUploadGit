@@ -2,7 +2,6 @@ package com.example.fileUpload.documentParser;
 
 import com.example.fileUpload.documentParser.parsers.*;
 import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
-import com.example.fileUpload.model.File.FileDto;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -13,6 +12,7 @@ import org.springframework.stereotype.Component;
 public class FileParserFactory {
 
     public OleExtractor createParser(String mimeType, String uuidFileName) {
+
 
         switch (mimeType) {
 
@@ -45,9 +45,6 @@ public class FileParserFactory {
 
                 }
                 return new HwpParser();
-            }
-            case "application/zip" -> {
-                return new ZipParser();
             }
             default -> {
                 return new OtherParser();

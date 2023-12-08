@@ -6,13 +6,14 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.hslf.usermodel.HSLFSlideShow;
 import org.apache.poi.openxml4j.opc.PackagePart;
+import org.springframework.util.StringUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
 import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
-import static com.example.fileUpload.util.FileUtil.removePath;
+
 
 public class PowerPointExtractor extends OleExtractor {
 
@@ -37,7 +38,7 @@ public class PowerPointExtractor extends OleExtractor {
     private void writePowerPoint() throws IOException {
         this.slideShow = new HSLFSlideShow(this.packagePart.getInputStream());
 
-        String uuid = addUniqueFileNameMapping(removePath(String.valueOf(this.packagePart.getPartName())));
+        String uuid = addUniqueFileNameMapping(StringUtils.getFilename(String.valueOf(this.packagePart.getPartName())));
 
         this.stringBuffer.append(this.oleSavePath).append(uuid);
 

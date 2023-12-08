@@ -13,7 +13,6 @@ import java.nio.file.Path;
 import java.util.Objects;
 import java.util.UUID;
 
-
 @Slf4j
 @Component
 public class FileDTOFactoryImpl implements FileDTOFactory{
@@ -37,7 +36,7 @@ public class FileDTOFactoryImpl implements FileDTOFactory{
         String fileOlePath = generateFileOlePath(uuidName);
         String dividedComment = dividedCommentSize(comment);
 
-        String tempFilePath = String.format("%s\\%s", tempDir, uuidFileName);
+        String tempFilePath = String.format("%s%s%s", tempDir,File.separator, uuidFileName);
 
         multipartFile.transferTo(Path.of(tempFilePath));
 
@@ -50,7 +49,6 @@ public class FileDTOFactoryImpl implements FileDTOFactory{
                 .fileOlePath(fileOlePath)
                 .countNum(countNum)
                 .fileTempPath(tempFilePath)
-                //.multipartFile(multipartFile)
                 .comment(dividedComment)
                 .build();
 
@@ -59,6 +57,7 @@ public class FileDTOFactoryImpl implements FileDTOFactory{
 
     private String generateUuidFileName(String originalFileName, String uuidName) {
         return new StringBuffer(uuidName)
+                .append(".")
                 .append(FileUtil.getFileExtension(originalFileName)).toString();
     }
 

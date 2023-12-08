@@ -5,9 +5,12 @@ import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
 import com.example.fileUpload.model.File.FileDto;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.hslf.usermodel.HSLFObjectData;
 import org.apache.poi.hslf.usermodel.HSLFSlideShow;
+import org.apache.poi.poifs.filesystem.DirectoryNode;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.apache.poi.ss.usermodel.ObjectData;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -38,14 +41,18 @@ public class PowerPointParser extends OleExtractor {
 
             List<HSLFObjectData> pptList = Arrays.stream(this.hslfSlideShow.getEmbeddedObjects()).toList();
 
+
             if(!pptList.isEmpty()){
                 generateFolder(fileDto.getFileOlePath());
 
                 for (HSLFObjectData object : pptList) {
-                    IOUtils.closeQuietly(this.poifs);
-                    this.poifs = new POIFSFileSystem(object.getInputStream());
 
-                    this.officeEntryHandler.parser(this.poifs.getRoot(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
+                    System.out.println(object.getDirectory().getEntryNames());
+                    this.officeEntryHandler.parser((DirectoryNode) object.getDirectory(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
+
+                    /*IOUtils.closeQuietly(this.poifs);
+                    this.poifs = new POIFSFileSystem(object.getInputStream());
+                    this.officeEntryHandler.parser(this.poifs.getRoot(), fileDto.getOriginFileName(), fileDto.getFileOlePath());*/
 
                 }
             }
@@ -53,19 +60,15 @@ public class PowerPointParser extends OleExtractor {
 
 
         }catch (IOException e){
-            catchIOException(e);
+            ExceptionUtils.getStackTrace(e);
 
         }finally {
-            closeResources();
+            IOUtils.closeQuietly(this.fs);
+            IOUtils.closeQuietly(this.poifs);
+            IOUtils.closeQuietly(this.hslfSlideShow);
+            IOUtils.closeQuietly(this.bi);
         }
 
     }
 
-    @Override
-    protected void closeResources() {
-        IOUtils.closeQuietly(this.fs);
-        IOUtils.closeQuietly(this.poifs);
-        IOUtils.closeQuietly(this.hslfSlideShow);
-        IOUtils.closeQuietly(this.bi);
-    }
 }

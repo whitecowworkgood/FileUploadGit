@@ -8,12 +8,12 @@ import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBookView;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.STVisibility;
+import org.springframework.util.StringUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.FileOutputStream;
 
 import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
-import static com.example.fileUpload.util.FileUtil.removePath;
 
 public class XExcelExtractor extends OleExtractor {
 
@@ -46,7 +46,7 @@ public class XExcelExtractor extends OleExtractor {
         cb[0].setVisibility(STVisibility.VISIBLE);
         this.embeddedWorkbook.getCTWorkbook().getBookViews().setWorkbookViewArray(cb);
 
-        String uuid = addUniqueFileNameMapping(removePath(String.valueOf(this.packagePart.getPartName())));
+        String uuid = addUniqueFileNameMapping(StringUtils.getFilename(String.valueOf(this.packagePart.getPartName())));
 
         super.stringBuffer.append(this.oleSavePath).append(uuid);
         this.outputStream = new FileOutputStream(super.stringBuffer.toString());

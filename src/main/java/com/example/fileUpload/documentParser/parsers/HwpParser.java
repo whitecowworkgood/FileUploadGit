@@ -9,6 +9,7 @@ import kr.dogfoot.hwplib.reader.HWPReader;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.extractor.ExtractorFactory;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
 
@@ -38,6 +39,7 @@ public class HwpParser extends OleExtractor {
             BinData binData = HWPReader.fromInputStream(this.bi).getBinData();
 
             for (EmbeddedBinaryData data : binData.getEmbeddedBinaryDataList()) {
+
                 if (data.getName().endsWith(".OLE")) {
 
                     if (!hasOLEFile) {
@@ -56,19 +58,14 @@ public class HwpParser extends OleExtractor {
 
 
         }catch (IOException e){
-            catchIOException(e);
+            ExceptionUtils.getStackTrace(e);
         }finally {
-            closeResources();
+            IOUtils.closeQuietly(this.fs);
+            IOUtils.closeQuietly(this.inputStream);
+            IOUtils.closeQuietly(this.poifs);
+            IOUtils.closeQuietly(this.bi);
         }
 
     }
 
-
-    @Override
-    protected void closeResources() {
-        IOUtils.closeQuietly(this.fs);
-        IOUtils.closeQuietly(this.inputStream);
-        IOUtils.closeQuietly(this.poifs);
-        IOUtils.closeQuietly(this.bi);
-    }
 }

@@ -7,11 +7,12 @@ import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.poifs.filesystem.DocumentInputStream;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
+import org.springframework.util.StringUtils;
 
 import java.io.*;
 
 import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
-import static com.example.fileUpload.util.FileUtil.removePath;
+
 
 public class WordExtractor extends OleExtractor {
 
@@ -37,7 +38,7 @@ public class WordExtractor extends OleExtractor {
 
     protected void writeDocument() throws IOException {
         this.document = new HWPFDocument(this.packagePart.getInputStream());
-        String uuid = addUniqueFileNameMapping(removePath(String.valueOf(this.packagePart.getPartName())));
+        String uuid = addUniqueFileNameMapping(StringUtils.getFilename(String.valueOf(this.packagePart.getPartName())));
 
         super.stringBuffer.append(this.oleSavePath).append(uuid);
 

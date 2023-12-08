@@ -5,6 +5,8 @@ import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
 import com.example.fileUpload.model.File.FileDto;
 import lombok.NoArgsConstructor;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.apache.poi.ooxml.POIXMLDocument;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
 import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
@@ -14,44 +16,45 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.sql.PreparedStatement;
+import java.util.List;
 
 import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 
 @NoArgsConstructor
 public class XExcelParser extends OleExtractor {
-    private FileInputStream fs = null;
-    private XSSFWorkbook xlsx = null;
-    private BufferedInputStream bi = null;
+
 
     @Override
     public void extractOleFromDocumentFile(FileDto fileDto) throws IOException, OpenXML4JException {
-
+        FileInputStream fileInputStream = null;
+        POIXMLDocument xlsx = null;
+        BufferedInputStream bufferedInputStream = null;
 
         try{
 
-            this.fs = new FileInputStream(fileDto.getFileTempPath());
-            this.bi = new BufferedInputStream(this.fs);
-            this.xlsx = new XSSFWorkbook(OPCPackage.open(this.bi));
+            fileInputStream = new FileInputStream(fileDto.getFileTempPath());
+            bufferedInputStream = new BufferedInputStream(fileInputStream);
+            xlsx = new XSSFWorkbook(bufferedInputStream);
 
-            if(!this.xlsx.getAllEmbeddedParts().isEmpty()){
+            List<PackagePart> xlsxList = xlsx.getAllEmbeddedParts();
+
+            if(!xlsxList.isEmpty()){
                 generateFolder(fileDto.getFileOlePath());
 
-                for (PackagePart pPart : this.xlsx.getAllEmbeddedParts())
+                for (PackagePart pPart : xlsxList){
                     new OleExtractorFactory().createModernOleExtractor(pPart, fileDto);
+                }
+
             }
 
         }catch (Exception e){
-            catchException(e);
+            ExceptionUtils.getStackTrace(e);
 
         } finally {
-            closeResources();
+            IOUtils.closeQuietly(fileInputStream);
+            IOUtils.closeQuietly(xlsx);
+            IOUtils.closeQuietly(bufferedInputStream);
         }
     }
 
-    @Override
-    protected void closeResources() {
-        IOUtils.closeQuietly(this.fs);
-        IOUtils.closeQuietly(this.xlsx);
-        IOUtils.closeQuietly(this.bi);
-    }
 }

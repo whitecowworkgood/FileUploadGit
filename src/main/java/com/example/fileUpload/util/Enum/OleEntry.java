@@ -11,6 +11,7 @@ public enum OleEntry {
     XLS("Workbook");
 
     private final String value;
+
     OleEntry(String value){
         this.value = value;
 

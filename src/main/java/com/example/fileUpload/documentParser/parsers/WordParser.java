@@ -7,6 +7,7 @@ import com.example.fileUpload.util.Enum.OleEntry;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.hwpf.HWPFDocument;
 import org.apache.poi.hwpf.HWPFDocumentCore;
 import org.apache.poi.poifs.filesystem.DirectoryNode;
@@ -24,7 +25,7 @@ import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 public class WordParser extends OleExtractor {
     private FileInputStream fs = null;
     private BufferedInputStream bi = null;
-    private HWPFDocumentCore hwpfDocument =null;
+    private HWPFDocument hwpfDocument =null;
     private final OfficeEntryHandler officeEntryHandler = new OfficeEntryHandler();
 
     @Override
@@ -37,30 +38,28 @@ public class WordParser extends OleExtractor {
             this.bi = new BufferedInputStream(this.fs);
             this.hwpfDocument = new HWPFDocument(this.bi);
 
+
             if (this.hwpfDocument.getDirectory().hasEntry(OleEntry.OBJECTPOOL.getValue())) {
 
                 generateFolder(fileDto.getFileOlePath());
 
                 DirectoryNode objectPools = (DirectoryNode) this.hwpfDocument.getDirectory().getEntry(OleEntry.OBJECTPOOL.getValue());
 
-                for (Iterator<Entry> it = objectPools.getEntries(); it.hasNext(); ) {
+                Iterator<Entry> it = objectPools.getEntries();
+                while (it.hasNext()) {
                     this.officeEntryHandler.parser((DirectoryNode)it.next(), fileDto.getOriginFileName(), fileDto.getFileOlePath());
                 }
             }
 
         }catch (IOException e){
-            catchIOException(e);
+            ExceptionUtils.getStackTrace(e);
 
         }finally{
-            closeResources();
+            IOUtils.closeQuietly(this.fs);
+            IOUtils.closeQuietly(this.hwpfDocument);
+            IOUtils.closeQuietly(this.bi);
         }
 
     }
 
-    @Override
-    protected void closeResources() {
-        IOUtils.closeQuietly(this.fs);
-        IOUtils.closeQuietly(this.hwpfDocument);
-        IOUtils.closeQuietly(this.bi);
-    }
 }

@@ -4,10 +4,12 @@ import com.example.fileUpload.util.Enum.FileType;
 import com.example.fileUpload.util.Enum.OleEntry;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.poifs.filesystem.*;
+import com.example.fileUpload.util.Enum.OleEntry;
 import org.apache.poi.ss.extractor.EmbeddedData;
 import org.apache.poi.ss.extractor.EmbeddedExtractor;
 import org.apache.poi.ss.usermodel.Cell;
@@ -18,11 +20,15 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.CTBookView;
 import org.openxmlformats.schemas.spreadsheetml.x2006.main.STVisibility;
 
+
 import java.io.*;
 import java.nio.charset.Charset;
+import java.util.Iterator;
 
+import static com.example.fileUpload.util.Enum.OleEntry.*;
 import static com.example.fileUpload.util.ExternalFileMap.addUniqueFileNameMapping;
 import static com.example.fileUpload.util.FileUtil.removeFileExtension;
+
 
 @Slf4j
 @NoArgsConstructor
@@ -36,7 +42,12 @@ public class OfficeEntryHandler {
         FileOutputStream outputStream = null;
         BufferedOutputStream bo = null;
 
+        CompObj compObj1 = CompObj.createFromEmbeddedCompObj(directoryNode);
+        log.info(compObj1.getFileExtraction());
+        //테스트용
+
         if(directoryNode.hasEntry(Ole10Native.OLE10_NATIVE)){
+
             String bmpType = embeddedFileExtractor.parseFileType((DocumentEntry) directoryNode.getEntry(OleEntry.COMPOBJ.getValue()));
 
             if(bmpType!=null && bmpType.equals(FileType.BMP.getValue())){
@@ -66,46 +77,48 @@ public class OfficeEntryHandler {
                 }
 
             }else{
-                DocumentEntry ole10Native = (DocumentEntry) directoryNode.getEntry(Ole10Native.OLE10_NATIVE);
-                embeddedFileExtractor.parseOle10NativeEntry(new DocumentInputStream(ole10Native), OLESavePath);
+
+                embeddedFileExtractor.parserOleNativeEntry(directoryNode, OLESavePath);
             }
 
 
-        }else if(directoryNode.hasEntry(OleEntry.XLS.getValue())){
+        }
+        else if(directoryNode.hasEntry(OleEntry.XLS.getValue())){
 
-                if (directoryNode.hasEntry("\u0001Ole")) {
-                    directoryNode.getEntry("\u0001Ole").delete();
-                }
+            if (directoryNode.hasEntry("\u0001Ole")) {
+                directoryNode.getEntry("\u0001Ole").delete();
+            }
 
-                EmbeddedExtractor extractor = new EmbeddedExtractor();
-                EmbeddedData embeddedData = extractor.extractOne(directoryNode);
+            EmbeddedExtractor extractor = new EmbeddedExtractor();
+            EmbeddedData embeddedData = extractor.extractOne(directoryNode);
 
-                HSSFWorkbook hs = new HSSFWorkbook(new ByteArrayInputStream(embeddedData.getEmbeddedData()));
-                hs.setHidden(false);
+            HSSFWorkbook hs = new HSSFWorkbook(new ByteArrayInputStream(embeddedData.getEmbeddedData()));
+            hs.setHidden(false);
 
-                stringBuffer.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.XLS.getValue());
-                String uuid = addUniqueFileNameMapping(stringBuffer.toString());
+            stringBuffer.append(removeFileExtension(OriginalFileName)).append("_OLE").append(FileType.XLS.getValue());
+            String uuid = addUniqueFileNameMapping(stringBuffer.toString());
+            stringBuffer.delete(0, stringBuffer.length());
+
+            stringBuffer.append(OLESavePath).append(uuid);
+
+            try {
+                outputStream = new FileOutputStream(stringBuffer.toString());
+                bo = new BufferedOutputStream(outputStream);
+                hs.write(bo);
+                //hs.write(outputStream);
+
+            } catch (IOException e) {
+                ExceptionUtils.getStackTrace(e);
+                log.error("파일 저장 실패");
+            } finally {
                 stringBuffer.delete(0, stringBuffer.length());
+                IOUtils.closeQuietly(outputStream);
+                IOUtils.closeQuietly(hs);
+                IOUtils.closeQuietly(bo);
+            }
 
-                stringBuffer.append(OLESavePath).append(uuid);
-
-                try {
-                    outputStream = new FileOutputStream(stringBuffer.toString());
-                    bo = new BufferedOutputStream(outputStream);
-                    hs.write(bo);
-                    //hs.write(outputStream);
-
-                } catch (IOException e) {
-                    ExceptionUtils.getStackTrace(e);
-                    log.error("파일 저장 실패");
-                } finally {
-                    stringBuffer.delete(0, stringBuffer.length());
-                    IOUtils.closeQuietly(outputStream);
-                    IOUtils.closeQuietly(hs);
-                    IOUtils.closeQuietly(bo);
-                }
-
-        }else if(directoryNode.hasEntry(OleEntry.PPT.getValue())){
+        }
+        else if(directoryNode.hasEntry(OleEntry.PPT.getValue())){
             if (directoryNode.hasEntry("\u0001Ole")) {
                 directoryNode.getEntry("\u0001Ole").delete();
             }
@@ -133,7 +146,8 @@ public class OfficeEntryHandler {
                 IOUtils.closeQuietly(bo);
             }
 
-        }else if(directoryNode.hasEntry(OleEntry.WORD.getValue())){
+        }
+        else if(directoryNode.hasEntry(OleEntry.WORD.getValue())){
             EmbeddedExtractor extractor = new EmbeddedExtractor();
 
 
@@ -163,7 +177,8 @@ public class OfficeEntryHandler {
                 IOUtils.closeQuietly(outputStream);
                 IOUtils.closeQuietly(bo);
             }
-        }else if (directoryNode.hasEntry(OleEntry.HWPINFO.getValue())) {
+        }
+        else if (directoryNode.hasEntry(OleEntry.HWPINFO.getValue())) {
 
             if (directoryNode.hasEntry("\u0001Ole")) {
                 directoryNode.getEntry("\u0001Ole").delete();
@@ -193,7 +208,8 @@ public class OfficeEntryHandler {
                 IOUtils.closeQuietly(bo);
             }
 
-        } else if (directoryNode.hasEntry(OleEntry.ODF.getValue())) {
+        }
+        else if (directoryNode.hasEntry(OleEntry.ODF.getValue())) {
 
             DocumentInputStream oleStream = new DocumentInputStream((DocumentEntry) directoryNode.getEntry(OleEntry.ODF.getValue()));
 
@@ -224,7 +240,8 @@ public class OfficeEntryHandler {
                 IOUtils.closeQuietly(bo);
             }
 
-        } else if (directoryNode.hasEntry(OleEntry.PACKAGE.getValue())) {
+        }
+        else if (directoryNode.hasEntry(OleEntry.PACKAGE.getValue())) {
             DocumentInputStream oleStream = new DocumentInputStream((DocumentEntry) directoryNode.getEntry(OleEntry.PACKAGE.getValue()));
 
             String type = embeddedFileExtractor.parseFileType((DocumentEntry) directoryNode.getEntry(OleEntry.COMPOBJ.getValue()));

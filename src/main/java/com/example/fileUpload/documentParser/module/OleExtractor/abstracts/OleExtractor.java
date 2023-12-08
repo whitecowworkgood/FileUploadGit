@@ -19,6 +19,7 @@ public abstract class OleExtractor {
     protected String fileName;
 
     protected EmbeddedFileExtractor embeddedFileExtractor = new EmbeddedFileExtractor();
+
     protected void catchIOException(IOException e){
         ExceptionUtils.getStackTrace(e);
     }
@@ -29,14 +30,13 @@ public abstract class OleExtractor {
 
 
     protected String buildPathFileName(String fileType){
-        return removeFileExtension(this.originalFileName) +
-                "_OLE" +
-                fileType;
+        return new StringBuffer(removeFileExtension(this.originalFileName)).append("_OLE")
+                .append(fileType).toString();
     }
 
     protected String buildOutputPath() {
-        return this.oleSavePath +
-                File.separator +
-                addUniqueFileNameMapping(this.fileName);
+        return new StringBuffer(this.oleSavePath).append(File.separator)
+                .append(addUniqueFileNameMapping(this.fileName)).toString();
+
     }
 }

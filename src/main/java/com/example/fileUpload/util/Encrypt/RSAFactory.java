@@ -18,10 +18,10 @@ import java.util.concurrent.ConcurrentHashMap;
 @Component
 public class RSAFactory {
 
-    private final int RSA_KEY_SIZE = 2048;
-    private final String RSA_ALGORITHM = "RSA";
-    private final String RSA_PUBLIC_KEY = "publicKey";
-    private final String RSA_PRIVATE_KEY = "privateKey";
+    private static final int RSA_KEY_SIZE = 2048;
+    private static final String RSA_ALGORITHM = "RSA";
+    private static final String RSA_PUBLIC_KEY = "publicKey";
+    private static final String RSA_PRIVATE_KEY = "privateKey";
 
     private final RSAKeysDAO RSAKeysDao;
 
@@ -31,15 +31,15 @@ public class RSAFactory {
 
         try{
             SecureRandom secureRandom = new SecureRandom();
-            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(this.RSA_ALGORITHM);
-            keyPairGenerator.initialize(this.RSA_KEY_SIZE, secureRandom);
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance(RSA_ALGORITHM);
+            keyPairGenerator.initialize(RSA_KEY_SIZE, secureRandom);
             KeyPair keyPair = keyPairGenerator.genKeyPair();
 
             String stringPublicKey = Base64.getEncoder().encodeToString(keyPair.getPublic().getEncoded());
             String stringPrivateKey = Base64.getEncoder().encodeToString(keyPair.getPrivate().getEncoded());
 
-            this.stringKeypair.put(this.RSA_PUBLIC_KEY, stringPublicKey);
-            this.stringKeypair.put(this.RSA_PRIVATE_KEY, stringPrivateKey);
+            this.stringKeypair.put(RSA_PUBLIC_KEY, stringPublicKey);
+            this.stringKeypair.put(RSA_PRIVATE_KEY, stringPrivateKey);
 
             this.RSAKeysDao.saveRSAKey(this.stringKeypair);
 
@@ -52,13 +52,13 @@ public class RSAFactory {
 
     public synchronized PublicKey getPublicKey(){
 
-        String stringPublicKey = this.stringKeypair.get(this.RSA_PUBLIC_KEY);
+        String stringPublicKey = this.stringKeypair.get(RSA_PUBLIC_KEY);
 
         byte[] publicKeyBytes = Base64.getDecoder().decode(stringPublicKey);
 
         try {
             X509EncodedKeySpec publicKeySpec = new X509EncodedKeySpec(publicKeyBytes);
-            KeyFactory keyFactory = KeyFactory.getInstance(this.RSA_ALGORITHM);
+            KeyFactory keyFactory = KeyFactory.getInstance(RSA_ALGORITHM);
 
             return keyFactory.generatePublic(publicKeySpec);
         } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
@@ -80,7 +80,7 @@ public class RSAFactory {
             byte[] privateKeyBytes = Base64.getDecoder().decode(this.RSAKeysDao.findPrivateKey(value));
 
             PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(privateKeyBytes);
-            KeyFactory keyFactory = KeyFactory.getInstance(this.RSA_ALGORITHM);
+            KeyFactory keyFactory = KeyFactory.getInstance(RSA_ALGORITHM);
 
             return keyFactory.generatePrivate(privateKeySpec);
 
