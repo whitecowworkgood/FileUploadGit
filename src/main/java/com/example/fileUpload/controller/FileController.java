@@ -1,6 +1,7 @@
 package com.example.fileUpload.controller;
 
 
+/*
 import com.example.fileUpload.message.TestMessage;
 import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.model.FileExtractionRequest;
@@ -56,3 +57,4 @@ public class FileController {
         return ResponseEntity.status(HttpStatus.OK).body((TestMessage) testService.selectStatus(code));
     }
 }
+*/

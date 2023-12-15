@@ -3,6 +3,7 @@ package com.example.fileUpload.model.DTOFactory;
 import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.tika.Tika;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
@@ -29,6 +30,8 @@ public class FileDTOFactoryImpl implements FileDTOFactory{
     @Override
     public synchronized FileDto generateUploadDtoOf(MultipartFile multipartFile, Long countNum, String comment) throws IOException {
 
+        Tika tika = new Tika();
+
         String uuidName = UUID.randomUUID().toString();
 
         String uuidFileName = generateUuidFileName(multipartFile.getOriginalFilename(), uuidName);
@@ -44,7 +47,7 @@ public class FileDTOFactoryImpl implements FileDTOFactory{
                 .UUIDFileName(uuidFileName)
                 .originFileName(Objects.requireNonNull(multipartFile.getOriginalFilename()))
                 .fileSize(multipartFile.getSize())
-                .fileType(multipartFile.getContentType())
+                .fileType(tika.detect(Path.of(tempFilePath)))
                 .fileSavePath(fileSavePath)
                 .fileOlePath(fileOlePath)
                 .countNum(countNum)

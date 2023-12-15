@@ -1,5 +1,6 @@
-package com.example.fileUpload.service.serviceImpl;
 
+package com.example.fileUpload.service.serviceImpl;
+/*
 import com.example.fileUpload.message.TestMessage;
 import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.model.TestVO;
@@ -95,3 +96,4 @@ public class TestServiceImpl implements TestService {
         return Collections.singletonList("");
     }
 }
+*/

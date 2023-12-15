@@ -85,7 +85,7 @@ public class FileDownloadServiceImpl implements FileDownloadService {
     }
 
     @Override
-    public Boolean isDownloadAble(Long id){
+    public boolean isDownloadAble(Long id){
         return this.fileEntityDao.acceptedFilesById(id).getCountNum()>0;
     }
 

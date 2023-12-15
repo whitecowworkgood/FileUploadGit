@@ -1,5 +1,5 @@
 package com.example.fileUpload.util;
-
+/*
 import com.example.fileUpload.documentParser.FileProcessor;
 import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.repository.TestDAO;
@@ -45,4 +45,4 @@ public class AsyncClass {
         // 큐에 파일 경로 추가
         fileQueue.add(fileDto);
     }
-}
+}*/

@@ -70,7 +70,7 @@ public class FileDownloadController {
         return ResponseEntity.ok().build();
     }
 
-    private Boolean canDownloadFile(Long id, Resource resource) {
+    private boolean canDownloadFile(Long id, Resource resource) {
         boolean downloadAble = fileDownloadService.isDownloadAble(id);
         return resource != null && resource.isFile() && downloadAble;
     }

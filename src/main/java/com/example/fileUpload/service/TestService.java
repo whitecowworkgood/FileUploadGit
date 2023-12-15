@@ -1,5 +1,6 @@
 package com.example.fileUpload.service;
 
+/*
 import com.example.fileUpload.message.TestMessage;
 import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.model.TestVO;
@@ -13,10 +14,13 @@ public interface TestService {
 
     Object selectStatus(String code);
     //List<String> doService(FileDto fileDto);
+*/
 /*
     CompletableFuture<String> AsyncService(FileDto fileDto) throws InterruptedException;
 
     void enqueueFile(FileDto fileDto);
 
-    CompletableFuture<List<String>> processFiles(FileDto fileDto);*/
+    CompletableFuture<List<String>> processFiles(FileDto fileDto);*//*
+
 }
+*/

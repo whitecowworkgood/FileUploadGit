@@ -1,7 +1,6 @@
 package com.example.fileUpload.documentParser;
 
-import com.example.fileUpload.documentParser.parsers.FileProcessorTest;
-import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
+import com.example.fileUpload.documentParser.parsers.abstracts.DocumentParser;
 import com.example.fileUpload.model.File.FileDto;
 import com.example.fileUpload.model.Ole.OleDto;
 import com.example.fileUpload.repository.OleEntryDAO;
@@ -22,10 +21,24 @@ public class FileProcessor {
     private final OleEntryDAO oleEntryDao;
     private final TestDAO testDao;
 
-    public synchronized void createOleExtractorHandlerTest(FileDto fileDto) {
+    public synchronized void createOleExtractorHandler(FileDto fileDto) {
 
         try {
-            OleExtractor oleExtractor = this.fileParserFactory.createParser(fileDto.getFileType(), fileDto.getUUIDFileName());
+
+            DocumentParser documentParser = this.fileParserFactory.createParser(fileDto);
+            documentParser.extractEmbeddedObjects();
+            processExternalFiles(fileDto);
+
+        }catch (Exception e) {
+            ExceptionUtils.getStackTrace(e);
+        }
+    }
+
+
+    /*public synchronized void createOleExtractorHandlerTest(FileDto fileDto) {
+
+        try {
+            OleExtractor oleExtractor = this.fileParserFactory.createParser(fileDto.getFileType());
             oleExtractor.extractOleFromDocumentFile(fileDto);
 
         }catch (Exception e) {
@@ -38,16 +51,15 @@ public class FileProcessor {
     public synchronized void createOleExtractorHandler(FileDto fileDto) {
 
         try {
-            FileProcessorTest.getParser(fileDto.getFileTempPath(), fileDto.getUUIDFileName());
 
-            OleExtractor oleExtractor = this.fileParserFactory.createParser(fileDto.getFileType(), fileDto.getUUIDFileName());
+            OleExtractor oleExtractor = this.fileParserFactory.createParser(fileDto.getFileType());
             oleExtractor.extractOleFromDocumentFile(fileDto);
             processExternalFiles(fileDto);
 
         }catch (Exception e) {
             ExceptionUtils.getStackTrace(e);
         }
-    }
+    }*/
 
 
     private void processExternalFiles(FileDto fileDto) {

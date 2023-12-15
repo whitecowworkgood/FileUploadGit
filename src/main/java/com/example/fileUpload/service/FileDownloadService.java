@@ -9,7 +9,7 @@ import java.util.List;
 
 public interface FileDownloadService {
 
-    Boolean isDownloadAble(Long id);
+    boolean isDownloadAble(Long id);
 
     void decreaseCountNum(Long id);
 

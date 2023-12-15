@@ -1,17 +1,14 @@
 package com.example.fileUpload.documentParser.parsers;
 
-import com.example.fileUpload.documentParser.module.OleExtractor.OleExtractorFactory;
-import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
-import com.example.fileUpload.model.File.FileDto;
-import lombok.NoArgsConstructor;
+import com.example.fileUpload.documentParser.ExtractEngine.DirectoryNodeParserAdapter;
+import com.example.fileUpload.documentParser.parsers.abstracts.DocumentParser;
+import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.ooxml.POIXMLDocument;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
-import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.xslf.usermodel.XMLSlideShow;
-import org.apache.xmlbeans.XmlException;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
@@ -20,41 +17,52 @@ import java.util.List;
 
 import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 
-@NoArgsConstructor
-public class XPowerPointParser extends OleExtractor {
+public class XPowerPointParser extends DocumentParser {
 
+    private final String fileSavePath;
+    private final String oleSavePath;
+    private final String originalFileName;
+
+    private POIXMLDocument poixmlDocument;
+
+    public XPowerPointParser(String fileSavePath, String oleSavePath, String originalFileName) {
+        this.fileSavePath = fileSavePath;
+        this.oleSavePath = oleSavePath;
+        this.originalFileName = originalFileName;
+    }
 
     @Override
-    public void extractOleFromDocumentFile(FileDto fileDto) throws OpenXML4JException, IOException, XmlException {
-        FileInputStream fileInputStream = null;
-        BufferedInputStream bufferedInputStream = null;
-        POIXMLDocument pptx = null;
+    public void extractEmbeddedObjects() {
+        try (FileInputStream fs = new FileInputStream(this.fileSavePath);
+             BufferedInputStream bi = new BufferedInputStream(fs)) {
 
-        try{
+            this.poixmlDocument = new XMLSlideShow(bi);
+            callDirectoryNodeParser();
 
-            fileInputStream = new FileInputStream(fileDto.getFileTempPath());
-            bufferedInputStream = new BufferedInputStream(fileInputStream);
-            pptx = new XMLSlideShow(bufferedInputStream);
-
-            List<PackagePart> pptxList = pptx.getAllEmbeddedParts();
-
-            if(!pptxList.isEmpty()){
-                generateFolder(fileDto.getFileOlePath());
-
-                for (PackagePart pPart : pptxList){
-                    new OleExtractorFactory().createModernOleExtractor(pPart, fileDto);
-                }
-
-            }
-
-        }catch (Exception e){
+        } catch (IOException |OpenXML4JException e) {
             ExceptionUtils.getStackTrace(e);
 
         }finally {
-            IOUtils.closeQuietly(fileInputStream);
-            IOUtils.closeQuietly(pptx);
-            IOUtils.closeQuietly(bufferedInputStream);
+            IOUtils.closeQuietly(this.poixmlDocument);
         }
     }
 
+    @SneakyThrows
+    private void callDirectoryNodeParser() throws IOException, OpenXML4JException {
+
+        List<PackagePart> xmlfSlideShowAllEmbeddedParts = poixmlDocument.getAllEmbeddedParts();
+
+        if(xmlfSlideShowAllEmbeddedParts.isEmpty()){
+            return;
+        }
+
+        generateFolder(this.oleSavePath);
+
+        for(PackagePart hssfObjectData : xmlfSlideShowAllEmbeddedParts) {
+            DirectoryNodeParserAdapter directoryNodeParserAdapter = new DirectoryNodeParserAdapter(hssfObjectData);
+            directoryNodeParserAdapter.getEmbeddedFile(oleSavePath, originalFileName);
+
+        }
+
+    }
 }

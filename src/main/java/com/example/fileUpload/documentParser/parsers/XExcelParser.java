@@ -1,60 +1,69 @@
 package com.example.fileUpload.documentParser.parsers;
 
-import com.example.fileUpload.documentParser.module.OleExtractor.OleExtractorFactory;
-import com.example.fileUpload.documentParser.parsers.abstracts.OleExtractor;
-import com.example.fileUpload.model.File.FileDto;
-import lombok.NoArgsConstructor;
+import com.example.fileUpload.documentParser.ExtractEngine.DirectoryNodeParserAdapter;
+import com.example.fileUpload.documentParser.parsers.abstracts.DocumentParser;
+import jdk.swing.interop.SwingInterOpUtils;
+import lombok.SneakyThrows;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
-import org.apache.poi.ooxml.POIXMLDocument;
 import org.apache.poi.openxml4j.exceptions.OpenXML4JException;
-import org.apache.poi.openxml4j.opc.OPCPackage;
 import org.apache.poi.openxml4j.opc.PackagePart;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.sql.PreparedStatement;
 import java.util.List;
 
 import static com.example.fileUpload.util.DirectoryChecker.generateFolder;
 
-@NoArgsConstructor
-public class XExcelParser extends OleExtractor {
 
+public class XExcelParser extends DocumentParser {
+    private final String fileSavePath;
+    private final String oleSavePath;
+    private final String originalFileName;
+
+    private XSSFWorkbook xssfWorkbook;
+
+    public XExcelParser(String fileSavePath, String oleSavePath, String originalFileName) {
+        this.fileSavePath = fileSavePath;
+        this.oleSavePath = oleSavePath;
+        this.originalFileName = originalFileName;
+    }
 
     @Override
-    public void extractOleFromDocumentFile(FileDto fileDto) throws IOException, OpenXML4JException {
-        FileInputStream fileInputStream = null;
-        POIXMLDocument xlsx = null;
-        BufferedInputStream bufferedInputStream = null;
+    public void extractEmbeddedObjects() {
+        try (FileInputStream fs = new FileInputStream(this.fileSavePath);
+             BufferedInputStream bi = new BufferedInputStream(fs)) {
 
-        try{
+            this.xssfWorkbook = new XSSFWorkbook(bi);
+            callDirectoryNodeParser();
 
-            fileInputStream = new FileInputStream(fileDto.getFileTempPath());
-            bufferedInputStream = new BufferedInputStream(fileInputStream);
-            xlsx = new XSSFWorkbook(bufferedInputStream);
-
-            List<PackagePart> xlsxList = xlsx.getAllEmbeddedParts();
-
-            if(!xlsxList.isEmpty()){
-                generateFolder(fileDto.getFileOlePath());
-
-                for (PackagePart pPart : xlsxList){
-                    new OleExtractorFactory().createModernOleExtractor(pPart, fileDto);
-                }
-
-            }
-
-        }catch (Exception e){
+        } catch (IOException |OpenXML4JException e) {
             ExceptionUtils.getStackTrace(e);
 
-        } finally {
-            IOUtils.closeQuietly(fileInputStream);
-            IOUtils.closeQuietly(xlsx);
-            IOUtils.closeQuietly(bufferedInputStream);
+        }finally {
+            IOUtils.closeQuietly(this.xssfWorkbook);
         }
+    }
+
+    @SneakyThrows
+    private void callDirectoryNodeParser() throws IOException, OpenXML4JException {
+        List<PackagePart> xssfWorkbookAllEmbeddedParts = xssfWorkbook.getAllEmbeddedParts();
+
+        if(xssfWorkbookAllEmbeddedParts.isEmpty()){
+            return;
+        }
+
+        generateFolder(this.oleSavePath);
+
+        for(PackagePart hssfObjectData : xssfWorkbookAllEmbeddedParts) {
+
+            DirectoryNodeParserAdapter directoryNodeParserAdapter = new DirectoryNodeParserAdapter(hssfObjectData);
+            directoryNodeParserAdapter.getEmbeddedFile(oleSavePath, originalFileName);
+
+        }
+
     }
 
 }

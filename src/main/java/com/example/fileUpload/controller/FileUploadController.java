@@ -41,6 +41,8 @@ public class FileUploadController {
 
 
         FileDto fileDto = dtoFactory.generateUploadDtoOf(file, countNum, comment);
+
+
         fileUploadService.fileUpload(fileDto);
 
         return ResponseEntity.status(HttpStatus.OK)

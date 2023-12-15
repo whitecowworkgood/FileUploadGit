@@ -11,7 +11,7 @@ public class FileUtil {
             return StringUtils.getFilenameExtension(originalFileName);
 
         } else {
-            return ".bin"; // 확장자가 없을 경우 bin 문자열 반환
+            return "bin"; // 확장자가 없을 경우 bin 문자열 반환
         }
     }
 
