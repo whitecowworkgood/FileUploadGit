@@ -37,18 +37,15 @@ public class DirectoryNodeParserAdapter {
 
     public void getEmbeddedFile(String savePath, String uploadFileName) throws Exception {
 
-
-        //TODO 추출코드 다시 구현하기 및 CSV추출 코드 구현하기
-
             if(isObject()){
                 this.poifsFileSystem = new POIFSFileSystem(packagePart.getInputStream());
                 DirectoryNodeParser directoryNodeParser = new DirectoryNodeParser(poifsFileSystem.getRoot());
                 directoryNodeParser.getEmbeddedFile(savePath, uploadFileName);
 
-            } else if (packagePart.getContentType().equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document")) {
+            } else if (isWord()) {
                 writeXDocument(savePath);
 
-            } else if (packagePart.getContentType().equals("application/vnd.openxmlformats-officedocument.presentationml.presentation")) {
+            } else if (isPPT()) {
                 writeXPowerPoint(savePath);
 
             } else if (isXExcel()) {
@@ -56,13 +53,12 @@ public class DirectoryNodeParserAdapter {
 
                 if(xssfWorkbook.getCTWorkbook().isSetExtLst()){
                     saveDocument(xssfWorkbook, savePath);
+                    IOUtils.closeQuietly(xssfWorkbook);
                     return;
                 }
                 Sheet sheet = xssfWorkbook.getSheetAt(0);
-                saveEmbeddedData(sheet, savePath, ".csv");
+                saveEmbeddedData(sheet, savePath);
                 IOUtils.closeQuietly(xssfWorkbook);
-
-
 
             } else if (isExcel()) {
                 this.poifsFileSystem = new POIFSFileSystem(packagePart.getInputStream());
@@ -76,14 +72,11 @@ public class DirectoryNodeParserAdapter {
                 saveDocument(savePath);
             }
 
-
-
-
     }
-    private void saveEmbeddedData(Sheet sheet, String savePath, String fileType) throws IOException{
+    private void saveEmbeddedData(Sheet sheet, String savePath) throws IOException{
         StringBuffer stringBuffer = new StringBuffer();
 
-        stringBuffer.append(sheet.getSheetName()).append(fileType);
+        stringBuffer.append(sheet.getSheetName()).append(".csv");
         String uuid = addUniqueFileNameMapping(stringBuffer.toString());
         stringBuffer.delete(0, stringBuffer.length());
 
@@ -162,7 +155,6 @@ public class DirectoryNodeParserAdapter {
             ExceptionUtils.getStackTrace(e);
             log.error("파일 추출에 실패하였습니다.");
         }
-        IOUtils.closeQuietly(xssfWorkbook);
     }
     private void saveDocument(HSSFWorkbook hssfWorkbook, String savePath){
         StringBuffer stringBuffer = new StringBuffer();
@@ -175,7 +167,6 @@ public class DirectoryNodeParserAdapter {
 
         try (FileOutputStream outputStream = new FileOutputStream(stringBuffer.toString());
              BufferedOutputStream bo = new BufferedOutputStream(outputStream)) {
-           // bo.write(bytes);
             hssfWorkbook.write(bo);
         }catch(IOException e){
             ExceptionUtils.getStackTrace(e);
@@ -193,9 +184,9 @@ public class DirectoryNodeParserAdapter {
         String test = stringBuffer.toString();
         try (FileOutputStream outputStream = new FileOutputStream(test);
              BufferedOutputStream bo = new BufferedOutputStream(outputStream)) {
-            //packagePart.save(bo);
              bo.write(packagePart.getInputStream().readAllBytes());
-        }catch(IOException /*|OpenXML4JException*/ e){
+
+        }catch(IOException e){
             ExceptionUtils.getStackTrace(e);
             log.error("파일 추출에 실패하였습니다.");
         }
@@ -211,6 +202,12 @@ public class DirectoryNodeParserAdapter {
     }
     private boolean isExcel(){
         return this.packagePart.getContentType().equals("application/vnd.ms-excel");
+    }
+    private boolean isWord(){
+        return packagePart.getContentType().equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+    }
+    private boolean isPPT(){
+        return packagePart.getContentType().equals("application/vnd.openxmlformats-officedocument.presentationml.presentation");
     }
 
 }

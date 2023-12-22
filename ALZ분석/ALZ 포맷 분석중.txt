@@ -1,0 +1,19 @@
+0x00 ~ 0x07 = 파일 시그니처(ALZ파일임을 확인하는 값)
+0x08 ~ 0x0B = 파일 섹션 시작 헤더(BLZ)
+
+
+0x0C ~ 0x0D = 파일의 파일명 길이
+0x0E = 파일 속성
+0x0f ~ 0x12 = Time_Stamp
+0x13 = 파일 크기 필드의 크기(뒤 값이 1이면 암호화 적용)
+0x14 = Unknown 값
+0x15 =  Compression_Method
+0x16 = Unknown 값
+0x17 ~ 0x1A = CRC
+0x1B ~ 0x1C = 
+0x1F ~ (가변) = 파일명
+ 
+0x0E = File_Attribute 구분자(readonly, hidden, directory, file)
+ ~ 0x1D = 모르겠음
+
+ = Compression_Method 구분자(no, bzip2, defalte, etc...)

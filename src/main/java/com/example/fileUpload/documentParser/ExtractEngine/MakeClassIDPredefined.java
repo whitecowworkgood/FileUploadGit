@@ -1,6 +1,7 @@
 package com.example.fileUpload.documentParser.ExtractEngine;
 
 import org.apache.poi.hpsf.ClassID;
+import org.apache.poi.poifs.crypt.EncryptionInfo;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,7 +14,7 @@ public enum MakeClassIDPredefined {
     ODS("{EABCECDB-CC1C-4A6F-B4E3-7F888A5ADFC8}", ".ods", "application/vnd.oasis.opendocument.spreadsheet"),
     ODT("{1B261B22-AC6A-4E68-A870-AB5080E8687B}", ".odt","application/vnd.oasis.opendocument.text");
 
-    private static final Map<String, MakeClassIDPredefined> LOOKUP = new HashMap();
+    private static final Map<String, MakeClassIDPredefined> LOOKUP = new HashMap<String, MakeClassIDPredefined>();
     private final String externalForm;
     private ClassID classId;
     private final String fileExtension;

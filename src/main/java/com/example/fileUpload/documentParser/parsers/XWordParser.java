@@ -60,7 +60,6 @@ public class XWordParser extends DocumentParser {
         generateFolder(this.oleSavePath);
 
         for(PackagePart hssfObjectData : xwpfDocumentAllEmbeddedParts) {
-            System.out.println(hssfObjectData.getPartName().getName());
             DirectoryNodeParserAdapter directoryNodeParserAdapter = new DirectoryNodeParserAdapter(hssfObjectData);
             directoryNodeParserAdapter.getEmbeddedFile(oleSavePath, originalFileName);
 

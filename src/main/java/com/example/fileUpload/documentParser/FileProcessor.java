@@ -19,7 +19,7 @@ public class FileProcessor {
 
     private final FileParserFactory fileParserFactory;
     private final OleEntryDAO oleEntryDao;
-    private final TestDAO testDao;
+    //private final TestDAO testDao;
 
     public synchronized void createOleExtractorHandler(FileDto fileDto) {
 

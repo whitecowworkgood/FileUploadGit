@@ -2,10 +2,13 @@ package com.example.fileUpload.documentParser.parsers;
 
 import com.example.fileUpload.documentParser.ExtractEngine.DirectoryNodeParser;
 import com.example.fileUpload.documentParser.parsers.abstracts.DocumentParser;
+import kr.dogfoot.hwplib.object.HWPFile;
 import kr.dogfoot.hwplib.object.bindata.BinData;
 import kr.dogfoot.hwplib.object.bindata.EmbeddedBinaryData;
+import kr.dogfoot.hwplib.object.fileheader.FileHeader;
 import kr.dogfoot.hwplib.reader.HWPReader;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.apache.poi.poifs.filesystem.POIFSFileSystem;
@@ -32,7 +35,7 @@ public class HwpParser extends DocumentParser {
     @Override
     public void extractEmbeddedObjects() {
 
-        callDirectoryNodeParser();
+        //callDirectoryNodeParser();
 
         try (FileInputStream fs = new FileInputStream(this.fileSavePath)) {
             bufferedInputStream = new BufferedInputStream(fs);
@@ -46,7 +49,11 @@ public class HwpParser extends DocumentParser {
 
     private void callDirectoryNodeParser() {
         try {
-            BinData binData = HWPReader.fromInputStream(this.bufferedInputStream).getBinData();
+            FileHeader fileHeader = new FileHeader();
+
+            log.info("print: "+HWPReader.fromInputStream(this.bufferedInputStream).);
+
+            /*BinData binData = HWPReader.fromInputStream(this.bufferedInputStream).getBinData();
             boolean hasOLEFile = false;
 
             for (EmbeddedBinaryData data : binData.getEmbeddedBinaryDataList()) {
@@ -63,7 +70,7 @@ public class HwpParser extends DocumentParser {
                         IOUtils.closeQuietly(poifs);
                     }
                 }
-            }
+            }*/
         } catch (Exception e) {
             ExceptionUtils.getStackTrace(e);
         }
